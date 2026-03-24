@@ -1,49 +1,107 @@
-# 🌾 Smart Secagem: Monitoramento e Controle Inteligente de Silos
+# 🌱 Smart Secagem | Aeração Inteligente 2.0
 
-![Status](https://img.shields.io/badge/Status-MVP_Funcional-brightgreen)
-![Django](https://img.shields.io/badge/Backend-Django-092E20?logo=django&logoColor=white)
-![Flutter](https://img.shields.io/badge/Mobile-Flutter-02569B?logo=flutter&logoColor=white)
-![Python](https://img.shields.io/badge/Language-Python-3776AB?logo=python&logoColor=white)
+![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=for-the-badge&logo=dart)
+![GetX](https://img.shields.io/badge/GetX-State_Management-FF2D55?style=for-the-badge&logo=flutter)
 
-**Acesse a plataforma:** [secagemdigital.com](https://secagemdigital.com/)
+O **Smart Secagem** é uma plataforma inovadora e completa em Flutter voltada para o monitoramento e automação do pós-colheita agrícola. Ele atua transformando a gestão tradicional de silos e grãos de uma atividade manual e reativa para um processo **inteligente, autônomo e preditivo**.
 
-O **Smart Secagem** é uma solução inovadora projetada para otimizar a conservação de grãos e aumentar a eficiência operacional no pós-colheita. Através do monitoramento em tempo real de variáveis críticas, o sistema garante que as condições de armazenamento em silos sejam constantemente ajustadas para evitar a deterioração e reduzir perdas.
+---
 
-## 🚀 Funcionalidades Principais
+## 🚀 Sobre o Projeto
 
-O ecossistema Smart Secagem oferece controle total sobre o ambiente de armazenamento:
+Garantir a qualidade do grão armazenado (Massa Estável) minimiza perdas biológicas e maximiza o lucro da colheita. O Smart Secagem foi concebido para entregar uma experiência premium a produtores agrícolas, integrando uma Landing Page imersiva com um Dashboard restrito e um **Assistente de Inteligência Artificial**, focado em **equilíbrio higroscópico**, métricas térmicas (Delta T) e pontos de orvalho.
 
-* **🌡️ Gestão de Sensores de Temperatura:** Monitoramento em tempo real com registro de dados históricos para análise de tendências.
-* **💧 Monitoramento de Umidade:** Controle rigoroso dos níveis de umidade para prevenir danos causados por fungos ou excesso de hidratação.
-* **🌬️ Controle de Aeração Inteligente:** Configuração de controladores de aeração nos modos **Automático** (baseado em algoritmos de clima e massa) ou **Manual**.
-* **⚠️ Alertas e Notificações:** Sistema de avisos em tempo real via Push/E-mail sempre que a temperatura ou umidade exceder os limites de segurança.
-* **💻 Interface Híbrida:** Experiência fluida e intuitiva disponível tanto em ambiente **Web (Desktop)** quanto **Mobile**.
+### 🎯 Principais Objetivos
+- Reduzir dores de cabeça com controle manual dos aeradores e exaustores.
+- Evitar consumo exagerado de energia ao ligar motores apenas em condições climáticas absolutamente ideais.
+- Entregar um diagnóstico preventivo e seguro sobre a saúde da massa de grãos 24 horas por dia.
 
-## 🛠️ Arquitetura Técnica
+---
 
-O projeto foi construído com foco em escalabilidade e precisão:
+## 🛠️ Tecnologias Utilizadas
 
-* **Backend & Web (Django):** * API RESTful para integração com sensores e aplicativo mobile.
-    * Painel administrativo web para gestão centralizada de unidades armazenadoras.
-    * Lógica de automação de aeração processada no servidor.
-* **Mobile (Flutter):** * Interface de usuário de alta performance para monitoramento remoto.
-* **Banco de Dados:** PostgreSQL (otimizado para grandes volumes de dados de sensores).
+O desenvolvimento segue as melhores práticas para escalabilidade e design responsivo, suportando perfeitamente Web, Desktop e Mobile com interfaces fluídas e adaptativas ao "Dark/Light Mode".
 
-## 📈 Benefícios do Sistema
+- **Framework:** Flutter (Web/Mobile/Desktop)
+- **Linguagem:** Dart
+- **State Management & Routing:** GetX (`get`)
+- **Storage Local:** GetStorage (`get_storage`)
+- **Tipografia:** Google Fonts (`google_fonts`)
+- **Arquitetura:** MVC Modificado (Focado em Módulos & Responsabilidade Única com Bindings do GetX)
 
-1.  **Melhoria na Gestão de Estoques:** Armazenamento em condições ideais de forma contínua.
-2.  **Redução de Perdas:** Prevenção ativa contra a deterioração por calor ou umidade adversa.
-3.  **Eficiência Operacional:** Redução de intervenções manuais e monitoramento proativo 24/7.
+---
 
-## 📂 Estrutura do Repositório
+## 🎨 Arquitetura de Módulos (Features)
 
-- `/smart_secagem_web`: Aplicação Django (Web e API).
-- `/smart_secagem_mobile`: Projeto Flutter para Android/iOS.
-- `/docs`: Documentação dos algoritmos de aeração e especificações de sensores.
+A aplicação foi rigorosamente dividida em módulos escaláveis:
 
+*   🌐 **Landing Page Responsiva:** Portfólio de funcionalidades, precificação e informações institucionais, integrando redirecionamento inteligente.
+*   🛤️ **Onboarding Interativo:** Fluxo educacional projetado em *cards e ilustrações* voltadas ao Agro que explicam a importância da aeração inteligente antes do usuário realizar o primeiro acesso. Redirecionamento de sessão em cache (One-time viewing).
+*   🔐 **Login Premium:** Autenticação limpa com validação UI/UX avançada.
+*   📊 **Dashboard Central (Área Restrita):** Container mestre contendo navegação unificada por Drawer Lateral para acessar:
+    *   **Gestão de Silos**: Parametrização dos silos da fazenda.
+    *   **Dispositivos**: Hubs, estações meteorológicas e termo-sensores.
+    *   **Notificações**: Central de alertas e métricas.
+    *   **Centro de Suporte (Lógica Avançada)**: Acervo educacional nativo explicando os pilares biológicos da Inteligência de Aeração do sistema.
+    *   **Meu Perfil**: Gestão restrita de dados cadastrais e opções ativas em UI (2FA, Nível de Acesso e Alertas).
+    *   **Configurações do Sistema**: Troca de esquemas de Cores, Dark/Light mode dinâmico global.
+*   🧠 **Smart Sense IA:** Painel demonstrativo do motor lógico avançado focado na previsão preditiva de até 48h de hotspots e otimização total de gasto energético.
 
-![1745439442103](https://github.com/user-attachments/assets/23dc55d0-e4d5-4157-b53a-51f956e2b526)
-![1745439442097](https://github.com/user-attachments/assets/bac8509e-bce5-4575-aeaf-8e86dc0364d3)
-![1745439442077](https://github.com/user-attachments/assets/20205214-d2e7-44ca-9920-763fc7c0c225)
-![1745439442069](https://github.com/user-attachments/assets/e07fddab-92cc-4bfd-8f68-bfc605af36f4)
+---
 
+## 📂 Estrutura de Pastas
+
+A organização em árvore reflete a separação de escopos e injeção de dependência via Bindings:
+
+```text
+lib/
+├── core/                   # Utilitários, Tema e Cores globais
+│   ├── theme/app_theme.dart
+│   └── values/app_colors.dart
+├── modules/                # Módulos Funcionais Exclusivos (MVC)
+│   ├── home/               # Painel Dashboard, Sidebar e Rotting Interno
+│   ├── landing/            # Landing Page Comercial
+│   ├── login/              # Interface de Acesso
+│   ├── onboarding/         # Onboarding do App 
+│   ├── profile/            # Gestão Pessoal e 2FA 
+│   ├── settings/           # Personalização Visual e Configurações
+│   ├── smart_sense_ia/     # Painel de Otimização Analítica (Motor IA)
+│   └── support/            # Onboarding Técnico (Regras de aeração)
+├── routes/                 # Registro e Padronização das Rotas (GetPage)
+│   ├── app_pages.dart
+│   └── app_routes.dart
+└── main.dart               # Ponto Inicial, Bootstrapping de Injeções e GetMaterialApp
+```
+
+---
+
+## ⚙️ Como Executar o Projeto
+
+**1. Clone o repositório:**
+```bash
+git clone https://github.com/SeuUsuario/projeto_smart_secagem.git
+cd projeto_smart_secagem
+```
+
+**2. Instale as dependências:**
+```bash
+flutter pub get
+```
+
+**3. Teste o projeto rodando na Web (Chrome):**
+```bash
+flutter run -d chrome
+```
+
+---
+
+## 📝 Próximos Passos e Integrações Planejadas
+- Conexão do módulo `Smart Sense IA` diretamente com a API do **Gemini 1.5 Flash (Google Generative AI)** para geração de laudos em linguagem natural.
+- Migração de estado mockado para chamadas reais de backend APIs/WebSockets lidando com sensores na fazenda.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9f5c635a-6ad1-4e2e-9d2e-251985558633" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/31fe34ae-7c53-4590-882b-94c80dfc49be" />
+
+---
+
+**Desenvolvido com dedicação para a Revolução do Agro-Tech.** 🌱
