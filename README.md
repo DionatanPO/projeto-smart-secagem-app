@@ -100,6 +100,9 @@ flutter run -d chrome
 - Conexão do módulo `Smart Sense IA` diretamente com a API do **Gemini 1.5 Flash (Google Generative AI)** para geração de laudos em linguagem natural.
 - Migração de estado mockado para chamadas reais de backend APIs/WebSockets lidando com sensores na fazenda.
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9f5c635a-6ad1-4e2e-9d2e-251985558633" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/31fe34ae-7c53-4590-882b-94c80dfc49be" />
+
 ---
 
 **Desenvolvido com dedicação para a Revolução do Agro-Tech.** 🌱
