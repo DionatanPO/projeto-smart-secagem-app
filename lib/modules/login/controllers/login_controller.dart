@@ -38,13 +38,6 @@ class LoginController extends GetxController {
 
         if (success) {
           Get.offAllNamed(Routes.home);
-          Get.snackbar(
-            'Sucesso',
-            'Bem-vindo ao Smart Secagem',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-          );
         }
       } catch (e) {
         Get.snackbar(

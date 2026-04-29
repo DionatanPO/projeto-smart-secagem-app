@@ -10,25 +10,12 @@ import '../../../core/models/silo_model.dart';
 class DevicesController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
-  final hubs = <Map<String, dynamic>>[
-    {
-      'id': 'HUB-001',
-      'name': 'Central de Secagem A',
-      'status': 'Online',
-      'lastSeen': 'Agora',
-      'ip': '192.168.1.50',
-      'signal': 0.85,
-      'battery': 1.0,
-      'connectedDevices': 12,
-    },
-  ].obs;
 
   final sensors = <SensorModel>[].obs;
   final silos = <SiloModel>[].obs;
   final telemetry = <TelemetryModel>[].obs;
   final isLoading = false.obs;
   final isLoadingTelemetry = false.obs;
-  final selectedTab = 0.obs;
   final rxSelectedDate = DateTime.now().obs;
   String? _currentSensorId; // Para recarregar quando a data mudar
 
@@ -234,9 +221,6 @@ class DevicesController extends GetxController {
     }
   }
 
-  void changeTab(int index) {
-    selectedTab.value = index;
-  }
 
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -279,7 +263,7 @@ class DevicesController extends GetxController {
   void scanDevices() {
     Get.snackbar(
       'Buscando Dispositivos',
-      'Procurando novos hubs e sensores na rede...',
+      'Procurando novos sensores na rede...',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.blue.withOpacity(0.1),
       colorText: Colors.blue[800],

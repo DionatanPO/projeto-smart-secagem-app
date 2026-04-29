@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/models/user_model.dart';
 import '../controllers/access_management_controller.dart';
@@ -266,91 +267,266 @@ class AccessManagementView extends GetView<AccessManagementController> {
     final accountType = (user?.accountType ?? 'operador').obs;
     final formKey = GlobalKey<FormState>();
 
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     Get.dialog(
-      AlertDialog(
-        title: Text(isEditing ? 'Editar Usuário' : 'Novo Usuário'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: usernameController,
-                  decoration: const InputDecoration(labelText: 'Username'),
-                  validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'E-mail'),
-                  validator: (v) => GetUtils.isEmail(v!) ? null : 'E-mail inválido',
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: isEditing ? 'Nova Senha (opcional)' : 'Senha',
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: 500,
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isEditing ? 'Editar Usuário' : 'Novo Usuário',
+                              style: GoogleFonts.outfit(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              isEditing ? 'Atualize as permissões ou dados do usuário.' : 'Cadastre um novo colaborador no sistema.',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: isDark ? Colors.grey[400] : AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(Icons.close_rounded),
+                        style: IconButton.styleFrom(
+                          backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                        ),
+                      ),
+                    ],
                   ),
-                  obscureText: true,
-                  validator: (v) => !isEditing && v!.isEmpty ? 'Campo obrigatório' : null,
-                ),
-                const SizedBox(height: 16),
-                Obx(() => DropdownButtonFormField<String>(
-                      value: accountType.value,
-                      items: const [
-                        DropdownMenuItem(value: 'admin', child: Text('Administrador')),
-                        DropdownMenuItem(value: 'operador', child: Text('Operador')),
-                      ],
-                      onChanged: (v) => accountType.value = v!,
-                      decoration: const InputDecoration(labelText: 'Tipo de Conta'),
-                    )),
-              ],
+                  const SizedBox(height: 32),
+                  _buildFieldLabel('NOME DE USUÁRIO'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: usernameController,
+                    style: GoogleFonts.inter(fontSize: 14),
+                    decoration: _buildInputDecoration('Ex: dionatan.p', Icons.person_outline_rounded, isDark),
+                    validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildFieldLabel('ENDEREÇO DE E-MAIL'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: emailController,
+                    style: GoogleFonts.inter(fontSize: 14),
+                    decoration: _buildInputDecoration('Ex: contato@empresa.com', Icons.email_outlined, isDark),
+                    validator: (v) => GetUtils.isEmail(v!) ? null : 'E-mail inválido',
+                  ),
+                  const SizedBox(height: 24),
+                  _buildFieldLabel(isEditing ? 'NOVA SENHA (OPCIONAL)' : 'SENHA DE ACESSO'),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: passwordController,
+                    style: GoogleFonts.inter(fontSize: 14),
+                    obscureText: true,
+                    decoration: _buildInputDecoration('••••••••', Icons.lock_outline_rounded, isDark),
+                    validator: (v) => !isEditing && v!.isEmpty ? 'Campo obrigatório' : null,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildFieldLabel('NÍVEL DE ACESSO'),
+                  const SizedBox(height: 8),
+                  Obx(() => DropdownButtonFormField<String>(
+                        value: accountType.value,
+                        style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : AppColors.textPrimary),
+                        dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                        items: const [
+                          DropdownMenuItem(value: 'admin', child: Text('Administrador')),
+                          DropdownMenuItem(value: 'operador', child: Text('Operador')),
+                        ],
+                        onChanged: (v) => accountType.value = v!,
+                        decoration: _buildInputDecoration('', Icons.admin_panel_settings_outlined, isDark),
+                      )),
+                  const SizedBox(height: 40),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Get.back(),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.grey)),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              final newUser = UserModel(
+                                id: user?.id,
+                                username: usernameController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
+                                accountType: accountType.value,
+                              );
+                              if (isEditing) {
+                                controller.updateUser(newUser);
+                              } else {
+                                controller.createUser(newUser);
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            isEditing ? 'Atualizar Dados' : 'Criar Conta',
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                final newUser = UserModel(
-                  id: user?.id,
-                  username: usernameController.text,
-                  email: emailController.text,
-                  password: passwordController.text,
-                  accountType: accountType.value,
-                );
-                if (isEditing) {
-                  controller.updateUser(newUser);
-                } else {
-                  controller.createUser(newUser);
-                }
-              }
-            },
-            child: const Text('Salvar'),
-          ),
-        ],
       ),
     );
   }
 
+  Widget _buildFieldLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 11,
+        fontWeight: FontWeight.w900,
+        color: AppColors.primary,
+        letterSpacing: 1.1,
+      ),
+    );
+  }
+
+  InputDecoration _buildInputDecoration(String hint, IconData icon, bool isDark) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, size: 20, color: AppColors.primary.withOpacity(0.5)),
+      filled: true,
+      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+    );
+  }
+
   void _confirmDelete(BuildContext context, UserModel user) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Get.dialog(
-      AlertDialog(
-        title: const Text('Excluir Usuário'),
-        content: Text('Deseja realmente excluir o usuário ${user.username}?'),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () {
-              controller.deleteUser(user.id!);
-              Get.back();
-            },
-            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: 400,
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+            borderRadius: BorderRadius.circular(28),
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.delete_forever_rounded, color: AppColors.error, size: 40),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Excluir Usuário',
+                style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Deseja realmente remover o usuário ${user.username}? Esta ação não poderá ser desfeita.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(color: Colors.grey, fontSize: 14),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                      child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.grey)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        controller.deleteUser(user.id!);
+                        Get.back();
+                      },
+                      child: Text('Excluir', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -13,6 +13,7 @@ import '../../smart_sense_ia/views/smart_sense_ia_view.dart';
 import '../../profile/views/profile_view.dart';
 import '../../simulation/views/simulation_view.dart';
 import '../../silo_viewer/views/silo_viewer_view.dart';
+import '../../farm_management/views/farm_management_view.dart';
 
 
 class HomeView extends GetView<HomeController> {
@@ -80,19 +81,21 @@ class HomeView extends GetView<HomeController> {
                   _buildMenuItem(
                       context, 1, 'Dashboard', Icons.dashboard_rounded),
                   _buildMenuItem(
-                      context, 2, 'Gestão de Silos', Icons.warehouse_rounded),
-                  _buildMenuItem(context, 3, 'Dispositivos', Icons.hub_rounded),
+                      context, 2, 'Gestão de Fazendas', Icons.location_on_rounded),
                   _buildMenuItem(
-                      context, 4, 'Notificações', Icons.notifications_rounded),
+                      context, 3, 'Gestão de Silos', Icons.warehouse_rounded),
+                  _buildMenuItem(context, 4, 'Dispositivos', Icons.hub_rounded),
                   _buildMenuItem(
-                      context, 5, 'Suporte Técnico', Icons.help_center_rounded),
-                  _buildMenuItem(context, 6, 'Gestão de Acesso',
+                      context, 5, 'Notificações', Icons.notifications_rounded),
+                  _buildMenuItem(
+                      context, 6, 'Suporte Técnico', Icons.help_center_rounded),
+                  _buildMenuItem(context, 7, 'Gestão de Acesso',
                       Icons.admin_panel_settings_rounded),
                   _buildMenuItem(
-                      context, 7, 'Configuração', Icons.settings_rounded),
+                      context, 8, 'Configuração', Icons.settings_rounded),
                   _buildMenuItem(
-                      context, 8, 'Smart Sense IA', Icons.psychology_rounded),
-                  _buildMenuItem(context, 9, 'Simulador Interativo',
+                      context, 9, 'Smart Sense IA', Icons.psychology_rounded),
+                  _buildMenuItem(context, 10, 'Simulador Interativo',
                       Icons.science_rounded),
                   const Padding(
                     padding:
@@ -100,7 +103,7 @@ class HomeView extends GetView<HomeController> {
                     child: Divider(height: 1),
                   ),
                   _buildMenuItem(
-                      context, 10, 'Meu Perfil', Icons.person_rounded),
+                      context, 11, 'Meu Perfil', Icons.person_rounded),
                 ],
               ),
             ),
@@ -252,22 +255,24 @@ class HomeView extends GetView<HomeController> {
       case 1:
         return _buildDashboardContent(context);
       case 2:
-        return const SiloManagementView();
+        return const FarmManagementView();
       case 3:
-        return const DevicesView();
+        return const SiloManagementView();
       case 4:
-        return const NotificationsView();
+        return const DevicesView();
       case 5:
-        return const SupportView();
+        return const NotificationsView();
       case 6:
-        return const AccessManagementView();
+        return const SupportView();
       case 7:
-        return const SettingsView();
+        return const AccessManagementView();
       case 8:
-        return const SmartSenseIAView();
+        return const SettingsView();
       case 9:
-        return const SimulationView();
+        return const SmartSenseIAView();
       case 10:
+        return const SimulationView();
+      case 11:
         return const ProfileView();
       default:
         return const SiloViewerView();

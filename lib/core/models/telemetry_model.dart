@@ -1,5 +1,6 @@
 class TelemetryModel {
   final int? id;
+  final int sensorId;
   final String sensorPhysicalId;
   final double temperature;
   final double humidity;
@@ -8,6 +9,7 @@ class TelemetryModel {
 
   TelemetryModel({
     this.id,
+    required this.sensorId,
     required this.sensorPhysicalId,
     required this.temperature,
     required this.humidity,
@@ -18,6 +20,7 @@ class TelemetryModel {
   factory TelemetryModel.fromJson(Map<String, dynamic> json) {
     return TelemetryModel(
       id: json['id'],
+      sensorId: json['sensor'] ?? 0,
       sensorPhysicalId: json['sensor_physical_id'] ?? '',
       temperature: (json['temperatura'] as num).toDouble(),
       humidity: (json['umidade'] as num).toDouble(),
@@ -28,6 +31,7 @@ class TelemetryModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'sensor': sensorId,
       'sensor_physical_id': sensorPhysicalId,
       'temperatura': temperature,
       'umidade': humidity,

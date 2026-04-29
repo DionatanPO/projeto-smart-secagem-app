@@ -61,22 +61,32 @@ class LoginView extends GetView<LoginController> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: isDark ? null : AppColors.primaryGradient,
-        color: isDark ? AppColors.surfaceDark : null,
-      ),
       child: Stack(
         children: [
-          Positioned(
-            top: -100,
-            left: -100,
-            child: CircleAvatar(
-              radius: 200,
-              backgroundColor: isDark
-                  ? Colors.white.withOpacity(0.02)
-                  : Colors.white.withOpacity(0.05),
+          // Background Image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/hero_tractor.png',
+              fit: BoxFit.cover,
             ),
           ),
+          // Dark Overlay
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.7),
+                    Colors.black.withOpacity(0.4),
+                    Colors.black.withOpacity(0.8),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Branding Content
           Center(
             child: Padding(
               padding: const EdgeInsets.all(60.0),
@@ -89,48 +99,63 @@ class LoginView extends GetView<LoginController> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? AppColors.primary.withOpacity(0.2)
-                              : Colors.white.withOpacity(0.1),
+                          color: AppColors.primary.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(16),
+                          border:
+                              Border.all(color: Colors.white.withOpacity(0.2)),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.auto_awesome_mosaic_rounded,
-                          color: isDark ? AppColors.primary : Colors.white,
+                          color: Colors.white,
                           size: 32,
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Text(
+                      const Text(
                         'Smart Secagem',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: isDark ? Colors.white : Colors.white,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 40),
-                  Text(
+                  const SizedBox(height: 48),
+                  const Text(
                     'Inteligência na\nSecagem de Grãos.',
-                    style: theme.textTheme.displayLarge?.copyWith(
+                    style: TextStyle(
                       fontSize: 48,
-                      color: isDark ? Colors.white : AppColors.textLight,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
                       height: 1.1,
+                      letterSpacing: -1,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'Otimize sua colheita com aeração inteligente e monitoramento em tempo real.',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: isDark
-                          ? Colors.white.withOpacity(0.7)
-                          : AppColors.textLight.withOpacity(0.7),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 18,
                       height: 1.5,
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          // Bottom subtle info
+          Positioned(
+            bottom: 40,
+            left: 60,
+            child: Text(
+              '© 2026 Smart Secagem',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.4),
+                fontSize: 12,
+                letterSpacing: 1,
               ),
             ),
           ),
