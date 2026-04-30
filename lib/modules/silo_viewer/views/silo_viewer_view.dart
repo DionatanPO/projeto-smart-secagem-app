@@ -13,88 +13,109 @@ class SiloViewerView extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final bool isDesktop = MediaQuery.of(context).size.width >= 1100;
+
     return DefaultTabController(
       length: 4,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(130),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      'Projeto do Silo',
-                      style: GoogleFonts.outfit(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : AppColors.textPrimary,
-                      ),
-                    ),
-                    Container(
-                      height: 48,
-                      width: 540, // Increased width to accommodate 4 tabs
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDark : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isDark
-                              ? AppColors.borderDark
-                              : AppColors.border.withOpacity(0.5),
-                        ),
-                      ),
-                      child: TabBar(
-                        indicatorColor: AppColors.primary,
-                        dividerColor: Colors.transparent,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        indicator: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.primary, width: 2),
-                        ),
-                        labelStyle: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        labelColor: AppColors.primary,
-                        unselectedLabelColor:
-                            isDark ? Colors.white70 : Colors.black54,
-                        tabs: const [
-                          Tab(text: 'Informações'),
-                          Tab(text: 'Etapas'),
-                          Tab(text: 'Modelo 3D'),
-                          Tab(text: 'Conectividade'),
+      child: Container(
+        color: Colors.transparent,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!isDesktop) ...[
+                            Builder(
+                              builder: (headerContext) => IconButton(
+                                onPressed: () => Scaffold.of(headerContext).openDrawer(),
+                                icon: const Icon(Icons.menu_rounded),
+                                color: theme.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            'Projeto do Silo',
+                            style: GoogleFonts.outfit(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : AppColors.textPrimary,
+                            ),
+                          ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Acompanhe as fases, diretrizes e a infraestrutura tecnológica do projeto.',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    color:
-                        isDark ? AppColors.textMuted : AppColors.textSecondary,
+                      Container(
+                        height: 48,
+                        width: isDesktop ? 540 : double.infinity,
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.surfaceDark : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.borderDark
+                                : AppColors.border.withOpacity(0.5),
+                          ),
+                        ),
+                        child: TabBar(
+                          indicatorColor: AppColors.primary,
+                          dividerColor: Colors.transparent,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicator: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppColors.primary, width: 2),
+                          ),
+                          labelStyle: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          labelColor: AppColors.primary,
+                          unselectedLabelColor:
+                              isDark ? Colors.white70 : Colors.black54,
+                          tabs: const [
+                            Tab(text: 'Informações'),
+                            Tab(text: 'Etapas'),
+                            Tab(text: 'Modelo 3D'),
+                            Tab(text: 'Conectividade'),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    'Acompanhe as fases, diretrizes e a infraestrutura tecnológica do projeto.',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color:
+                          isDark ? AppColors.textMuted : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildInfoTab(context),
-            _buildStagesTab(context),
-            _build3DTab(context),
-            _buildConnectivityTab(context),
+            const SizedBox(height: 16),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _buildInfoTab(context),
+                  _buildStagesTab(context),
+                  _build3DTab(context),
+                  _buildConnectivityTab(context),
+                ],
+              ),
+            ),
           ],
         ),
       ),

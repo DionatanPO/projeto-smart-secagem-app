@@ -39,13 +39,17 @@ class SettingsView extends GetView<SettingsController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Personalização',
-                        style: (isDesktop
-                                ? theme.textTheme.headlineSmall
-                                : theme.textTheme.titleLarge)
-                            ?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Personalização',
+                          style: (isDesktop
+                                  ? theme.textTheme.headlineSmall
+                                  : theme.textTheme.titleLarge)
+                              ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),

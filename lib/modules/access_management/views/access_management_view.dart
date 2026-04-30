@@ -78,13 +78,17 @@ class AccessManagementView extends GetView<AccessManagementController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Gestão de Acesso',
-                      style: (isDesktop
-                              ? theme.textTheme.headlineSmall
-                              : theme.textTheme.titleLarge)
-                          ?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Gestão de Acesso',
+                        style: (isDesktop
+                                ? theme.textTheme.headlineSmall
+                                : theme.textTheme.titleLarge)
+                            ?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -105,7 +109,7 @@ class AccessManagementView extends GetView<AccessManagementController> {
             icon: const Icon(Icons.person_add_rounded, size: 20),
             label: const Text('Novo Usuário'),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
           ),
         ],
@@ -406,7 +410,7 @@ class AccessManagementView extends GetView<AccessManagementController> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 0,
                           ),

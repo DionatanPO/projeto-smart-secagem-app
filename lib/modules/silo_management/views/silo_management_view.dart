@@ -20,48 +20,67 @@ class SiloManagementView extends GetView<SiloManagementController> {
     final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width >= 1100;
 
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(context),
-          const SizedBox(height: 32),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (controller.silos.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.warehouse_outlined, size: 64, color: theme.hintColor),
-                      const SizedBox(height: 16),
-                      Text('Nenhum silo cadastrado', style: theme.textTheme.titleMedium),
-                    ],
-                  ),
-                );
-              }
-
-              return LayoutBuilder(builder: (context, constraints) {
-                return ListView.separated(
-                  padding: const EdgeInsets.all(4),
-                  itemCount: controller.silos.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 32),
-                  itemBuilder: (context, index) {
-                    final silo = controller.silos[index];
-                    return _buildSiloCard(context, silo, index);
-                  },
-                );
-              });
-            }),
-          ),
-        ],
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        padding: EdgeInsets.all(isDesktop ? 32 : 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            const SizedBox(height: 32),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+  
+                if (controller.silos.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.warehouse_outlined,
+                            size: 64, color: theme.hintColor),
+                        const SizedBox(height: 16),
+                        Text('Nenhum silo cadastrado',
+                            style: theme.textTheme.titleMedium),
+                      ],
+                    ),
+                  );
+                }
+  
+                return LayoutBuilder(builder: (context, constraints) {
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(4),
+                    itemCount: controller.silos.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 32),
+                    itemBuilder: (context, index) {
+                      final silo = controller.silos[index];
+                      return _buildSiloCard(context, silo, index);
+                    },
+                  );
+                });
+              }),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showSiloForm(context),
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        highlightElevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          'Novo Silo',
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
       ),
     );
   }
@@ -92,13 +111,17 @@ class SiloManagementView extends GetView<SiloManagementController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Gestão de Silos',
-                      style: (isDesktop
-                              ? theme.textTheme.headlineSmall
-                              : theme.textTheme.titleLarge)
-                          ?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Gestão de Silos',
+                        style: (isDesktop
+                                ? theme.textTheme.headlineSmall
+                                : theme.textTheme.titleLarge)
+                            ?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -114,37 +137,21 @@ class SiloManagementView extends GetView<SiloManagementController> {
               ),
             ],
           ),
-          Wrap(
-            spacing: 16,
-            runSpacing: 8,
-            children: [
-              OutlinedButton.icon(
-                onPressed: controller.refreshSilos,
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-                label: const Text('Sincronizar'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 16),
-                  side: BorderSide(color: theme.primaryColor),
-                  foregroundColor: theme.primaryColor,
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _showSiloForm(context),
-                icon: const Icon(Icons.add_rounded, size: 20),
-                label: const Text('Novo Silo'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 16),
-                  backgroundColor: theme.primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
+          OutlinedButton.icon(
+            onPressed: controller.refreshSilos,
+            icon: const Icon(Icons.refresh_rounded, size: 20),
+            label: const Text('Sincronizar'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              side: BorderSide(color: theme.primaryColor),
+              foregroundColor: theme.primaryColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
         ],
       ),
     );
+
   }
   Widget _buildSiloCard(BuildContext context, SiloModel silo, int index) {
     final theme = Theme.of(context);
@@ -479,21 +486,37 @@ class SiloManagementView extends GetView<SiloManagementController> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
-      child: Text(status.toUpperCase(), style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900, color: color, letterSpacing: 1)),
+      child: Text(_getStatusText(status).toUpperCase(), style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900, color: color, letterSpacing: 1)),
     );
   }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'ativo':
+      case 'disponivel':
         return Colors.green;
+      case 'em_uso':
+        return AppColors.primary;
       case 'manutencao':
         return Colors.orange;
-      case 'desactivated':
       case 'desativado':
-        return Colors.red;
+        return Colors.grey;
       default:
         return Colors.grey;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
+      case 'disponivel':
+        return 'Disponível';
+      case 'em_uso':
+        return 'Em Uso';
+      case 'manutencao':
+        return 'Manutenção';
+      case 'desativado':
+        return 'Inativo';
+      default:
+        return status;
     }
   }
 
@@ -665,7 +688,12 @@ class SiloManagementView extends GetView<SiloManagementController> {
     final quantityController = TextEditingController(text: silo?.currentQuantity.toString() ?? '');
     final productController = TextEditingController(text: silo?.productType ?? '');
     final observationsController = TextEditingController(text: silo?.observations ?? '');
-    final status = (silo?.status ?? 'ativo').obs;
+    
+    // Garantir que o status inicial seja válido para não quebrar o Dropdown
+    final validStatuses = ['disponivel', 'em_uso', 'manutencao', 'desativado'];
+    final currentStatus = silo?.status ?? 'disponivel';
+    final status = (validStatuses.contains(currentStatus) ? currentStatus : 'disponivel').obs;
+    
     final selectedFarmId = (silo?.farmId).obs;
 
     final theme = Theme.of(context);
@@ -804,8 +832,9 @@ class SiloManagementView extends GetView<SiloManagementController> {
                       style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : AppColors.textPrimary),
                       dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
                       items: const [
-                        DropdownMenuItem(value: 'ativo', child: Text('Ativo')),
-                        DropdownMenuItem(value: 'manutencao', child: Text('Em Manutenção')),
+                        DropdownMenuItem(value: 'disponivel', child: Text('Disponível')),
+                        DropdownMenuItem(value: 'em_uso', child: Text('Em Uso')),
+                        DropdownMenuItem(value: 'manutencao', child: Text('Manutenção')),
                         DropdownMenuItem(value: 'desativado', child: Text('Desativado')),
                       ],
                       onChanged: (v) => status.value = v!,

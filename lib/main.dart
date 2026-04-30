@@ -29,6 +29,13 @@ void main() async {
           theme: AppTheme.light(settingsController.primaryColor.value),
           darkTheme: AppTheme.dark(settingsController.primaryColor.value),
           themeMode: settingsController.themeMode,
+          builder: (context, child) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: 0.8,
+              maxScaleFactor: 1.2,
+              child: child!,
+            );
+          },
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,

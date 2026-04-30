@@ -9,4 +9,5 @@ abstract class Routes {
   static const support = '/support';
   static const smartSenseIA = '/smart-sense-ia';
   static const simulation = '/simulation';
+  static const batchManagement = '/batch-management';
 }

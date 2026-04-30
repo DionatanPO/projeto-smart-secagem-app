@@ -45,13 +45,17 @@ class ProfileView extends GetView<ProfileController> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Meu Perfil',
-                            style: (isDesktop
-                                    ? theme.textTheme.headlineSmall
-                                    : theme.textTheme.titleLarge)
-                                ?.copyWith(
-                              fontWeight: FontWeight.bold,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Meu Perfil',
+                              style: (isDesktop
+                                      ? theme.textTheme.headlineSmall
+                                      : theme.textTheme.titleLarge)
+                                  ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),

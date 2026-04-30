@@ -64,13 +64,17 @@ class SupportView extends GetView<SupportController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Centro de Conhecimento',
-                style: (isDesktop
-                        ? theme.textTheme.headlineSmall
-                        : theme.textTheme.titleLarge)
-                    ?.copyWith(
-                  fontWeight: FontWeight.bold,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Centro de Conhecimento',
+                  style: (isDesktop
+                          ? theme.textTheme.headlineSmall
+                          : theme.textTheme.titleLarge)
+                      ?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -375,9 +379,9 @@ class SupportView extends GetView<SupportController> {
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.primaryColor,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(16)),
             ),
             child: const Text('Falar com Especialista'),
           ),

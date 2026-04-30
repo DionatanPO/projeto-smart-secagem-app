@@ -46,15 +46,18 @@ class SimulationView extends GetView<SimulationController> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Simulador Interativo',
-                            style: (isDesktop
-                                    ? theme.textTheme.headlineSmall
-                                    : theme.textTheme.titleLarge)
-                                ?.copyWith(
-                              fontWeight: FontWeight.bold,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Simulador Interativo',
+                              style: (isDesktop
+                                      ? theme.textTheme.headlineSmall
+                                      : theme.textTheme.titleLarge)
+                                  ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            softWrap: true,
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -435,9 +438,9 @@ class SimulationView extends GetView<SimulationController> {
                         backgroundColor: controller.isPlaying.value
                             ? AppColors.error
                             : AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(16)),
                       ),
                       icon: Icon(
                           controller.isPlaying.value
@@ -458,10 +461,10 @@ class SimulationView extends GetView<SimulationController> {
                 child: OutlinedButton.icon(
                   onPressed: () => controller.advanceOneHour(),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     side: const BorderSide(color: AppColors.primary, width: 2),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                   icon: const Icon(Icons.fast_forward_rounded,
                       color: AppColors.primary),

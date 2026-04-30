@@ -13,74 +13,103 @@ class FarmManagementView extends GetView<FarmManagementController> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Gestão de Fazendas & Armazéns',
-                    style: GoogleFonts.outfit(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    'Gerencie as unidades de armazenamento e suas localizações.',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: isDark ? Colors.grey[400] : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _showFarmForm(context),
-                icon: const Icon(Icons.add_location_alt_rounded, size: 20),
-                label: const Text('Nova Unidade'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value && controller.farms.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    final bool isDesktop = MediaQuery.of(context).size.width >= 1100;
 
-              if (controller.farms.isEmpty) {
-                return _buildEmptyState(context);
-              }
-
-              return GridView.builder(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 450,
-                  mainAxisExtent: 200,
-                  crossAxisSpacing: 24,
-                  mainAxisSpacing: 24,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        padding: EdgeInsets.all(isDesktop ? 32 : 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      if (!isDesktop) ...[
+                        Builder(
+                          builder: (headerContext) => IconButton(
+                            onPressed: () => Scaffold.of(headerContext).openDrawer(),
+                            icon: const Icon(Icons.menu_rounded),
+                            color: theme.primaryColor,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Gestão de Fazendas',
+                                style: GoogleFonts.outfit(
+                                  fontSize: isDesktop ? 28 : 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            if (isDesktop)
+                              Text(
+                                'Gerencie as unidades de armazenamento e suas localizações.',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: isDark ? Colors.grey[400] : AppColors.textSecondary,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                itemCount: controller.farms.length,
-                itemBuilder: (context, index) {
-                  return _buildFarmCard(context, controller.farms[index]);
-                },
-              );
-            }),
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 32),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value && controller.farms.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+  
+                if (controller.farms.isEmpty) {
+                  return _buildEmptyState(context);
+                }
+  
+                return GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 450,
+                    mainAxisExtent: 200,
+                    crossAxisSpacing: 24,
+                    mainAxisSpacing: 24,
+                  ),
+                  itemCount: controller.farms.length,
+                  itemBuilder: (context, index) {
+                    return _buildFarmCard(context, controller.farms[index]);
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showFarmForm(context),
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        highlightElevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: const Icon(Icons.add_location_alt_rounded),
+        label: Text(
+          'Nova Unidade',
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
       ),
     );
   }
@@ -306,7 +335,7 @@ class FarmManagementView extends GetView<FarmManagementController> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           elevation: 0,
                         ),

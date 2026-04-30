@@ -21,77 +21,85 @@ class DevicesView extends GetView<DevicesController> {
     final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width >= 1100;
 
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!isDesktop) ...[
-                      IconButton(
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                        icon: const Icon(Icons.menu_rounded),
-                        color: theme.primaryColor,
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Gestão de Dispositivos',
-                            style: (isDesktop
-                                    ? theme.textTheme.headlineSmall
-                                    : theme.textTheme.titleLarge)
-                                ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!isDesktop) ...[
+                          IconButton(
+                            onPressed: () => Scaffold.of(context).openDrawer(),
+                            icon: const Icon(Icons.menu_rounded),
+                            color: theme.primaryColor,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Controle e monitore seus sensores de campo.',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.textTheme.bodyMedium?.color
-                                  ?.withOpacity(0.6),
-                            ),
-                          ),
+                          const SizedBox(width: 8),
                         ],
-                      ),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Gestão de Dispositivos',
+                                  style: (isDesktop
+                                          ? theme.textTheme.headlineSmall
+                                          : theme.textTheme.titleLarge)
+                                      ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Controle e monitore seus sensores de campo.',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.textTheme.bodyMedium?.color
+                                      ?.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _showSensorForm(context),
-                  icon: const Icon(Icons.sensors_rounded, size: 20),
-                  label: const Text('Configurar Novo'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
-                    backgroundColor: theme.primaryColor,
-                    foregroundColor: Colors.white,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: Obx(() => _buildSensorsList(context)),
-          ),
-        ],
+            const SizedBox(height: 32),
+            Expanded(
+              child: Obx(() => _buildSensorsList(context)),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showSensorForm(context),
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        highlightElevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: const Icon(Icons.sensors_rounded),
+        label: Text(
+          'Configurar Novo',
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
       ),
     );
   }

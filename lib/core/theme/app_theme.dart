@@ -55,20 +55,35 @@ class AppTheme {
           labelStyle: GoogleFonts.inter(
               color: AppColors.textSecondary, fontWeight: FontWeight.w500),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.border),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.border),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: primaryColor, width: 2),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.error),
+          ),
+        ),
+
+        // Card and Dialog Themes for M3 Expressive
+        cardTheme: CardTheme(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          clipBehavior: Clip.antiAlias,
+        ),
+        dialogTheme: DialogTheme(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
           ),
         ),
 
@@ -77,9 +92,9 @@ class AppTheme {
           style: ElevatedButton.styleFrom(
             backgroundColor: primaryColor,
             foregroundColor: Colors.white,
-            minimumSize: const Size(64, 60),
+            minimumSize: const Size(64, 48),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(20),
             ),
             textStyle: GoogleFonts.inter(
               fontSize: 16,
@@ -152,20 +167,35 @@ class AppTheme {
           labelStyle: GoogleFonts.inter(
               color: Colors.white70, fontWeight: FontWeight.w500),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.borderDark),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.borderDark),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: primaryColor, width: 2),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: AppColors.error),
+          ),
+        ),
+
+        // Card and Dialog Themes for M3 Expressive
+        cardTheme: CardTheme(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          clipBehavior: Clip.antiAlias,
+        ),
+        dialogTheme: DialogTheme(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
           ),
         ),
 
@@ -174,9 +204,9 @@ class AppTheme {
           style: ElevatedButton.styleFrom(
             backgroundColor: primaryColor,
             foregroundColor: Colors.white,
-            minimumSize: const Size(64, 60),
+            minimumSize: const Size(64, 48),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(20),
             ),
             textStyle: GoogleFonts.inter(
               fontSize: 16,

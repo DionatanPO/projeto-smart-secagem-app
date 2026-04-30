@@ -15,6 +15,8 @@ import '../modules/smart_sense_ia/bindings/smart_sense_ia_binding.dart';
 import '../modules/smart_sense_ia/views/smart_sense_ia_view.dart';
 import '../modules/simulation/bindings/simulation_binding.dart';
 import '../modules/simulation/views/simulation_view.dart';
+import '../modules/batch_management/bindings/batch_management_binding.dart';
+import '../modules/batch_management/views/batch_management_view.dart';
 import 'app_routes.dart';
 import '../core/middlewares/auth_middleware.dart';
 
@@ -74,6 +76,12 @@ class AppPages {
       name: Routes.simulation,
       page: () => const SimulationView(),
       binding: SimulationBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: Routes.batchManagement,
+      page: () => const BatchManagementView(),
+      binding: BatchManagementBinding(),
       middlewares: [AuthMiddleware()],
     ),
   ];
