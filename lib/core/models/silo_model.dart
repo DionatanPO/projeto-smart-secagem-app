@@ -5,7 +5,6 @@ class SiloModel {
   final String name;
   final double capacity;
   final double currentQuantity;
-  final String productType;
   final String status;
   final String? observations;
   final DateTime? createdAt;
@@ -18,7 +17,6 @@ class SiloModel {
     required this.name,
     required this.capacity,
     required this.currentQuantity,
-    required this.productType,
     required this.status,
     this.observations,
     this.createdAt,
@@ -33,7 +31,6 @@ class SiloModel {
       name: json['name'],
       capacity: (json['capacity'] as num).toDouble(),
       currentQuantity: (json['current_quantity'] as num).toDouble(),
-      productType: json['product_type'],
       status: json['status'],
       observations: json['observations'] ?? json['observacao'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
@@ -48,7 +45,6 @@ class SiloModel {
       'name': name,
       'capacity': capacity,
       'current_quantity': currentQuantity,
-      'product_type': productType,
       'status': status,
       'observations': observations,
     };

@@ -135,8 +135,10 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   'Silo Sense IA',
-                  style: GoogleFonts.outfit(
-                    fontSize: isDesktop ? 32 : 24,
+                  style: (isDesktop
+                          ? theme.textTheme.headlineSmall
+                          : theme.textTheme.titleLarge)
+                      ?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -192,7 +194,7 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
                       return DropdownMenuItem<int>(
                         value: silo.id,
                         child: Text(
-                          '${silo.name} • ${silo.productType}',
+                          silo.name,
                           style: GoogleFonts.inter(fontWeight: FontWeight.w500),
                         ),
                       );

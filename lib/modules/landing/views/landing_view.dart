@@ -43,7 +43,9 @@ class LandingView extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: isMobile ? 600 : 800,
+      constraints: BoxConstraints(
+        minHeight: isMobile ? 600 : 800,
+      ),
       child: Stack(
         children: [
           // Background Image
@@ -71,82 +73,87 @@ class LandingView extends StatelessWidget {
             ),
           ),
           // Content Overlay
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 24 : size.width * 0.08,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment:
-                  isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.auto_awesome_rounded,
-                          color: Colors.white, size: 18),
-                      const SizedBox(width: 10),
-                      Text(
-                        'TECNOLOGIA PARA O CAMPO',
-                        style: GoogleFonts.inter(
+          Center(
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 24 : size.width * 0.08,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: isMobile
+                      ? CrossAxisAlignment.center
+                      : CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(50),
+                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome_rounded,
+                              color: Colors.white, size: 18),
+                          const SizedBox(width: 10),
+                          Text(
+                            'TECNOLOGIA PARA O CAMPO',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: isMobile ? double.infinity : size.width * 0.5,
+                      child: Text(
+                        'A inteligência que seu grão precisa.',
+                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
+                        style: GoogleFonts.outfit(
+                          fontSize: isMobile ? (size.width < 360 ? 36 : 48) : 84,
+                          fontWeight: FontWeight.w900,
                           color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                          letterSpacing: 1.5,
+                          height: 1.05,
+                          letterSpacing: -1.5,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: isMobile ? double.infinity : size.width * 0.5,
-                  child: Text(
-                    'A inteligência que seu grão precisa.',
-                    textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                    style: GoogleFonts.outfit(
-                      fontSize: isMobile ? (size.width < 360 ? 36 : 48) : 84,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      height: 1.05,
-                      letterSpacing: -1.5,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                SizedBox(
-                  width: isMobile ? double.infinity : size.width * 0.4,
-                  child: Text(
-                    'Otimize sua aeração com algoritmos avançados. Reduza perdas, economize energia e garanta a qualidade máxima da sua safra.',
-                    textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                    style: GoogleFonts.inter(
-                      fontSize: isMobile ? 18 : 22,
-                      color: Colors.white.withOpacity(0.85),
-                      height: 1.6,
-                      fontWeight: FontWeight.w400,
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: isMobile ? double.infinity : size.width * 0.4,
+                      child: Text(
+                        'Otimize sua aeração com algoritmos avançados. Reduza perdas, economize energia e garanta a qualidade máxima da sua safra.',
+                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
+                        style: GoogleFonts.inter(
+                          fontSize: isMobile ? 18 : 22,
+                          color: Colors.white.withOpacity(0.85),
+                          height: 1.6,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 54),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 24,
-                  runSpacing: 20,
-                  children: [
-                    _buildPrimaryButton(
-                        'Acessar Sistema', controller.accessSystem),
-                    _buildSecondaryButton('Conhecer Soluções', () {}),
+                    const SizedBox(height: 54),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 24,
+                      runSpacing: 20,
+                      children: [
+                        _buildPrimaryButton(
+                            'Acessar Sistema', controller.accessSystem),
+                        _buildSecondaryButton('Conhecer Soluções', () {}),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
           // Badges/Status at Bottom Right (Desktop only)

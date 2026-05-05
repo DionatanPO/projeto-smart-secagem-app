@@ -77,6 +77,7 @@ flutter:
     - assets/images/lotes.png
     - assets/images/amostras.png
     - assets/images/romaneios.png
+    - assets/images/login_bg_agro.png
     - assets/silo3d.glb
 
   # An image asset can refer to one or more resolution-specific "variants", see

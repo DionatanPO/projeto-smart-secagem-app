@@ -66,7 +66,7 @@ class LoginView extends GetView<LoginController> {
           // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/hero_tractor.png',
+              'assets/images/login_bg_agro.png',
               fit: BoxFit.cover,
             ),
           ),

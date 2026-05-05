@@ -135,6 +135,7 @@ class SimulationView extends GetView<SimulationController> {
   }
 
   Widget _buildVisualSilo(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -157,10 +158,8 @@ class SimulationView extends GetView<SimulationController> {
         children: [
           Text(
             'Silo 01 (Massa de Grãos)',
-            style: GoogleFonts.outfit(
-              fontSize: 22,
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 40),
@@ -363,6 +362,7 @@ class SimulationView extends GetView<SimulationController> {
   }
 
   Widget _buildWeatherControls(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -390,10 +390,8 @@ class SimulationView extends GetView<SimulationController> {
               const SizedBox(width: 12),
               Text(
                 'Clima Externo (Estação)',
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : AppColors.textPrimary,
                 ),
               ),
             ],

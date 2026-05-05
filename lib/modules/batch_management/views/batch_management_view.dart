@@ -33,12 +33,10 @@ class BatchManagementView extends GetView<BatchManagementController> {
                   child: Row(
                     children: [
                       if (!isDesktop) ...[
-                        Builder(
-                          builder: (headerContext) => IconButton(
-                            onPressed: () => Scaffold.of(headerContext).openDrawer(),
-                            icon: const Icon(Icons.menu_rounded),
-                            color: theme.primaryColor,
-                          ),
+                        IconButton(
+                          onPressed: () => Scaffold.of(context).openDrawer(),
+                          icon: const Icon(Icons.menu_rounded),
+                          color: theme.primaryColor,
                         ),
                         const SizedBox(width: 8),
                       ],
@@ -51,10 +49,11 @@ class BatchManagementView extends GetView<BatchManagementController> {
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 'Gestão de Lotes',
-                                style: GoogleFonts.outfit(
-                                  fontSize: isDesktop ? 28 : 22,
+                                style: (isDesktop
+                                        ? theme.textTheme.headlineSmall
+                                        : theme.textTheme.titleLarge)
+                                    ?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : AppColors.textPrimary,
                                 ),
                               ),
                             ),
@@ -117,9 +116,11 @@ class BatchManagementView extends GetView<BatchManagementController> {
   Widget _buildBatchCard(BuildContext context, BatchModel batch) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final width = MediaQuery.of(context).size.width;
+    final isCompact = width < 700;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isCompact ? 16 : 24),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -128,81 +129,209 @@ class BatchManagementView extends GetView<BatchManagementController> {
           if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 4)),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: _getStatusColor(batch.status).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
+          isCompact
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(batch.status).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(_getStatusIcon(batch.status), color: _getStatusColor(batch.status), size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Lote ${batch.numeroLote}',
+                              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            _buildStatusChip(batch.status),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton(
+                        icon: const Icon(Icons.more_vert_rounded, size: 20),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            onTap: () => Future.delayed(Duration.zero, () => _showBatchForm(context, batch: batch)),
+                            child: const Row(children: [Icon(Icons.edit_rounded, size: 18), SizedBox(width: 8), Text('Editar')]),
+                          ),
+                          PopupMenuItem(
+                            onTap: () => controller.deleteBatch(batch.id!),
+                            child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red), SizedBox(width: 8), Text('Excluir', style: TextStyle(color: Colors.red))]),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 10,
+                    children: [
+                      _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
+                      _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildMetricItem('Peso Inicial', '${batch.pesoInicial.toStringAsFixed(0)} kg', isDark),
+                        _buildMetricItem('Umidade', '${batch.umidadeInicial}%', isDark, crossAxisAlignment: CrossAxisAlignment.end),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(batch.status).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(_getStatusIcon(batch.status), color: _getStatusColor(batch.status), size: 28),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                'Lote ${batch.numeroLote}',
+                                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            _buildStatusChip(batch.status),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 16,
+                          runSpacing: 4,
+                          children: [
+                            _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
+                            _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  _buildMetricItem('Peso Inicial', '${batch.pesoInicial.toStringAsFixed(0)} kg', isDark, crossAxisAlignment: CrossAxisAlignment.end),
+                  const SizedBox(width: 24),
+                  _buildMetricItem('Umidade', '${batch.umidadeInicial}%', isDark, crossAxisAlignment: CrossAxisAlignment.end),
+                  const SizedBox(width: 16),
+                  PopupMenuButton(
+                    icon: const Icon(Icons.more_vert_rounded),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        onTap: () => Future.delayed(Duration.zero, () => _showBatchForm(context, batch: batch)),
+                        child: const Row(children: [Icon(Icons.edit_rounded, size: 18), SizedBox(width: 8), Text('Editar')]),
+                      ),
+                      PopupMenuItem(
+                        onTap: () => controller.deleteBatch(batch.id!),
+                        child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red), SizedBox(width: 8), Text('Excluir', style: TextStyle(color: Colors.red))]),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+          if (batch.observacoes != null && batch.observacoes!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.assignment_outlined, size: 14, color: theme.primaryColor),
+                      const SizedBox(width: 8),
+                      Text(
+                        'NOTAS E DIAGNÓSTICOS',
+                        style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: theme.primaryColor, letterSpacing: 0.5),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    batch.observacoes!,
+                    style: GoogleFonts.inter(fontSize: 12, color: isDark ? Colors.grey[400] : Colors.grey[700], height: 1.5),
+                  ),
+                ],
+              ),
             ),
-            child: Icon(_getStatusIcon(batch.status), color: _getStatusColor(batch.status), size: 28),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'Lote ${batch.numeroLote}',
-                      style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 12),
-                    _buildStatusChip(batch.status),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${batch.cultura} (${batch.safra})',
-                      style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600]),
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text(
-                      batch.farmName ?? 'Fazenda não informada',
-                      style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${batch.pesoInicial.toStringAsFixed(0)} kg',
-                style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                '${batch.umidadeInicial}% umidade',
-                style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-          const SizedBox(width: 16),
-          PopupMenuButton(
-            icon: const Icon(Icons.more_vert_rounded),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                onTap: () => Future.delayed(Duration.zero, () => _showBatchForm(context, batch: batch)),
-                child: const Row(children: [Icon(Icons.edit_rounded, size: 18), SizedBox(width: 8), Text('Editar')]),
-              ),
-              PopupMenuItem(
-                onTap: () => controller.deleteBatch(batch.id!),
-                child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red), SizedBox(width: 8), Text('Excluir', style: TextStyle(color: Colors.red))]),
-              ),
-            ],
-          ),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoItem(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: Colors.grey[600]),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            text,
+            style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600]),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricItem(String label, String value, bool isDark, {CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start}) {
+    return Column(
+      crossAxisAlignment: crossAxisAlignment,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : AppColors.textPrimary),
+        ),
+      ],
     );
   }
 
@@ -284,6 +413,11 @@ class BatchManagementView extends GetView<BatchManagementController> {
     final safraController = TextEditingController(text: batch?.safra ?? '2023/2024');
     final pesoController = TextEditingController(text: batch?.pesoInicial.toString() ?? '');
     final umidadeController = TextEditingController(text: batch?.umidadeInicial.toString() ?? '');
+    final observacoesController = TextEditingController(text: batch?.observacoes ?? '');
+    
+    final grainTypes = ['Milho', 'Soja', 'Arroz', 'Trigo', 'Sorgo', 'Café', 'Feijão', 'Outros'];
+    final initialCultura = batch?.cultura ?? 'Milho';
+    final selectedCultura = (grainTypes.contains(initialCultura) ? initialCultura : 'Outros').obs;
     
     var selectedFarmId = batch?.farm.obs ?? (farmController.farms.isNotEmpty ? farmController.farms.first.id : null).obs;
     var selectedSiloId = batch?.silo.obs ?? Rxn<int>();
@@ -348,10 +482,12 @@ class BatchManagementView extends GetView<BatchManagementController> {
                 const SizedBox(height: 24),
                 _buildFieldLabel('CULTURA / GRÃO'),
                 const SizedBox(height: 8),
-                TextField(
-                  controller: culturaController,
-                  decoration: _buildInputDecoration('Ex: Milho, Soja', Icons.grass, isDark),
-                ),
+                Obx(() => DropdownButtonFormField<String>(
+                  value: selectedCultura.value,
+                  decoration: _buildInputDecoration('Selecione o grão', Icons.grass, isDark),
+                  items: grainTypes.map((type) => DropdownMenuItem(value: type, child: Text(type))).toList(),
+                  onChanged: (val) => selectedCultura.value = val!,
+                )),
                 
                 const SizedBox(height: 24),
                 Row(
@@ -423,6 +559,16 @@ class BatchManagementView extends GetView<BatchManagementController> {
                       .toList(),
                   onChanged: (val) => selectedSiloId.value = val,
                 )),
+                
+                const SizedBox(height: 24),
+                _buildFieldLabel('NOTAS E DIAGNÓSTICOS'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: observacoesController,
+                  maxLines: 3,
+                  style: GoogleFonts.inter(fontSize: 14),
+                  decoration: _buildInputDecoration('Detalhes adicionais sobre o lote...', Icons.notes_rounded, isDark),
+                ),
 
                 const SizedBox(height: 40),
                 Row(
@@ -459,12 +605,13 @@ class BatchManagementView extends GetView<BatchManagementController> {
                             id: batch?.id,
                             numeroLote: numeroController.text,
                             farm: selectedFarmId.value!,
-                            cultura: culturaController.text,
+                            cultura: selectedCultura.value,
                             safra: safraController.text,
                             pesoInicial: peso,
                             umidadeInicial: double.tryParse(umidadeController.text) ?? 0,
                             status: selectedStatus.value,
                             silo: siloId,
+                            observacoes: observacoesController.text,
                           );
                           if (isEditing) {
                             controller.updateBatch(newBatch);

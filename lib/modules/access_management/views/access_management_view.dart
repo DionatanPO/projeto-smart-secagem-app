@@ -14,57 +14,69 @@ class AccessManagementView extends GetView<AccessManagementController> {
       Get.put(AccessManagementController());
     }
 
+    final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width >= 1100;
 
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(context),
-          const SizedBox(height: 32),
-          _buildFilters(context),
-          const SizedBox(height: 24),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (controller.users.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.people_outline_rounded, size: 64, color: Get.theme.hintColor),
-                      const SizedBox(height: 16),
-                      Text('Nenhum usuário cadastrado', style: Get.textTheme.titleMedium),
-                    ],
-                  ),
-                );
-              }
-              return _buildUsersList(context);
-            }),
-          ),
-        ],
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (controller.users.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.people_outline_rounded, size: 64, color: theme.hintColor),
+                        const SizedBox(height: 16),
+                        Text('Nenhum usuário cadastrado', style: theme.textTheme.titleMedium),
+                      ],
+                    ),
+                  );
+                }
+                return _buildUsersList(context);
+              }),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showUserForm(context),
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        highlightElevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: const Icon(Icons.person_add_rounded),
+        label: Text(
+          'Novo Usuário',
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isDesktop = MediaQuery.of(context).size.width >= 1100;
-    return SizedBox(
-      width: double.infinity,
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 16,
-        runSpacing: 16,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Row(
             children: [
               if (!isDesktop) ...[
                 IconButton(
@@ -74,7 +86,7 @@ class AccessManagementView extends GetView<AccessManagementController> {
                 ),
                 const SizedBox(width: 8),
               ],
-              Flexible(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -91,12 +103,11 @@ class AccessManagementView extends GetView<AccessManagementController> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
                     Text(
                       'Gerencie os usuários e permissões do sistema.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color:
-                            theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: isDark ? Colors.grey[400] : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -104,61 +115,11 @@ class AccessManagementView extends GetView<AccessManagementController> {
               ),
             ],
           ),
-          ElevatedButton.icon(
-            onPressed: () => _showUserForm(context),
-            icon: const Icon(Icons.person_add_rounded, size: 20),
-            label: const Text('Novo Usuário'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilters(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color:
-              isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5),
         ),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.search_rounded, color: theme.hintColor),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Buscar por nome...',
-                hintStyle: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.hintColor),
-                border: InputBorder.none,
-                filled: false,
-              ),
-              onChanged: (val) {
-                // TODO: Implement search logic in controller
-              },
-            ),
-          ),
-          const VerticalDivider(indent: 10, endIndent: 10),
-          IconButton(
-            onPressed: () => controller.getUsers(),
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Atualizar Lista',
-          ),
-        ],
-      ),
+      ],
     );
   }
+
 
   Widget _buildUsersList(BuildContext context) {
     final theme = Theme.of(context);
@@ -307,8 +268,7 @@ class AccessManagementView extends GetView<AccessManagementController> {
                           children: [
                             Text(
                               isEditing ? 'Editar Usuário' : 'Novo Usuário',
-                              style: GoogleFonts.outfit(
-                                fontSize: 24,
+                              style: theme.textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white : AppColors.textPrimary,
                               ),

@@ -126,9 +126,8 @@ class SupportView extends GetView<SupportController> {
               children: [
                 Text(
                   'O que é o Sistema de Aeração?',
-                  style: GoogleFonts.outfit(
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
-                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

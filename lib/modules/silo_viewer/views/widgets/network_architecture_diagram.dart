@@ -45,18 +45,20 @@ class NetworkArchitectureDiagram extends StatelessWidget {
                         child: Icon(Icons.lan_rounded, color: theme.primaryColor, size: 20),
                       ),
                       const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Arquitetura de Conectividade',
-                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Integração Modbus TCP/RTU em Tempo Real',
-                            style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
-                          ),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Arquitetura de Conectividade',
+                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              'Integração Modbus TCP/RTU em Tempo Real',
+                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

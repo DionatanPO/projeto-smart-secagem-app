@@ -28,19 +28,21 @@ class HomeView extends GetView<HomeController> {
     final bool isDesktop = size.width >= 1100;
 
     return Scaffold(
-      drawer: isDesktop ? null : _buildSidebar(context),
-      body: Row(
-        children: [
-          if (isDesktop) _buildSidebar(context),
-          Expanded(
-            child: Builder(
-              builder: (viewContext) => Obx(
-                () =>
-                    _buildContent(viewContext, controller.selectedIndex.value),
+      drawer: isDesktop ? null : SafeArea(child: Builder(builder: (drawerContext) => _buildSidebar(drawerContext))),
+      body: SafeArea(
+        child: Row(
+          children: [
+            if (isDesktop) _buildSidebar(context),
+            Expanded(
+              child: Builder(
+                builder: (viewContext) => Obx(
+                  () =>
+                      _buildContent(viewContext, controller.selectedIndex.value),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -170,7 +172,12 @@ class HomeView extends GetView<HomeController> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => controller.changePage(index),
+            onTap: () {
+              controller.changePage(index);
+              if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                Navigator.pop(context);
+              }
+            },
             borderRadius: BorderRadius.circular(12),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -234,7 +241,12 @@ class HomeView extends GetView<HomeController> {
         ),
       ),
       child: InkWell(
-        onTap: controller.logout,
+        onTap: () {
+          if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+            Navigator.pop(context);
+          }
+          controller.logout();
+        },
         child: Row(
           children: [
             const Icon(Icons.logout_rounded, color: AppColors.error, size: 22),

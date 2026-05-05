@@ -87,7 +87,10 @@ class SiloManagementView extends GetView<SiloManagementController> {
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width >= 1100;
+    final width = MediaQuery.of(context).size.width;
+    final isDesktop = width >= 1100;
+    final isMobile = width < 600;
+
     return SizedBox(
       width: double.infinity,
       child: Wrap(
@@ -96,64 +99,73 @@ class SiloManagementView extends GetView<SiloManagementController> {
         spacing: 16,
         runSpacing: 16,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (!isDesktop) ...[
-                IconButton(
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                  icon: const Icon(Icons.menu_rounded),
-                  color: theme.primaryColor,
-                ),
-                const SizedBox(width: 8),
-              ],
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Gestão de Silos',
-                        style: (isDesktop
-                                ? theme.textTheme.headlineSmall
-                                : theme.textTheme.titleLarge)
-                            ?.copyWith(
-                          fontWeight: FontWeight.bold,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: isDesktop ? 600 : (width - (isMobile ? 48 : 80))),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!isDesktop) ...[
+                  IconButton(
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    icon: const Icon(Icons.menu_rounded),
+                    color: theme.primaryColor,
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Gestão de Silos',
+                          style: (isDesktop
+                                  ? theme.textTheme.headlineSmall
+                                  : theme.textTheme.titleLarge)
+                              ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Monitoramento em tempo real dos seus silos de secagem.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color
-                            ?.withOpacity(0.6),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Monitoramento em tempo real dos seus silos.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.textTheme.bodyMedium?.color
+                              ?.withOpacity(0.6),
+                          fontSize: isMobile ? 12 : 14,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          OutlinedButton.icon(
-            onPressed: controller.refreshSilos,
-            icon: const Icon(Icons.refresh_rounded, size: 20),
-            label: const Text('Sincronizar'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              side: BorderSide(color: theme.primaryColor),
-              foregroundColor: theme.primaryColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          SizedBox(
+            width: isMobile ? double.infinity : null,
+            child: OutlinedButton.icon(
+              onPressed: controller.refreshSilos,
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+              label: const Text('Sincronizar'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                side: BorderSide(color: theme.primaryColor),
+                foregroundColor: theme.primaryColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
           ),
         ],
       ),
     );
-
   }
-  Widget _buildSiloCard(BuildContext context, SiloModel silo, int index) {
+
+  Widget _buildSiloCard(BuildContext context, SiloModel silo, int index) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final statusColor = _getStatusColor(silo.status);
@@ -179,19 +191,20 @@ class SiloManagementView extends GetView<SiloManagementController> {
                   VerticalDivider(width: 1, color: theme.dividerColor.withOpacity(0.5)),
                   Expanded(flex: 4, child: _buildTelemetrySection(context, silo, padding)),
                   VerticalDivider(width: 1, color: theme.dividerColor.withOpacity(0.5)),
-                  Expanded(flex: 3, child: _buildNotesSection(context, silo, padding)),
+                  Expanded(flex: 3, child: _buildNotesSection(context, silo, padding, true)),
                   VerticalDivider(width: 1, color: theme.dividerColor.withOpacity(0.5)),
                   Expanded(flex: 2, child: _buildActionsSection(context, silo, index, padding, true)),
                 ],
               ),
             )
           : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildIdentitySection(context, silo, statusColor, isDark, padding, false),
                 const Divider(height: 1),
                 _buildTelemetrySection(context, silo, padding),
                 const Divider(height: 1),
-                _buildNotesSection(context, silo, padding),
+                _buildNotesSection(context, silo, padding, false),
                 const Divider(height: 1),
                 _buildActionsSection(context, silo, index, padding, false),
               ],
@@ -218,10 +231,10 @@ class SiloManagementView extends GetView<SiloManagementController> {
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
                     Text(
-                      silo.productType,
+                      'Capacidade: ${silo.capacity}t',
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -246,42 +259,56 @@ class SiloManagementView extends GetView<SiloManagementController> {
         width: graphicWidth,
         height: graphicHeight,
         child: Stack(
-          alignment: Alignment.bottomCenter,
+          alignment: Alignment.center,
           children: [
-            Container(
-              width: graphicWidth * 0.65,
-              height: graphicHeight * 0.8,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(graphicWidth * 0.35), bottom: const Radius.circular(12)),
-                border: Border.all(color: isDark ? Colors.white12 : Colors.black12, width: 2),
-                gradient: LinearGradient(colors: [isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.01), isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.06)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            CustomPaint(
+              size: Size(graphicWidth, graphicHeight),
+              painter: SiloPainter(
+                percentage: silo.percentage,
+                statusColor: statusColor,
+                isDark: isDark,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(4),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 1500),
-                width: graphicWidth * 0.6,
-                height: (graphicHeight * 0.75) * (silo.percentage / 100).clamp(0.08, 1.0),
+            // Texto de Porcentagem
+            Positioned(
+              bottom: graphicHeight * 0.3,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(silo.percentage > 85 ? graphicWidth * 0.3 : 8),
-                    topRight: Radius.circular(silo.percentage > 85 ? graphicWidth * 0.3 : 8),
-                    bottomLeft: const Radius.circular(10), bottomRight: const Radius.circular(10),
-                  ),
-                  gradient: LinearGradient(colors: [statusColor.withOpacity(0.7), statusColor], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Center(
-                  child: Text('${silo.percentage.toInt()}%', style: GoogleFonts.outfit(fontSize: isHorizontal ? 18 : 16, fontWeight: FontWeight.w900, color: Colors.white)),
+                child: Text(
+                  '${silo.percentage.toInt()}%',
+                  style: GoogleFonts.outfit(
+                    fontSize: isHorizontal ? 16 : 14,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
+            // Tooltip de Quantidade
             Positioned(
               top: 0,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: theme.cardColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: theme.dividerColor, width: 0.5)),
-                child: Text('${silo.currentQuantity}t / ${silo.capacity}t', style: GoogleFonts.inter(fontSize: isHorizontal ? 9 : 8, fontWeight: FontWeight.bold)),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: theme.dividerColor, width: 0.5),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2)),
+                  ],
+                ),
+                child: Text(
+                  '${silo.currentQuantity}t / ${silo.capacity}t',
+                  style: GoogleFonts.inter(
+                    fontSize: isHorizontal ? 9 : 8,
+                    fontWeight: FontWeight.bold,
+                    color: theme.primaryColor,
+                  ),
+                ),
               ),
             ),
           ],
@@ -330,48 +357,55 @@ class SiloManagementView extends GetView<SiloManagementController> {
     );
   }
 
-  Widget _buildNotesSection(BuildContext context, SiloModel silo, double padding) {
+  Widget _buildNotesSection(BuildContext context, SiloModel silo, double padding, bool isHorizontal) {
     final theme = Theme.of(context);
+    
+    final notesWidget = Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.brightness == Brightness.dark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+      ),
+      child: Text(
+        silo.observations?.isEmpty ?? true 
+            ? 'Nenhuma observação registrada para este silo.' 
+            : silo.observations!,
+        style: GoogleFonts.inter(
+          fontSize: 12,
+          height: 1.6,
+          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+          fontStyle: silo.observations?.isEmpty ?? true ? FontStyle.italic : FontStyle.normal,
+        ),
+      ),
+    );
+
     return Padding(
       padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
               Icon(Icons.assignment_outlined, size: 18, color: theme.primaryColor),
               const SizedBox(width: 8),
               Text(
-                'NOTAS E DIAGNÓSTICO',
+                'NOTAS E DIAGNÓSTICOS',
                 style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.1, color: theme.primaryColor),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.brightness == Brightness.dark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-              ),
+          if (isHorizontal)
+            Expanded(
               child: SingleChildScrollView(
-                child: Text(
-                  silo.observations?.isEmpty ?? true 
-                      ? 'Nenhuma observação registrada para este silo.' 
-                      : silo.observations!,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    height: 1.6,
-                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                    fontStyle: silo.observations?.isEmpty ?? true ? FontStyle.italic : FontStyle.normal,
-                  ),
-                ),
+                child: notesWidget,
               ),
-            ),
-          ),
+            )
+          else
+            notesWidget,
         ],
       ),
     );
@@ -526,8 +560,9 @@ class SiloManagementView extends GetView<SiloManagementController> {
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
-          width: 500,
-          padding: const EdgeInsets.all(32),
+          constraints: const BoxConstraints(maxWidth: 500),
+          width: MediaQuery.of(context).size.width * 0.9,
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: BorderRadius.circular(28),
@@ -686,7 +721,6 @@ class SiloManagementView extends GetView<SiloManagementController> {
     final nameController = TextEditingController(text: silo?.name ?? '');
     final capacityController = TextEditingController(text: silo?.capacity.toString() ?? '');
     final quantityController = TextEditingController(text: silo?.currentQuantity.toString() ?? '');
-    final productController = TextEditingController(text: silo?.productType ?? '');
     final observationsController = TextEditingController(text: silo?.observations ?? '');
     
     // Garantir que o status inicial seja válido para não quebrar o Dropdown
@@ -703,8 +737,9 @@ class SiloManagementView extends GetView<SiloManagementController> {
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
-          width: 500,
-          padding: const EdgeInsets.all(32),
+          constraints: const BoxConstraints(maxWidth: 550),
+          width: MediaQuery.of(context).size.width * 0.95,
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: BorderRadius.circular(28),
@@ -781,48 +816,48 @@ class SiloManagementView extends GetView<SiloManagementController> {
                   decoration: _buildInputDecoration('Ex: Silo Sul 01', Icons.warehouse_rounded, isDark),
                 ),
                 const SizedBox(height: 24),
-                _buildFieldLabel('TIPO DE GRÃO / PRODUTO'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: productController,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: _buildInputDecoration('Ex: Milho, Soja...', Icons.eco_rounded, isDark),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFieldLabel('CAPACIDADE (T)'),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: capacityController,
-                            style: GoogleFonts.inter(fontSize: 14),
-                            keyboardType: TextInputType.number,
-                            decoration: _buildInputDecoration('0.0', Icons.scale_rounded, isDark),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isSmall = constraints.maxWidth < 350;
+                    return Flex(
+                      direction: isSmall ? Axis.vertical : Axis.horizontal,
+                      children: [
+                        Expanded(
+                          flex: isSmall ? 0 : 1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('CAPACIDADE (T)'),
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: capacityController,
+                                style: GoogleFonts.inter(fontSize: 14),
+                                keyboardType: TextInputType.number,
+                                decoration: _buildInputDecoration('0.0', Icons.scale_rounded, isDark),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFieldLabel('QTD ATUAL (T)'),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: quantityController,
-                            style: GoogleFonts.inter(fontSize: 14),
-                            keyboardType: TextInputType.number,
-                            decoration: _buildInputDecoration('0.0', Icons.inventory_2_rounded, isDark),
+                        ),
+                        if (!isSmall) const SizedBox(width: 16) else const SizedBox(height: 24),
+                        Expanded(
+                          flex: isSmall ? 0 : 1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('QTD ATUAL (T)'),
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: quantityController,
+                                style: GoogleFonts.inter(fontSize: 14),
+                                keyboardType: TextInputType.number,
+                                decoration: _buildInputDecoration('0.0', Icons.inventory_2_rounded, isDark),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
+                        ),
+                      ],
+                    );
+                  }
                 ),
                 const SizedBox(height: 24),
                 _buildFieldLabel('STATUS OPERACIONAL'),
@@ -841,7 +876,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
                       decoration: _buildInputDecoration('', Icons.info_outline_rounded, isDark),
                     )),
                 const SizedBox(height: 24),
-                _buildFieldLabel('OBSERVAÇÕES'),
+                _buildFieldLabel('NOTAS E DIAGNÓSTICOS'),
                 const SizedBox(height: 8),
                 TextField(
                   controller: observationsController,
@@ -873,7 +908,6 @@ class SiloManagementView extends GetView<SiloManagementController> {
                             name: nameController.text,
                             capacity: double.tryParse(capacityController.text) ?? 0.0,
                             currentQuantity: double.tryParse(quantityController.text) ?? 0.0,
-                            productType: productController.text,
                             status: status.value,
                             observations: observationsController.text,
                           );
@@ -946,8 +980,9 @@ class SiloManagementView extends GetView<SiloManagementController> {
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(32),
+          constraints: const BoxConstraints(maxWidth: 400),
+          width: MediaQuery.of(context).size.width * 0.9,
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: BorderRadius.circular(28),
@@ -1077,10 +1112,14 @@ class SiloManagementView extends GetView<SiloManagementController> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(4),
@@ -1098,6 +1137,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
                 ],
               ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.thermostat_auto_rounded, size: 14, color: Colors.orange),
                   const SizedBox(width: 4),
@@ -1138,5 +1178,135 @@ class SiloManagementView extends GetView<SiloManagementController> {
         ],
       ),
     );
+  }
+}
+
+class SiloPainter extends CustomPainter {
+  final double percentage;
+  final Color statusColor;
+  final bool isDark;
+
+  SiloPainter({
+    required this.percentage,
+    required this.statusColor,
+    required this.isDark,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    final width = size.width;
+    final height = size.height;
+
+    // Margens para a escala lateral
+    final siloWidth = width * 0.7;
+    final siloLeft = width * 0.1;
+    final siloTop = height * 0.25;
+    final siloHeight = height * 0.7;
+
+    // 1. Desenhar o corpo do Silo (Cilindro metálico com 3D)
+    final siloRect = Rect.fromLTWH(siloLeft, siloTop, siloWidth, siloHeight);
+    
+    // Gradiente metálico principal
+    final bodyGradient = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: isDark 
+        ? [Colors.grey[850]!, Colors.grey[700]!, Colors.grey[900]!] 
+        : [Colors.grey[400]!, Colors.grey[100]!, Colors.grey[500]!],
+      stops: const [0.0, 0.4, 1.0],
+    ).createShader(siloRect);
+    
+    paint.shader = bodyGradient;
+    canvas.drawRRect(RRect.fromRectAndRadius(siloRect, const Radius.circular(4)), paint);
+
+    // 2. Desenhar o topo (Cone metálico)
+    final roofPath = Path();
+    roofPath.moveTo(siloLeft - 2, siloTop + 2);
+    roofPath.lineTo(siloLeft + siloWidth / 2, height * 0.1);
+    roofPath.lineTo(siloLeft + siloWidth + 2, siloTop + 2);
+    roofPath.close();
+    
+    paint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: isDark ? [Colors.grey[700]!, Colors.grey[800]!] : [Colors.grey[300]!, Colors.grey[400]!],
+    ).createShader(Rect.fromLTWH(0, height * 0.1, width, siloTop));
+    canvas.drawPath(roofPath, paint);
+
+    // 3. Preenchimento (Grãos)
+    if (percentage > 0) {
+      final fillHeight = (siloHeight - 6) * (percentage / 100).clamp(0.05, 1.0);
+      final fillRect = Rect.fromLTWH(
+        siloLeft + 3, 
+        siloTop + siloHeight - fillHeight - 3, 
+        siloWidth - 6, 
+        fillHeight
+      );
+      
+      final fillPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [statusColor.withOpacity(0.8), statusColor],
+        ).createShader(fillRect);
+      
+      canvas.drawRRect(RRect.fromRectAndRadius(fillRect, const Radius.circular(2)), fillPaint);
+      
+      // Reflexo interno no grão (Efeito 3D)
+      final grainGloss = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.white.withOpacity(0.2), 
+            Colors.transparent, 
+            Colors.black.withOpacity(0.1)
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ).createShader(fillRect);
+      canvas.drawRRect(RRect.fromRectAndRadius(fillRect, const Radius.circular(2)), grainGloss);
+    }
+
+    // 4. Detalhes: Nervuras (Ribs) do Silo
+    paint.shader = null;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 0.8;
+    paint.color = isDark ? Colors.black26 : Colors.black.withOpacity(0.05);
+    
+    for (int i = 1; i < 8; i++) {
+      double y = siloTop + (siloHeight * i / 8);
+      canvas.drawLine(Offset(siloLeft, y), Offset(siloLeft + siloWidth, y), paint);
+    }
+
+    // 5. Escala de Medição Lateral
+    paint.color = isDark ? Colors.white24 : Colors.black26;
+    paint.strokeWidth = 1.5;
+    for (int i = 0; i <= 4; i++) {
+      double y = siloTop + siloHeight - (siloHeight * i / 4);
+      canvas.drawLine(Offset(siloLeft + siloWidth + 5, y), Offset(siloLeft + siloWidth + 12, y), paint);
+    }
+
+    // 6. Vidro de Inspeção / Reflexo de Vidro (Efeito Profissional)
+    final glassRect = Rect.fromLTWH(siloLeft, siloTop, siloWidth, siloHeight);
+    final glassGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Colors.white.withOpacity(isDark ? 0.05 : 0.2),
+        Colors.transparent,
+        Colors.white.withOpacity(isDark ? 0.02 : 0.1),
+      ],
+      stops: const [0.0, 0.5, 1.0],
+    ).createShader(glassRect);
+    
+    paint.shader = glassGradient;
+    paint.style = PaintingStyle.fill;
+    canvas.drawRRect(RRect.fromRectAndRadius(glassRect, const Radius.circular(4)), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant SiloPainter oldDelegate) {
+    return oldDelegate.percentage != percentage || oldDelegate.isDark != isDark;
   }
 }

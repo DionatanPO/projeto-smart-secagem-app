@@ -29,12 +29,10 @@ class FarmManagementView extends GetView<FarmManagementController> {
                   child: Row(
                     children: [
                       if (!isDesktop) ...[
-                        Builder(
-                          builder: (headerContext) => IconButton(
-                            onPressed: () => Scaffold.of(headerContext).openDrawer(),
-                            icon: const Icon(Icons.menu_rounded),
-                            color: theme.primaryColor,
-                          ),
+                        IconButton(
+                          onPressed: () => Scaffold.of(context).openDrawer(),
+                          icon: const Icon(Icons.menu_rounded),
+                          color: theme.primaryColor,
                         ),
                         const SizedBox(width: 8),
                       ],
@@ -171,19 +169,6 @@ class FarmManagementView extends GetView<FarmManagementController> {
                   ),
                 ],
               ),
-            ],
-          ),
-          const Spacer(),
-          const Divider(),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Monitorando silos',
-                style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-              ),
-              const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 18),
             ],
           ),
         ],

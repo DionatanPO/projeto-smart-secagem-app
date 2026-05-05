@@ -47,10 +47,11 @@ class SiloViewerView extends StatelessWidget {
                           ],
                           Text(
                             'Projeto do Silo',
-                            style: GoogleFonts.outfit(
-                              fontSize: 28,
+                            style: (isDesktop
+                                    ? theme.textTheme.headlineSmall
+                                    : theme.textTheme.titleLarge)
+                                ?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppColors.textPrimary,
                             ),
                           ),
                         ],
@@ -68,6 +69,8 @@ class SiloViewerView extends StatelessWidget {
                           ),
                         ),
                         child: TabBar(
+                          isScrollable: !isDesktop,
+                          tabAlignment: isDesktop ? TabAlignment.fill : TabAlignment.start,
                           indicatorColor: AppColors.primary,
                           dividerColor: Colors.transparent,
                           indicatorSize: TabBarIndicatorSize.tab,
@@ -96,10 +99,8 @@ class SiloViewerView extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Acompanhe as fases, diretrizes e a infraestrutura tecnológica do projeto.',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      color:
-                          isDark ? AppColors.textMuted : AppColors.textSecondary,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark ? AppColors.textMuted : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -272,7 +273,8 @@ class SiloViewerView extends StatelessWidget {
     bool isActive,
     bool isLast,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final accentColor = isCompleted
         ? AppColors.primary
         : (isActive ? Colors.orange : AppColors.textMuted);
@@ -405,17 +407,14 @@ class SiloViewerView extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     title,
-                    style: GoogleFonts.outfit(
-                      fontSize: 22,
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     description,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       height: 1.6,
                       color: isDark
                           ? AppColors.textMuted
@@ -432,6 +431,7 @@ class SiloViewerView extends StatelessWidget {
   }
 
   Widget _buildHeroSection(BuildContext context, String title, String content, IconData icon) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -487,11 +487,9 @@ class SiloViewerView extends StatelessWidget {
                 const SizedBox(height: 24),
                 Text(
                   title,
-                  style: GoogleFonts.outfit(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -500,7 +498,7 @@ class SiloViewerView extends StatelessWidget {
                   child: Text(
                     content,
                     style: GoogleFonts.inter(
-                      fontSize: 18,
+                      fontSize: MediaQuery.of(context).size.width < 600 ? 15 : 18,
                       height: 1.6,
                       color: Colors.white.withOpacity(0.9),
                       fontWeight: FontWeight.w400,
@@ -516,7 +514,8 @@ class SiloViewerView extends StatelessWidget {
   }
 
   Widget _buildGlassCard(BuildContext context, String title, String content, IconData icon, Color color) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       width: double.infinity,
@@ -550,17 +549,14 @@ class SiloViewerView extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             title,
-            style: GoogleFonts.outfit(
-              fontSize: 20,
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             content,
-            style: GoogleFonts.inter(
-              fontSize: 15,
+            style: theme.textTheme.bodyMedium?.copyWith(
               height: 1.5,
               color: isDark ? AppColors.textMuted : AppColors.textSecondary,
             ),
@@ -571,7 +567,8 @@ class SiloViewerView extends StatelessWidget {
   }
 
   Widget _buildExtraInfoSection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
     return Container(
       padding: const EdgeInsets.all(24),
@@ -589,8 +586,7 @@ class SiloViewerView extends StatelessWidget {
           Expanded(
             child: Text(
               'Este silo utiliza a tecnologia de sensores IoT de 4ª geração com blindagem magnética e comunicação criptografada.',
-              style: GoogleFonts.inter(
-                fontSize: 14,
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: isDark ? AppColors.textMuted : AppColors.textSecondary,
                 fontStyle: FontStyle.italic,
               ),
@@ -664,7 +660,9 @@ class SiloViewerView extends StatelessWidget {
   Widget _buildInteractiveTips(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Row(
+    return Wrap(
+      spacing: 24,
+      runSpacing: 12,
       children: [
         _buildTip(
           context,
@@ -672,14 +670,12 @@ class SiloViewerView extends StatelessWidget {
           'Arraste para girar',
           isDark,
         ),
-        const SizedBox(width: 24),
         _buildTip(
           context,
           Icons.zoom_in_rounded,
           'Pinça para zoom',
           isDark,
         ),
-        const SizedBox(width: 24),
         _buildTip(
           context,
           Icons.view_in_ar_rounded,
@@ -692,6 +688,7 @@ class SiloViewerView extends StatelessWidget {
 
   Widget _buildTip(
       BuildContext context, IconData icon, String label, bool isDark) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Icon(
@@ -702,8 +699,7 @@ class SiloViewerView extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 14,
+          style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w500,
             color: isDark ? AppColors.textMuted : AppColors.textSecondary,
           ),

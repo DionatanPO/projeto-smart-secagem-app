@@ -10,13 +10,13 @@ class ApiService extends GetxService {
   final _storage = const FlutterSecureStorage();
 
   static const String baseUrlReal = 'https://apismart.secagemdigital.com/api/';
-  static const String baseUrlEmulator = 'http://10.0.2.2:8000/api/';
-  static const String baseUrlLocal = 'http://localhost:8000/api/';
+  static const String baseUrlEmulator = 'http://localhost:8000/api/';
+  static const String baseUrlLocal = 'http://192.168.1.209:8000/api/';
 
   ApiService() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: baseUrlLocal,
+        baseUrl: baseUrlEmulator,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: {

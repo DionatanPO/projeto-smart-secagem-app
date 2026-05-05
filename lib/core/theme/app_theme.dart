@@ -36,7 +36,13 @@ class AppTheme {
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
           ),
+          headlineSmall: GoogleFonts.outfit(
+            fontSize: 22,
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
           titleLarge: GoogleFonts.outfit(
+            fontSize: 18,
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
@@ -148,7 +154,13 @@ class AppTheme {
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
+          headlineSmall: GoogleFonts.outfit(
+            fontSize: 22,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
           titleLarge: GoogleFonts.outfit(
+            fontSize: 18,
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),

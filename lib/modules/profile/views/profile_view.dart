@@ -149,6 +149,7 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildPersonalInfoCard(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width > 900;
     return Container(
       padding: EdgeInsets.all(isDesktop ? 32 : 20),
@@ -214,10 +215,8 @@ class ProfileView extends GetView<ProfileController> {
                 children: [
                   Text(
                     'Foto de Perfil',
-                    style: GoogleFonts.outfit(
-                      fontSize: 20,
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -241,10 +240,8 @@ class ProfileView extends GetView<ProfileController> {
           ),
           Text(
             'Informações Pessoais',
-            style: GoogleFonts.outfit(
-              fontSize: 20,
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 24),
@@ -340,6 +337,7 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildSecurityCard(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width > 900;
     return Container(
       padding: EdgeInsets.all(isDesktop ? 32 : 20),
@@ -368,10 +366,8 @@ class ProfileView extends GetView<ProfileController> {
               const SizedBox(width: 12),
               Text(
                 'Segurança',
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : AppColors.textPrimary,
                 ),
               ),
             ],
@@ -419,6 +415,7 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildPreferencesCard(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width > 900;
     return Container(
       padding: EdgeInsets.all(isDesktop ? 32 : 20),
@@ -447,10 +444,8 @@ class ProfileView extends GetView<ProfileController> {
               const SizedBox(width: 12),
               Text(
                 'Preferências',
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : AppColors.textPrimary,
                 ),
               ),
             ],
