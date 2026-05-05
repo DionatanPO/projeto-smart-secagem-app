@@ -53,11 +53,16 @@ class SiloManagementView extends GetView<SiloManagementController> {
                 }
   
                 return LayoutBuilder(builder: (context, constraints) {
-                  return ListView.separated(
-                    padding: const EdgeInsets.all(4),
+                  final isWideGrid = constraints.maxWidth > 900;
+                  return GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(4, 4, 4, 80),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: isWideGrid ? 2 : 1,
+                      crossAxisSpacing: 24,
+                      mainAxisSpacing: 24,
+                      mainAxisExtent: 520, // Aumentado para acomodar o gráfico e notas
+                    ),
                     itemCount: controller.silos.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 32),
                     itemBuilder: (context, index) {
                       final silo = controller.silos[index];
                       return _buildSiloCard(context, silo, index);
@@ -169,101 +174,133 @@ class SiloManagementView extends GetView<SiloManagementController> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final statusColor = _getStatusColor(silo.status);
-    final width = MediaQuery.of(context).size.width;
-    final isHorizontal = width > 850;
-    final padding = isHorizontal ? 24.0 : 16.0;
-
+    
     return Container(
+      margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5)),
         boxShadow: [
-          if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 8)),
+          if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 12)),
         ],
       ),
-      child: isHorizontal
-          ? IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(flex: 3, child: _buildIdentitySection(context, silo, statusColor, isDark, padding, true)),
-                  VerticalDivider(width: 1, color: theme.dividerColor.withOpacity(0.5)),
-                  Expanded(flex: 4, child: _buildTelemetrySection(context, silo, padding)),
-                  VerticalDivider(width: 1, color: theme.dividerColor.withOpacity(0.5)),
-                  Expanded(flex: 3, child: _buildNotesSection(context, silo, padding, true)),
-                  VerticalDivider(width: 1, color: theme.dividerColor.withOpacity(0.5)),
-                  Expanded(flex: 2, child: _buildActionsSection(context, silo, index, padding, true)),
-                ],
-              ),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildIdentitySection(context, silo, statusColor, isDark, padding, false),
-                const Divider(height: 1),
-                _buildTelemetrySection(context, silo, padding),
-                const Divider(height: 1),
-                _buildNotesSection(context, silo, padding, false),
-                const Divider(height: 1),
-                _buildActionsSection(context, silo, index, padding, false),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildIdentitySection(BuildContext context, SiloModel silo, Color statusColor, bool isDark, double padding, bool isHorizontal) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // 1. Header Integrado com Nome, Status e Ações
+          _buildSiloHeader(context, silo, statusColor, isDark, index),
+          
+          // 2. Conteúdo Principal (Gráfico + Métricas)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > 600;
+                return isWide 
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Gráfico do Silo com Telemetria Integrada
+                        Expanded(
+                          child: _buildSiloGraphic(context, silo, statusColor, isDark, true),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        _buildSiloGraphic(context, silo, statusColor, isDark, false),
+                      ],
+                    );
+              },
+            ),
+          ),
+          
+          // 3. Rodapé de Notas (Subtil e Integrado)
+          if (silo.observations != null && silo.observations!.isNotEmpty)
+            _buildSiloFooter(context, silo, isDark),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSiloHeader(BuildContext context, SiloModel silo, Color statusColor, bool isDark, int index) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 20, 16, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
                     Text(
                       silo.name,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor),
-                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Capacidade: ${silo.capacity}t',
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-                    ),
-                    if (silo.farmName != null) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.agriculture_rounded, size: 12, color: theme.primaryColor.withOpacity(0.5)),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              silo.farmName!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: theme.hintColor,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    const SizedBox(width: 12),
+                    _buildStatusBadge(silo.status, statusColor),
                   ],
                 ),
+                if (silo.farmName != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.location_on_outlined, size: 14, color: theme.hintColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          silo.farmName!,
+                          style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Capacidade abaixo da Fazenda
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warehouse_outlined, size: 14, color: AppColors.primary.withOpacity(0.7)),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Carga: ',
+                        style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
+                      ),
+                      Text(
+                        '${silo.currentQuantity}t / ${silo.capacity}t',
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: theme.primaryColor),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          PopupMenuButton(
+            icon: const Icon(Icons.more_horiz_rounded),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            itemBuilder: (context) => <PopupMenuEntry>[
+              PopupMenuItem(
+                onTap: () {
+                  controller.getSensorsBySilo(silo.id!);
+                  _showSiloSensors(context, silo);
+                },
+                child: const Row(children: [Icon(Icons.sensors_rounded, size: 20, color: AppColors.primary), SizedBox(width: 12), Text('Ver Sensores')]),
               ),
-              _buildStatusBadge(silo.status, statusColor),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                onTap: () => Future.delayed(Duration.zero, () => _showSiloForm(context, silo: silo)),
+                child: const Row(children: [Icon(Icons.edit_rounded, size: 20), SizedBox(width: 12), Text('Editar Silo')]),
+              ),
+              PopupMenuItem(
+                onTap: () => controller.deleteSilo(silo.id!),
+                child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red), SizedBox(width: 12), Text('Remover', style: TextStyle(color: Colors.red))]),
+              ),
             ],
           ),
-          SizedBox(height: isHorizontal ? 32 : 16),
-          _buildSiloGraphic(context, silo, statusColor, isDark, isHorizontal),
         ],
       ),
     );
@@ -271,242 +308,257 @@ class SiloManagementView extends GetView<SiloManagementController> {
 
   Widget _buildSiloGraphic(BuildContext context, SiloModel silo, Color statusColor, bool isDark, bool isHorizontal) {
     final theme = Theme.of(context);
-    final graphicWidth = isHorizontal ? 120.0 : 100.0;
-    final graphicHeight = isHorizontal ? 160.0 : 130.0;
+    final graphicWidth = isHorizontal ? 320.0 : 280.0;
+    final graphicHeight = isHorizontal ? 240.0 : 220.0;
+    final siloWidth = graphicWidth * (isHorizontal ? 0.4 : 0.4);
 
-    return Center(
-      child: SizedBox(
-        width: graphicWidth,
-        height: graphicHeight,
-        child: Stack(
-          alignment: Alignment.center,
+    return Obx(() {
+      final readings = controller.getLatestReadings(silo.id ?? 0);
+      
+      return Center(
+        child: SizedBox(
+          width: graphicWidth,
+          height: graphicHeight,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              // O Silo (CustomPaint)
+              Positioned(
+                left: 20,
+                child: CustomPaint(
+                  size: Size(siloWidth, graphicHeight),
+                  painter: SiloPainter(
+                    percentage: silo.percentage,
+                    statusColor: statusColor,
+                    isDark: isDark,
+                  ),
+                ),
+              ),
+
+              // Porcentagem de Nível (Sobre o Silo)
+              Positioned(
+                left: 20 + (siloWidth * 0.15),
+                bottom: graphicHeight * 0.3,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '${silo.percentage.toInt()}%',
+                    style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white),
+                  ),
+                ),
+              ),
+
+              // Sensores Integrados (Callouts)
+              if (readings.isNotEmpty)
+                ...List.generate(readings.length, (index) {
+                  final r = readings[index];
+                  // Distribuir sensores verticalmente ao longo do corpo do silo
+                  final double topOffset = (graphicHeight * 0.3) + (index * 60.0);
+                  
+                  return Positioned(
+                    left: 20 + (siloWidth * 0.75), // Começa na borda direita do silo
+                    top: topOffset,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Linha de Conexão
+                        Container(
+                          width: 15,
+                          height: 1,
+                          color: theme.primaryColor.withOpacity(0.3),
+                        ),
+                        const SizedBox(width: 8),
+                        // Label do Sensor
+                        _buildIntegratedSensorLabel(r, isDark),
+                      ],
+                    ),
+                  );
+                }),
+              
+              if (readings.isEmpty)
+                Positioned(
+                  right: 40,
+                  top: graphicHeight * 0.4,
+                  child: Text(
+                    'Sem sensores\nativos',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(fontSize: 11, color: Colors.grey.withOpacity(0.5), fontStyle: FontStyle.italic),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildIntegratedSensorLabel(TelemetryModel reading, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          reading.sensorPhysicalId.toUpperCase(),
+          style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 0.5),
+        ),
+        const SizedBox(height: 4),
+        Row(
           children: [
-            CustomPaint(
-              size: Size(graphicWidth, graphicHeight),
-              painter: SiloPainter(
-                percentage: silo.percentage,
-                statusColor: statusColor,
-                isDark: isDark,
-              ),
-            ),
-            // Texto de Porcentagem
-            Positioned(
-              bottom: graphicHeight * 0.3,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${silo.percentage.toInt()}%',
-                  style: GoogleFonts.outfit(
-                    fontSize: isHorizontal ? 16 : 14,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            // Tooltip de Quantidade
-            Positioned(
-              top: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: theme.dividerColor, width: 0.5),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2)),
-                  ],
-                ),
-                child: Text(
-                  '${silo.currentQuantity}t / ${silo.capacity}t',
-                  style: GoogleFonts.inter(
-                    fontSize: isHorizontal ? 9 : 8,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primaryColor,
-                  ),
-                ),
-              ),
-            ),
+            _buildMiniSensorBadge(Icons.thermostat_rounded, '${reading.temperature}°C', Colors.orange),
+            const SizedBox(width: 8),
+            _buildMiniSensorBadge(Icons.water_drop_rounded, '${reading.humidity}%', Colors.blue),
           ],
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildTelemetrySection(BuildContext context, SiloModel silo, double padding) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.all(padding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildMiniSensorBadge(IconData icon, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Icon(Icons.sensors_rounded, size: 18, color: theme.primaryColor),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'SENSORES EM TEMPO REAL',
-                  style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.1, color: theme.primaryColor),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Obx(() {
-            final readings = controller.getLatestReadings(silo.id ?? 0);
-            if (readings.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text('Aguardando conexão...', style: theme.textTheme.bodySmall),
-                ),
-              );
-            }
-            return Column(
-              children: readings.map((r) => _buildSensorReadingRow(context, r)).toList(),
-            );
-          }),
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 4),
+          Text(value, style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
         ],
       ),
     );
   }
 
-  Widget _buildNotesSection(BuildContext context, SiloModel silo, double padding, bool isHorizontal) {
+  Widget _buildSiloFooter(BuildContext context, SiloModel silo, bool isDark) {
     final theme = Theme.of(context);
-    
-    final notesWidget = Container(
+    return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        color: isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.015),
+        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28)),
       ),
-      child: Text(
-        silo.observations?.isEmpty ?? true 
-            ? 'Nenhuma observação registrada para este silo.' 
-            : silo.observations!,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          height: 1.6,
-          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-          fontStyle: silo.observations?.isEmpty ?? true ? FontStyle.italic : FontStyle.normal,
-        ),
-      ),
-    );
-
-    return Padding(
-      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
-              Icon(Icons.assignment_outlined, size: 18, color: theme.primaryColor),
+              Icon(Icons.assignment_outlined, size: 14, color: theme.primaryColor.withOpacity(0.6)),
               const SizedBox(width: 8),
               Text(
                 'NOTAS E DIAGNÓSTICOS',
-                style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.1, color: theme.primaryColor),
+                style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: theme.primaryColor.withOpacity(0.6), letterSpacing: 0.5),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          if (isHorizontal)
-            Expanded(
-              child: SingleChildScrollView(
-                child: notesWidget,
-              ),
-            )
-          else
-            notesWidget,
+          const SizedBox(height: 8),
+          Text(
+            silo.observations!,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(fontSize: 12, height: 1.5, color: isDark ? Colors.grey[400] : Colors.grey[700]),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildActionsSection(BuildContext context, SiloModel silo, int index, double padding, bool isHorizontal) {
-    final theme = Theme.of(context);
+  Widget _buildSiloMetricsGrid(BuildContext context, SiloModel silo, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildMetricTile('Quantidade Atual', '${silo.currentQuantity} t', Icons.inventory_2_outlined, isDark),
+        const SizedBox(height: 16),
+        _buildMetricTile('Capacidade Total', '${silo.capacity} t', Icons.warehouse_outlined, isDark),
+      ],
+    );
+  }
+
+  Widget _buildMetricTile(String label, String value, IconData icon, bool isDark) {
     return Container(
-      padding: EdgeInsets.all(padding),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark ? Colors.white.withOpacity(0.01) : Colors.black.withOpacity(0.01),
-        borderRadius: isHorizontal 
-          ? const BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24))
-          : const BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
+        color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.01),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'AÇÕES AUTOMÁTICAS',
-            style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: theme.hintColor),
-          ),
-          const SizedBox(height: 16),
-          if (isHorizontal) ...[
-            _buildActionItem(context, Icons.wind_power_rounded, 'AERAÇÃO', Colors.blue, () => controller.toggleAeration(index)),
-            const SizedBox(height: 12),
-            _buildActionItem(context, Icons.sensors_rounded, 'SENSORES', theme.primaryColor, () {
-              controller.getSensorsBySilo(silo.id!);
-              _showSiloSensors(context, silo);
-            }),
-            const SizedBox(height: 12),
-            _buildActionItem(context, Icons.edit_rounded, 'EDITAR', Colors.grey, () => _showSiloForm(context, silo: silo)),
-            const Spacer(),
-            TextButton.icon(
-              onPressed: () => _confirmDelete(context, silo),
-              icon: const Icon(Icons.delete_outline_rounded, size: 16),
-              label: const Text('REMOVER'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.redAccent,
-                textStyle: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w800),
-              ),
-            ),
-          ] else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildCompactAction(context, Icons.wind_power_rounded, 'Ar', Colors.blue, () => controller.toggleAeration(index)),
-                _buildCompactAction(context, Icons.sensors_rounded, 'Sensores', theme.primaryColor, () {
-                  controller.getSensorsBySilo(silo.id!);
-                  _showSiloSensors(context, silo);
-                }),
-                _buildCompactAction(context, Icons.edit_rounded, 'Edit', Colors.grey, () => _showSiloForm(context, silo: silo)),
-                _buildCompactAction(context, Icons.delete_outline_rounded, 'Del', Colors.redAccent, () => _confirmDelete(context, silo)),
-              ],
-            ),
+          Icon(icon, size: 16, color: Colors.grey),
+          const SizedBox(height: 8),
+          Text(label, style: GoogleFonts.inter(fontSize: 10, color: Colors.grey)),
+          Text(value, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
         ],
       ),
     );
   }
 
-  Widget _buildCompactAction(BuildContext context, IconData icon, String label, Color color, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
+  Widget _buildSensorMiniStat(TelemetryModel reading, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: color),
-            const SizedBox(width: 4),
-            Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+            Icon(Icons.developer_board_rounded, size: 12, color: AppColors.primary.withOpacity(0.5)),
+            const SizedBox(width: 6),
+            Text(
+              reading.sensorPhysicalId.toUpperCase(),
+              style: GoogleFonts.inter(
+                fontSize: 10, 
+                fontWeight: FontWeight.w900, 
+                color: Colors.grey,
+                letterSpacing: 0.5,
+              ),
+            ),
           ],
         ),
-      ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildMiniCircleIcon(Icons.thermostat_rounded, Colors.orange),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${reading.temperature}°C', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text('Temperatura', style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
+              ],
+            ),
+            const SizedBox(width: 16),
+            _buildMiniCircleIcon(Icons.water_drop_rounded, Colors.blue),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${reading.humidity}%', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text('Umidade', style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
+
+  Widget _buildMiniCircleIcon(IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+      child: Icon(icon, size: 12, color: color),
+    );
+  }
+
 
   Widget _buildActionItem(BuildContext context, IconData icon, String label, Color color, VoidCallback onTap) {
     return InkWell(

@@ -186,6 +186,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                     children: [
                       _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
                       _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
+                      if (batch.siloName != null) _buildInfoItem(Icons.warehouse_outlined, batch.siloName!),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -240,6 +241,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                           children: [
                             _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
                             _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
+                            if (batch.siloName != null) _buildInfoItem(Icons.warehouse_outlined, batch.siloName!),
                           ],
                         ),
                       ],
