@@ -236,6 +236,26 @@ class SiloManagementView extends GetView<SiloManagementController> {
                       'Capacidade: ${silo.capacity}t',
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
                     ),
+                    if (silo.farmName != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.agriculture_rounded, size: 12, color: theme.primaryColor.withOpacity(0.5)),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              silo.farmName!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: theme.hintColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
