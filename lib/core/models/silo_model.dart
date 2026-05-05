@@ -29,8 +29,8 @@ class SiloModel {
       farmId: json['farm'],
       farmName: json['farm_name'],
       name: json['name'],
-      capacity: (json['capacity'] as num).toDouble(),
-      currentQuantity: (json['current_quantity'] as num).toDouble(),
+      capacity: (json['capacity'] as num? ?? 0.0).toDouble(),
+      currentQuantity: (json['current_quantity'] as num? ?? 0.0).toDouble(),
       status: json['status'],
       observations: json['observations'] ?? json['observacao'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
@@ -50,5 +50,8 @@ class SiloModel {
     };
   }
 
-  double get percentage => (currentQuantity / capacity) * 100;
+  double get percentage {
+    if (capacity <= 0) return 0.0;
+    return (currentQuantity / capacity) * 100;
+  }
 }

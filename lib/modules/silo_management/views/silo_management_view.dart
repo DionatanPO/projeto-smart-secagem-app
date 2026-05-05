@@ -54,14 +54,29 @@ class SiloManagementView extends GetView<SiloManagementController> {
   
                 return LayoutBuilder(builder: (context, constraints) {
                   final isWideGrid = constraints.maxWidth > 900;
-                  return GridView.builder(
+                  
+                  if (isWideGrid) {
+                    return GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(4, 4, 4, 80),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 24,
+                        mainAxisSpacing: 0,
+                        mainAxisExtent: 600, // Altura segura para acomodar quebras de linha em textos de lote
+                      ),
+                      itemCount: controller.silos.length,
+                      itemBuilder: (context, index) {
+                        final silo = controller.silos[index];
+                        return Align(
+                          alignment: Alignment.topCenter,
+                          child: _buildSiloCard(context, silo, index),
+                        );
+                      },
+                    );
+                  }
+                  
+                  return ListView.builder(
                     padding: const EdgeInsets.fromLTRB(4, 4, 4, 80),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: isWideGrid ? 2 : 1,
-                      crossAxisSpacing: 24,
-                      mainAxisSpacing: 24,
-                      mainAxisExtent: 520, // Aumentado para acomodar o gráfico e notas
-                    ),
                     itemCount: controller.silos.length,
                     itemBuilder: (context, index) {
                       final silo = controller.silos[index];
@@ -186,6 +201,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. Header Integrado com Nome, Status e Ações
@@ -193,23 +209,30 @@ class SiloManagementView extends GetView<SiloManagementController> {
           
           // 2. Conteúdo Principal (Gráfico + Métricas)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isWide = constraints.maxWidth > 600;
+                final isWide = constraints.maxWidth > 400; // Threshold reduzido para manter Row em 2 colunas grid
                 return isWide 
                   ? Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Gráfico do Silo com Telemetria Integrada
                         Expanded(
+                          flex: 3,
                           child: _buildSiloGraphic(context, silo, statusColor, isDark, true),
+                        ),
+                        // Card Lateral de Lote
+                        Expanded(
+                          flex: 2,
+                          child: _buildBatchSideCard(context, silo, isDark),
                         ),
                       ],
                     )
                   : Column(
                       children: [
                         _buildSiloGraphic(context, silo, statusColor, isDark, false),
+                        _buildBatchSideCard(context, silo, isDark),
                       ],
                     );
               },
@@ -227,7 +250,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
   Widget _buildSiloHeader(BuildContext context, SiloModel silo, Color statusColor, bool isDark, int index) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 20, 16, 8),
+      padding: const EdgeInsets.fromLTRB(24, 20, 16, 0),
       child: Row(
         children: [
           Expanded(
@@ -435,11 +458,25 @@ class SiloManagementView extends GetView<SiloManagementController> {
     );
   }
 
+  Widget _buildBatchDetailItem(IconData icon, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: Colors.orange.withOpacity(0.7)),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.orange.withOpacity(0.9)),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSiloFooter(BuildContext context, SiloModel silo, bool isDark) {
-    final theme = Theme.of(context);
+    // ... mantido ...
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.015),
         borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28)),
@@ -449,11 +486,11 @@ class SiloManagementView extends GetView<SiloManagementController> {
         children: [
           Row(
             children: [
-              Icon(Icons.assignment_outlined, size: 14, color: theme.primaryColor.withOpacity(0.6)),
+              Icon(Icons.assignment_outlined, size: 14, color: Theme.of(context).primaryColor.withOpacity(0.6)),
               const SizedBox(width: 8),
               Text(
                 'NOTAS E DIAGNÓSTICOS',
-                style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: theme.primaryColor.withOpacity(0.6), letterSpacing: 0.5),
+                style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor.withOpacity(0.6), letterSpacing: 0.5),
               ),
             ],
           ),
@@ -467,6 +504,73 @@ class SiloManagementView extends GetView<SiloManagementController> {
         ],
       ),
     );
+  }
+
+  Widget _buildBatchSideCard(BuildContext context, SiloModel silo, bool isDark) {
+    return Obx(() {
+      final batch = controller.getBatchBySilo(silo.id ?? 0);
+      if (batch == null) return const SizedBox.shrink();
+
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(isDark ? 0.08 : 0.05),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.orange.withOpacity(0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.inventory_2_outlined, size: 16, color: Colors.orange),
+                const SizedBox(width: 8),
+                Text(
+                  'LOTE ATIVO',
+                  style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.orange, letterSpacing: 1),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              batch.numeroLote,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              batch.cultura,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: isDark ? Colors.white70 : Colors.black87),
+            ),
+            if (batch.variedade != null)
+              Text(
+                batch.variedade!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(fontSize: 11, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+              ),
+            const SizedBox(height: 12),
+            const Divider(color: Colors.orange, height: 1, thickness: 0.1),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.event_available_rounded, size: 14, color: Colors.orange.withOpacity(0.7)),
+                const SizedBox(width: 6),
+                Text(
+                  'Safra ${batch.safra}',
+                  style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.orange),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildSiloMetricsGrid(BuildContext context, SiloModel silo, bool isDark) {

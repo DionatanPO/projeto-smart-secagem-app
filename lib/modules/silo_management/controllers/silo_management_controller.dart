@@ -7,10 +7,13 @@ import '../../../core/models/sensor_model.dart';
 import '../../../core/models/telemetry_model.dart';
 import '../../farm_management/controllers/farm_management_controller.dart';
 import '../../../core/models/farm_model.dart';
+import '../../../core/models/batch_model.dart';
+import '../../batch_management/controllers/batch_management_controller.dart';
 
 class SiloManagementController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
   final _farmController = Get.find<FarmManagementController>();
+  final _batchController = Get.put(BatchManagementController());
 
   final silos = <SiloModel>[].obs;
   List<FarmModel> get availableFarms => _farmController.farms;
@@ -214,6 +217,10 @@ class SiloManagementController extends GetxController {
 
   List<TelemetryModel> getLatestReadings(int siloId) {
     return siloLatestReadings[siloId] ?? [];
+  }
+
+  BatchModel? getBatchBySilo(int siloId) {
+    return _batchController.batches.firstWhereOrNull((b) => b.silo == siloId);
   }
 }
 
