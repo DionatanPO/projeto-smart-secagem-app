@@ -15,8 +15,8 @@ import '../../simulation/views/simulation_view.dart';
 import '../../silo_viewer/views/silo_viewer_view.dart';
 import '../../farm_management/views/farm_management_view.dart';
 import '../../batch_management/views/batch_management_view.dart';
-import '../../batch_management/controllers/batch_management_controller.dart';
 import '../../batch_management/bindings/batch_management_binding.dart';
+import '../../secagem/views/secagem_view.dart';
 
 
 class HomeView extends GetView<HomeController> {
@@ -91,6 +91,8 @@ class HomeView extends GetView<HomeController> {
                       context, 3, 'Gestão de Silos', Icons.warehouse_rounded),
                   _buildMenuItem(
                       context, 12, 'Gestão de Lotes', Icons.inventory_2_rounded),
+                  _buildMenuItem(
+                      context, 13, 'Controle de Secagem', Icons.waves_rounded),
                   _buildMenuItem(context, 4, 'Dispositivos', Icons.hub_rounded),
                   _buildMenuItem(
                       context, 5, 'Notificações', Icons.notifications_rounded),
@@ -293,6 +295,8 @@ class HomeView extends GetView<HomeController> {
         return const ProfileView();
       case 12:
         return const BatchManagementView();
+      case 13:
+        return const SecagemView();
       default:
         return const SiloViewerView();
     }
