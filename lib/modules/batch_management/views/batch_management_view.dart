@@ -354,33 +354,34 @@ class BatchManagementView extends GetView<BatchManagementController> {
   }
 
   Color _getStatusColor(String status) {
-    switch (status) {
-      case 'aguardando': return Colors.orange;
-      case 'secando': return AppColors.primary;
-      case 'finalizado': return Colors.green;
-      case 'despachado': return Colors.blue;
-      default: return Colors.grey;
-    }
+    if (status.contains('Pausado')) return Colors.orangeAccent;
+    if (status.contains('Secagem')) return AppColors.primary;
+    if (status.contains('Aeração')) return Colors.blue;
+    if (status.contains('Transilagem')) return Colors.purple;
+    if (status.contains('Expurgo')) return Colors.red;
+    if (status.contains('Expedição')) return Colors.green;
+    if (status == 'finalizado') return Colors.teal;
+    if (status == 'despachado') return Colors.grey;
+    return Colors.orange; // aguardando
   }
 
   String _getStatusText(String status) {
-    switch (status) {
-      case 'aguardando': return 'Aguardando';
-      case 'secando': return 'Em Secagem';
-      case 'finalizado': return 'Finalizado';
-      case 'despachado': return 'Despachado';
-      default: return status;
-    }
+    if (status == 'aguardando') return 'Aguardando';
+    if (status == 'finalizado') return 'Finalizado';
+    if (status == 'despachado') return 'Despachado';
+    return status; // Retorna a string composta (ex: Secagem (Executando))
   }
 
   IconData _getStatusIcon(String status) {
-    switch (status) {
-      case 'aguardando': return Icons.timer_outlined;
-      case 'secando': return Icons.wb_sunny_outlined;
-      case 'finalizado': return Icons.check_circle_outline;
-      case 'despachado': return Icons.local_shipping_outlined;
-      default: return Icons.help_outline;
-    }
+    if (status.contains('Pausado')) return Icons.pause_circle_outline_rounded;
+    if (status.contains('Secagem')) return Icons.waves_rounded;
+    if (status.contains('Aeração')) return Icons.air_rounded;
+    if (status.contains('Transilagem')) return Icons.swap_horiz_rounded;
+    if (status.contains('Expurgo')) return Icons.biotech_rounded;
+    if (status.contains('Expedição')) return Icons.local_shipping_rounded;
+    if (status == 'finalizado') return Icons.check_circle_outline;
+    if (status == 'despachado') return Icons.done_all_rounded;
+    return Icons.timer_outlined;
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -408,7 +409,6 @@ class BatchManagementView extends GetView<BatchManagementController> {
   void _showBatchForm(BuildContext context, {BatchModel? batch}) {
     final isEditing = batch != null;
     final farmController = Get.find<FarmManagementController>();
-    final siloController = Get.find<SiloManagementController>();
 
     final numeroController = TextEditingController(text: batch?.numeroLote ?? '');
     final culturaController = TextEditingController(text: batch?.cultura ?? '');
@@ -422,7 +422,6 @@ class BatchManagementView extends GetView<BatchManagementController> {
     final selectedCultura = (grainTypes.contains(initialCultura) ? initialCultura : 'Outros').obs;
     
     var selectedFarmId = batch?.farm.obs ?? (farmController.farms.isNotEmpty ? farmController.farms.first.id : null).obs;
-    var selectedSiloId = batch?.silo.obs ?? Rxn<int>();
     var selectedStatus = (batch?.status ?? 'aguardando').obs;
 
     final theme = Theme.of(context);
@@ -537,32 +536,6 @@ class BatchManagementView extends GetView<BatchManagementController> {
                 )),
 
                 const SizedBox(height: 24),
-                _buildFieldLabel('STATUS'),
-                const SizedBox(height: 8),
-                Obx(() => DropdownButtonFormField<String>(
-                  value: selectedStatus.value,
-                  decoration: _buildInputDecoration('Status atual', Icons.info_outline, isDark),
-                  items: const [
-                    DropdownMenuItem(value: 'aguardando', child: Text('Aguardando')),
-                    DropdownMenuItem(value: 'secando', child: Text('Em Secagem')),
-                    DropdownMenuItem(value: 'finalizado', child: Text('Finalizado')),
-                    DropdownMenuItem(value: 'despachado', child: Text('Despachado')),
-                  ],
-                  onChanged: (val) => selectedStatus.value = val!,
-                )),
-
-                const SizedBox(height: 24),
-                Obx(() => DropdownButtonFormField<int>(
-                  value: selectedSiloId.value,
-                  decoration: _buildInputDecoration('Selecione o silo (Opcional)', Icons.warehouse, isDark),
-                  items: siloController.silos
-                      .where((s) => (s.farmId == selectedFarmId.value && s.status == 'disponivel') || s.id == batch?.silo)
-                      .map((s) => DropdownMenuItem(value: s.id, child: Text('${s.name} (${s.capacity} Ton)')))
-                      .toList(),
-                  onChanged: (val) => selectedSiloId.value = val,
-                )),
-                
-                const SizedBox(height: 24),
                 _buildFieldLabel('NOTAS E DIAGNÓSTICOS'),
                 const SizedBox(height: 8),
                 TextField(
@@ -587,21 +560,6 @@ class BatchManagementView extends GetView<BatchManagementController> {
                       child: ElevatedButton(
                         onPressed: () {
                           final peso = double.tryParse(pesoController.text) ?? 0;
-                          final siloId = selectedSiloId.value;
-
-                          // Validação de Capacidade no Front
-                          if (siloId != null) {
-                            final silo = siloController.silos.firstWhere((s) => s.id == siloId);
-                            if (peso > (silo.capacity * 1000)) {
-                              Get.snackbar(
-                                'Limite de Capacidade',
-                                'O peso do lote (${peso}kg) excede a capacidade do silo ${silo.name} (${silo.capacity * 1000}kg).',
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                              );
-                              return;
-                            }
-                          }
 
                           final newBatch = BatchModel(
                             id: batch?.id,
@@ -611,8 +569,8 @@ class BatchManagementView extends GetView<BatchManagementController> {
                             safra: safraController.text,
                             pesoInicial: peso,
                             umidadeInicial: double.tryParse(umidadeController.text) ?? 0,
-                            status: selectedStatus.value,
-                            silo: siloId,
+                            status: batch?.status ?? 'aguardando',
+                            silo: batch?.silo, // Mantém o silo atual se estiver editando
                             observacoes: observacoesController.text,
                           );
                           if (isEditing) {

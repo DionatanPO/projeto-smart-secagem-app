@@ -11,4 +11,5 @@ abstract class Routes {
   static const simulation = '/simulation';
   static const batchManagement = '/batch-management';
   static const secagem = '/secagem';
+  static const processos = '/processos';
 }
