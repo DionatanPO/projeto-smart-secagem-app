@@ -99,12 +99,8 @@ class HomeView extends GetView<HomeController> {
                   _buildMenuItem(context, 4, 'Dispositivos', Icons.hub_rounded),
                   _buildMenuItem(
                       context, 5, 'Notificações', Icons.notifications_rounded),
-                  _buildMenuItem(
-                      context, 6, 'Suporte Técnico', Icons.help_center_rounded),
                   _buildMenuItem(context, 7, 'Gestão de Acesso',
                       Icons.admin_panel_settings_rounded),
-                  _buildMenuItem(
-                      context, 8, 'Configuração', Icons.settings_rounded),
                   _buildMenuItem(
                       context, 9, 'Smart Sense IA', Icons.psychology_rounded),
                   _buildMenuItem(context, 10, 'Simulador Interativo',

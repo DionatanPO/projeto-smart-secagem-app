@@ -1,6 +1,6 @@
 class BatchModel {
   int? id;
-  String numeroLote;
+  String? numeroLote;
   int farm;
   String? farmName;
   String cultura;
@@ -19,7 +19,7 @@ class BatchModel {
 
   BatchModel({
     this.id,
-    required this.numeroLote,
+    this.numeroLote,
     required this.farm,
     this.farmName,
     required this.cultura,

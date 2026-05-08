@@ -153,7 +153,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Lote ${batch.numeroLote}',
+                              'Lote ${batch.numeroLote ?? '---'}',
                               style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -225,7 +225,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                           children: [
                             Flexible(
                               child: Text(
-                                'Lote ${batch.numeroLote}',
+                                'Lote ${batch.numeroLote ?? '---'}',
                                 style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -450,20 +450,25 @@ class BatchManagementView extends GetView<BatchManagementController> {
                 
                 Row(
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFieldLabel('NÚMERO DO LOTE'),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: numeroController,
-                            decoration: _buildInputDecoration('Ex: L-001', Icons.tag, isDark),
-                          ),
-                        ],
+                    if (isEditing) ...[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildFieldLabel('NÚMERO DO LOTE'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: numeroController,
+                              readOnly: true,
+                              enabled: false,
+                              style: GoogleFonts.inter(color: Colors.grey),
+                              decoration: _buildInputDecoration('', Icons.tag, isDark),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
+                      const SizedBox(width: 16),
+                    ],
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

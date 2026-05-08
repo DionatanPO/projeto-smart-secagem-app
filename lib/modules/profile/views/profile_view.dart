@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/values/app_colors.dart';
 import '../controllers/profile_controller.dart';
+import '../../home/controllers/home_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -119,6 +120,8 @@ class ProfileView extends GetView<ProfileController> {
                       _buildSecurityCard(context, isDark),
                       const SizedBox(height: 32),
                       _buildPreferencesCard(context, isDark),
+                      const SizedBox(height: 32),
+                      _buildSystemSupportCard(context, isDark),
                     ],
                   ),
                 ),
@@ -137,6 +140,8 @@ class ProfileView extends GetView<ProfileController> {
                     _buildSecurityCard(context, isDark),
                     const SizedBox(height: 32),
                     _buildPreferencesCard(context, isDark),
+                    const SizedBox(height: 32),
+                    _buildSystemSupportCard(context, isDark),
                   ],
                 );
               }
@@ -470,6 +475,125 @@ class ProfileView extends GetView<ProfileController> {
                 contentPadding: EdgeInsets.zero,
               )),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSystemSupportCard(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+    // Precisamos do HomeController para trocar de página
+    final homeController = Get.find<HomeController>();
+
+    return Container(
+      padding: EdgeInsets.all(isDesktop ? 32 : 20),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+            color: isDark
+                ? AppColors.borderDark
+                : AppColors.border.withOpacity(0.5)),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.hub_rounded, color: AppColors.primary),
+              const SizedBox(width: 12),
+              Text(
+                'Sistema e Suporte',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _buildActionTile(
+            context,
+            icon: Icons.settings_rounded,
+            title: 'Configuração do Sistema',
+            subtitle: 'Ajustes gerais e parâmetros',
+            onTap: () => homeController.changePage(8),
+            isDark: isDark,
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            context,
+            icon: Icons.help_center_rounded,
+            title: 'Suporte Técnico',
+            subtitle: 'Central de ajuda e chamados',
+            onTap: () => homeController.changePage(6),
+            isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionTile(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required String subtitle,
+      required VoidCallback onTap,
+      required bool isDark}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: AppColors.primary, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: isDark ? AppColors.textMuted : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                color: isDark ? AppColors.textMuted : AppColors.textSecondary,
+                size: 20),
+          ],
+        ),
       ),
     );
   }

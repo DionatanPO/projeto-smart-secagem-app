@@ -535,7 +535,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
             ),
             const SizedBox(height: 12),
             Text(
-              batch.numeroLote,
+              batch.numeroLote ?? '---',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
