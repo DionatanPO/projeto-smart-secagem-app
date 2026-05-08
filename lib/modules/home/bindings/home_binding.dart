@@ -5,6 +5,7 @@ import '../../batch_management/controllers/batch_management_controller.dart';
 import '../../silo_management/controllers/silo_management_controller.dart';
 import '../../secagem/controllers/secagem_controller.dart';
 import '../../processos/controllers/processos_controller.dart';
+import '../../clientes/controllers/clientes_controller.dart';
 
 class HomeBinding extends Bindings {
   @override
@@ -15,5 +16,6 @@ class HomeBinding extends Bindings {
     Get.lazyPut<SiloManagementController>(() => SiloManagementController());
     Get.lazyPut<SecagemController>(() => SecagemController());
     Get.lazyPut<ProcessosController>(() => ProcessosController());
+    Get.lazyPut<ClientesController>(() => ClientesController());
   }
 }

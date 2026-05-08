@@ -18,6 +18,7 @@ import '../../batch_management/views/batch_management_view.dart';
 import '../../batch_management/bindings/batch_management_binding.dart';
 import '../../secagem/views/secagem_view.dart';
 import '../../processos/views/processos_view.dart';
+import '../../clientes/views/clientes_view.dart';
 
 
 class HomeView extends GetView<HomeController> {
@@ -96,6 +97,8 @@ class HomeView extends GetView<HomeController> {
                       context, 13, 'Controle de Secagem', Icons.waves_rounded),
                   _buildMenuItem(
                       context, 14, 'Processos Ativos', Icons.history_rounded),
+                  _buildMenuItem(
+                      context, 15, 'Gestão de Clientes', Icons.people_alt_rounded),
                   _buildMenuItem(context, 4, 'Dispositivos', Icons.hub_rounded),
                   _buildMenuItem(
                       context, 5, 'Notificações', Icons.notifications_rounded),
@@ -298,6 +301,8 @@ class HomeView extends GetView<HomeController> {
         return const SecagemView();
       case 14:
         return const ProcessosView();
+      case 15:
+        return const ClientesView();
       default:
         return const SiloViewerView();
     }

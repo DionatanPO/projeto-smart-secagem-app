@@ -21,6 +21,8 @@ import '../modules/secagem/bindings/secagem_binding.dart';
 import '../modules/secagem/views/secagem_view.dart';
 import '../modules/processos/bindings/processos_binding.dart';
 import '../modules/processos/views/processos_view.dart';
+import '../modules/clientes/bindings/clientes_binding.dart';
+import '../modules/clientes/views/clientes_view.dart';
 import 'app_routes.dart';
 import '../core/middlewares/auth_middleware.dart';
 
@@ -98,6 +100,12 @@ class AppPages {
       name: Routes.processos,
       page: () => const ProcessosView(),
       binding: ProcessosBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: Routes.clientes,
+      page: () => const ClientesView(),
+      binding: ClientesBinding(),
       middlewares: [AuthMiddleware()],
     ),
   ];
