@@ -28,68 +28,64 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Builder(builder: (headerContext) => _buildHeader(headerContext, isDesktop, theme)),
-            const SizedBox(height: 32),
-            
-            // Grid principal para Desktop, Coluna para Mobile
-            if (isDesktop)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      children: [
-                        _buildActionCard(isDark),
-                        const SizedBox(height: 24),
-                        _buildDataPreviewCard(isDark),
-                      ],
+            Obx(() => Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Builder(builder: (headerContext) => _buildHeader(headerContext, isDesktop, theme)),
+                    const SizedBox(height: 32),
+                    
+                    // Grid principal para Desktop, Coluna para Mobile
+                    if (isDesktop)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: _buildChatInterface(isDark),
+                          ),
+                          const SizedBox(width: 32),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              children: [
+                                _buildActionCard(isDark),
+                                const SizedBox(height: 24),
+                                _buildAIResponseCard(isDark),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Column(
+                        children: [
+                          _buildActionCard(isDark),
+                          const SizedBox(height: 24),
+                          _buildAIResponseCard(isDark),
+                          const SizedBox(height: 24),
+                          _buildChatInterface(isDark),
+                        ],
+                      ),
+                      
+                    const SizedBox(height: 100),
+                  ],
+                ),
+                if (controller.isProcessing.value)
+                  const Positioned.fill(
+                    child: IgnorePointer(
+                      child: _ScanningOverlay(),
                     ),
                   ),
-                  const SizedBox(width: 32),
-                  Expanded(
-                    flex: 3,
-                    child: _buildAIResponseCard(isDark),
-                  ),
-                ],
-              )
-            else
-              Column(
-                children: [
-                  _buildActionCard(isDark),
-                  const SizedBox(height: 24),
-                  _buildAIResponseCard(isDark),
-                  const SizedBox(height: 24),
-                  _buildDataPreviewCard(isDark),
-                ],
-              ),
-              
-            const SizedBox(height: 100),
+              ],
+            )),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLeftPanel(bool isDark) {
-    return Column(
-      children: [
-        _buildSiloSelector(isDark),
-        const SizedBox(height: 24),
-        _buildActionCard(isDark),
-      ],
-    );
-  }
-
-  Widget _buildRightPanel(bool isDark) {
-    return Column(
-      children: [
-        _buildDataPreviewCard(isDark),
-        const SizedBox(height: 24),
-        _buildAIResponseCard(isDark),
-      ],
-    );
-  }
 
   Widget _buildHeader(BuildContext context, bool isDesktop, ThemeData theme) {
     return Row(
@@ -120,7 +116,7 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
                         size: 12, color: AppColors.primary),
                     const SizedBox(width: 6),
                     Text(
-                      'GEMINI 3.0 FLASH ACTIVE',
+                      'SENSE AI ACTIVE',
                       style: GoogleFonts.inter(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -282,114 +278,6 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
     );
   }
 
-  Widget _buildDataPreviewCard(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.fact_check_rounded, size: 20, color: AppColors.primary),
-              const SizedBox(width: 12),
-              Text(
-                'CRITÉRIOS DE DIAGNÓSTICO',
-                style: GoogleFonts.outfit(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.5,
-                  color: isDark ? Colors.white54 : Colors.black54,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          _buildDataPoint(
-            Icons.thermostat_rounded, 
-            'Tendência Térmica', 
-            'Variação de temperatura nas últimas 10 coletas para detectar focos de calor.',
-            isDark
-          ),
-          const Divider(height: 32),
-          _buildDataPoint(
-            Icons.water_drop_rounded, 
-            'Equilíbrio Higroscópico', 
-            'Relação entre umidade e temperatura para prever o ponto de condensação.',
-            isDark
-          ),
-          const Divider(height: 32),
-          _buildDataPoint(
-            Icons.inventory_2_rounded, 
-            'Especificidade do Grão', 
-            'A IA ajusta os limites de alerta baseada no tipo de produto (Soja, Milho, etc).',
-            isDark
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'Estes dados são extraídos em tempo real dos seus sensores e processados pelo motor Gemini.',
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontStyle: FontStyle.italic,
-                color: isDark ? Colors.white60 : Colors.black54,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDataPoint(IconData icon, String title, String desc, bool isDark) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, size: 18, color: AppColors.primary),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.outfit(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                desc,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: isDark ? Colors.white54 : AppColors.textSecondary,
-                  height: 1.3,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildAIResponseCard(bool isDark) {
     return Obx(() {
@@ -401,7 +289,8 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
         borderRadius: BorderRadius.circular(32),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
             width: double.infinity,
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
@@ -410,40 +299,69 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
                 : AppColors.primary.withOpacity(0.02),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
-                color: AppColors.primary.withOpacity(0.2),
-                width: 1.5,
+                color: controller.isProcessing.value 
+                    ? AppColors.primary.withOpacity(0.5) 
+                    : AppColors.primary.withOpacity(0.2),
+                width: controller.isProcessing.value ? 2.5 : 1.5,
               ),
+              boxShadow: controller.isProcessing.value ? [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.1),
+                  blurRadius: 30,
+                  spreadRadius: 10,
+                )
+              ] : [],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const _PulseIcon(),
-                    const SizedBox(width: 16),
-                    Text(
-                      'INSIGHT DO GEMINI',
-                      style: GoogleFonts.outfit(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                        color: AppColors.primary,
-                      ),
+                    Row(
+                      children: [
+                        const _PulseIcon(),
+                        const SizedBox(width: 16),
+                        Text(
+                          'INSIGHT DA IA LOCAL',
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
                     ),
+                    if (controller.isProcessing.value)
+                      const _ProcessingTag(),
                   ],
                 ),
                 const SizedBox(height: 24),
                 if (controller.isProcessing.value)
-                  const _AIThinkingPlaceholder()
+                  const _AIProcessingVisualizer()
                 else
-                  SelectionArea(
-                    child: Text(
-                      controller.aiInsight.value,
-                      style: GoogleFonts.inter(
-                        fontSize: 17,
-                        height: 1.7,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.white.withOpacity(0.9) : AppColors.textPrimary,
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: 1),
+                    duration: const Duration(seconds: 1),
+                    builder: (context, value, child) {
+                      return Opacity(
+                        opacity: value,
+                        child: Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: SelectionArea(
+                      child: Text(
+                        controller.aiInsight.value,
+                        style: GoogleFonts.inter(
+                          fontSize: 17,
+                          height: 1.7,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white.withOpacity(0.9) : AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ),
@@ -473,7 +391,6 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark.withOpacity(0.5) : Colors.grey.withOpacity(0.05),
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.3), style: BorderStyle.none),
       ),
       child: Center(
         child: Column(
@@ -485,6 +402,143 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
               style: GoogleFonts.inter(color: Colors.grey.withOpacity(0.6), fontWeight: FontWeight.w500),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatInterface(bool isDark) {
+    return Container(
+      height: 600,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header do Chat
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5))),
+            ),
+            child: Row(
+              children: [
+                const CircleAvatar(
+                  backgroundColor: AppColors.primary,
+                  child: Icon(Icons.psychology_rounded, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'SENSE CHAT IA',
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    Text(
+                      'Online - Consultando Base de Dados',
+                      style: GoogleFonts.inter(fontSize: 10, color: Colors.green, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Lista de Mensagens
+          Expanded(
+            child: Obx(() => ListView.builder(
+              controller: controller.scrollController,
+              padding: const EdgeInsets.all(20),
+              itemCount: controller.chatMessages.length,
+              itemBuilder: (context, index) {
+                final msg = controller.chatMessages[index];
+                return _buildChatBubble(msg['isUser'], msg['text'], isDark);
+              },
+            )),
+          ),
+
+          if (controller.isChatLoading.value)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: _LoadingBrain(),
+            ),
+
+          // Input de Mensagem
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5))),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller.chatInputController,
+                    decoration: InputDecoration(
+                      hintText: 'Pergunte sobre sensores, lotes...',
+                      hintStyle: GoogleFonts.inter(fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: isDark ? Colors.black26 : Colors.grey.withOpacity(0.1),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                    onSubmitted: (_) => controller.sendMessage(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: controller.sendMessage,
+                  icon: const Icon(Icons.send_rounded, color: AppColors.primary),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChatBubble(bool isUser, String text, bool isDark) {
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        constraints: BoxConstraints(maxWidth: Get.width * 0.6),
+        decoration: BoxDecoration(
+          color: isUser 
+              ? AppColors.primary 
+              : (isDark ? Colors.grey[850] : Colors.grey[100]),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(isUser ? 16 : 0),
+            bottomRight: Radius.circular(isUser ? 0 : 16),
+          ),
+        ),
+        child: Text(
+          text,
+          style: GoogleFonts.inter(
+            color: isUser ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+            fontSize: 13,
+          ),
         ),
       ),
     );
@@ -538,7 +592,7 @@ class _PulseIconState extends State<_PulseIcon> with SingleTickerProviderStateMi
   }
 }
 
-class _LoadingBrain extends StatelessWidget {
+class _LoadingBrain extends GetView<SmartSenseIAController> {
   const _LoadingBrain();
 
   @override
@@ -552,20 +606,62 @@ class _LoadingBrain extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
         ),
         const SizedBox(width: 16),
-        Text('Sincronizando Neurônios...', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        Obx(() => Text(
+          controller.processingStep.value.isEmpty 
+              ? 'Sincronizando Neurônios...' 
+              : controller.processingStep.value, 
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold)
+        )),
       ],
     );
   }
 }
 
-class _AIThinkingPlaceholder extends StatelessWidget {
-  const _AIThinkingPlaceholder();
+class _ProcessingTag extends StatelessWidget {
+  const _ProcessingTag();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 10,
+            height: 10,
+            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'PROCESSANDO',
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AIProcessingVisualizer extends StatelessWidget {
+  const _AIProcessingVisualizer();
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const _NeuralNetworkVisualizer(),
+        const SizedBox(height: 32),
         _buildShimmerLine(double.infinity),
         const SizedBox(height: 12),
         _buildShimmerLine(double.infinity),
@@ -583,6 +679,153 @@ class _AIThinkingPlaceholder extends StatelessWidget {
         color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(7),
       ),
+    );
+  }
+}
+
+class _NeuralNetworkVisualizer extends StatefulWidget {
+  const _NeuralNetworkVisualizer();
+
+  @override
+  State<_NeuralNetworkVisualizer> createState() => _NeuralNetworkVisualizerState();
+}
+
+class _NeuralNetworkVisualizerState extends State<_NeuralNetworkVisualizer> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 120,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _NeuralNetworkPainter(_controller),
+      ),
+    );
+  }
+}
+
+class _NeuralNetworkPainter extends CustomPainter {
+  final Animation<double> animation;
+  _NeuralNetworkPainter(this.animation) : super(repaint: animation);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.2)
+      ..strokeWidth = 1.0;
+
+    final dotPaint = Paint()
+      ..color = AppColors.primary
+      ..style = PaintingStyle.fill;
+
+    const nodesCount = 12;
+    final nodes = List.generate(nodesCount, (i) {
+      double x = (size.width / (nodesCount / 2)) * (i % (nodesCount ~/ 2)) + 30;
+      double y = (i < nodesCount / 2) ? 30.0 : 90.0;
+      return Offset(x, y);
+    });
+
+    // Draw connections
+    for (int i = 0; i < nodesCount / 2; i++) {
+      for (int j = nodesCount ~/ 2; j < nodesCount; j++) {
+        // Pulse effect
+        double distance = (animation.value * size.width);
+        double opacity = 0.1;
+        if ((nodes[i].dx - distance).abs() < 50) {
+          opacity = 0.5;
+        }
+
+        canvas.drawLine(
+          nodes[i], 
+          nodes[j], 
+          paint..color = AppColors.primary.withOpacity(opacity)
+        );
+      }
+    }
+
+    // Draw nodes
+    for (var node in nodes) {
+      canvas.drawCircle(node, 4, dotPaint);
+      canvas.drawCircle(node, 8, dotPaint..color = AppColors.primary.withOpacity(0.2));
+    }
+    
+    // Draw scanning line
+    final scanX = animation.value * size.width;
+    canvas.drawLine(
+      Offset(scanX, 0), 
+      Offset(scanX, size.height), 
+      Paint()..color = AppColors.primary.withOpacity(0.5)..strokeWidth = 2
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class _ScanningOverlay extends StatefulWidget {
+  const _ScanningOverlay();
+
+  @override
+  State<_ScanningOverlay> createState() => _ScanningOverlayState();
+}
+
+class _ScanningOverlayState extends State<_ScanningOverlay> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            Positioned(
+              top: _controller.value * MediaQuery.of(context).size.height,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.primary.withOpacity(0),
+                      AppColors.primary.withOpacity(0.05),
+                      AppColors.primary.withOpacity(0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -456,7 +456,7 @@ class HomeView extends GetView<HomeController> {
               ),
               const SizedBox(width: 12),
               Text(
-                'Briefing Inteligente Gemini',
+                'Briefing Inteligente Sense IA',
                 style: GoogleFonts.outfit(
                   color: Colors.white,
                   fontSize: 18,

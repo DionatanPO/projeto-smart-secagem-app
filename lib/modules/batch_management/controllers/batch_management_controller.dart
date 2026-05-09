@@ -7,12 +7,14 @@ class BatchManagementController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   var batches = <BatchModel>[].obs;
+  var clients = <dynamic>[].obs; // Usando dynamic para evitar conflito se o modelo não estiver importado corretamente, mas vamos importar
   var isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     getBatches();
+    getClients();
   }
 
   Future<void> getBatches() async {
@@ -80,6 +82,17 @@ class BatchManagementController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Erro', 'Falha ao remover lote');
+    }
+  }
+
+  Future<void> getClients() async {
+    try {
+      final response = await _apiService.dio.get('clientes/');
+      if (response.statusCode == 200) {
+        clients.assignAll(response.data);
+      }
+    } catch (e) {
+      print("Erro ao buscar clientes: $e");
     }
   }
 }

@@ -186,6 +186,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                     children: [
                       _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
                       _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
+                      if (batch.clienteNome != null) _buildInfoItem(Icons.person_outline_rounded, batch.clienteNome!),
                       if (batch.siloName != null) _buildInfoItem(Icons.warehouse_outlined, batch.siloName!),
                     ],
                   ),
@@ -241,6 +242,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                           children: [
                             _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
                             _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
+                            if (batch.clienteNome != null) _buildInfoItem(Icons.person_outline_rounded, batch.clienteNome!),
                             if (batch.siloName != null) _buildInfoItem(Icons.warehouse_outlined, batch.siloName!),
                           ],
                         ),
@@ -422,6 +424,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
     final selectedCultura = (grainTypes.contains(initialCultura) ? initialCultura : 'Outros').obs;
     
     var selectedFarmId = batch?.farm.obs ?? (farmController.farms.isNotEmpty ? farmController.farms.first.id : null).obs;
+    var selectedClientId = batch?.cliente.obs ?? (controller.clients.isNotEmpty ? controller.clients.first['id'] as int : null).obs;
     var selectedStatus = (batch?.status ?? 'aguardando').obs;
 
     final theme = Theme.of(context);
@@ -485,6 +488,21 @@ class BatchManagementView extends GetView<BatchManagementController> {
                   ],
                 ),
                 
+                const SizedBox(height: 24),
+                _buildFieldLabel('CLIENTE / PRODUTOR'),
+                const SizedBox(height: 8),
+                Obx(() => DropdownButtonFormField<int>(
+                  value: selectedClientId.value,
+                  isExpanded: true,
+                  decoration: _buildInputDecoration('Selecione o cliente', Icons.person_add_alt_1_rounded, isDark),
+                  items: controller.clients.map((c) => DropdownMenuItem<int>(
+                    value: c['id'], 
+                    child: Text(c['nome'] ?? 'Sem nome')
+                  )).toList(),
+                  onChanged: (val) => selectedClientId.value = val,
+                  validator: (value) => value == null ? 'Selecione um cliente' : null,
+                )),
+
                 const SizedBox(height: 24),
                 _buildFieldLabel('CULTURA / GRÃO'),
                 const SizedBox(height: 8),
@@ -574,10 +592,11 @@ class BatchManagementView extends GetView<BatchManagementController> {
                             safra: safraController.text,
                             pesoInicial: peso,
                             umidadeInicial: double.tryParse(umidadeController.text) ?? 0,
-                            status: batch?.status ?? 'aguardando',
-                            silo: batch?.silo, // Mantém o silo atual se estiver editando
-                            observacoes: observacoesController.text,
-                          );
+                             status: batch?.status ?? 'aguardando',
+                             silo: batch?.silo,
+                             cliente: selectedClientId.value,
+                             observacoes: observacoesController.text,
+                           );
                           if (isEditing) {
                             controller.updateBatch(newBatch);
                           } else {

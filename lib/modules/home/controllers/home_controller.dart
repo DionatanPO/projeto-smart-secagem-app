@@ -18,7 +18,7 @@ class HomeController extends GetxController {
   final chatMessages = <Map<String, dynamic>>[
     {
       'isUser': false,
-      'text': 'Olá, Alexandre! Sou a IA Gemini de controle da sua Dashboard. As condições térmicas estão estáveis. Como posso ajudar com sua operação hoje?'
+      'text': 'Olá! Sou a Sense IA de controle da sua Dashboard. As condições térmicas estão estáveis. Como posso ajudar com sua operação hoje?'
     }
   ].obs;
   

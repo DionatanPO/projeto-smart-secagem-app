@@ -14,6 +14,8 @@ class BatchModel {
   DateTime? dataSaida;
   int? silo;
   String? siloName;
+  int? cliente;
+  String? clienteNome;
   String status;
   String? observacoes;
 
@@ -33,6 +35,8 @@ class BatchModel {
     this.dataSaida,
     this.silo,
     this.siloName,
+    this.cliente,
+    this.clienteNome,
     required this.status,
     this.observacoes,
   });
@@ -54,6 +58,8 @@ class BatchModel {
       dataSaida: json['data_saida'] != null ? DateTime.parse(json['data_saida']) : null,
       silo: json['silo'],
       siloName: json['silo_name'],
+      cliente: json['cliente'],
+      clienteNome: json['cliente_nome'],
       status: json['status'],
       observacoes: json['observacoes'],
     );
@@ -73,6 +79,7 @@ class BatchModel {
       'umidade_final': umidadeFinal,
       'data_saida': dataSaida?.toIso8601String(),
       'silo': silo,
+      'cliente': cliente,
       'status': status,
       'observacoes': observacoes,
     };
