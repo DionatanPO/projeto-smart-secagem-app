@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/cliente_model.dart';
 
@@ -42,12 +43,12 @@ class ClientesController extends GetxController {
         Get.back();
         Get.snackbar('Sucesso', 'Cliente cadastrado com sucesso');
       }
-    } catch (e) {
+    } on DioException catch (e) {
       String errorMsg = 'Falha ao cadastrar cliente';
       
       // Verifica se é um erro de validação (duplicidade de CPF, por exemplo)
-      if (e is dynamic && e.response?.data != null) {
-        final data = e.response.data;
+      if (e.response?.data != null) {
+        final data = e.response!.data;
         if (data is Map && data.containsKey('cpf_cnpj')) {
           errorMsg = 'Este CPF/CNPJ já está cadastrado no sistema.';
         }
@@ -56,6 +57,14 @@ class ClientesController extends GetxController {
       Get.snackbar(
         'Erro de Cadastro', 
         errorMsg,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+        snackPosition: SnackPosition.BOTTOM
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Erro de Cadastro', 
+        'Falha ao cadastrar cliente',
         backgroundColor: Colors.red.withOpacity(0.1),
         colorText: Colors.red,
         snackPosition: SnackPosition.BOTTOM
