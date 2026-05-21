@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../core/values/app_colors.dart';
 import '../controllers/smart_sense_ia_controller.dart';
 
@@ -21,20 +22,31 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
       width: double.infinity,
       height: double.infinity,
       color: isDark ? AppColors.backgroundDark : AppColors.background,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Builder(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: isDesktop ? 32.0 : 16.0),
+          
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 32.0 : 16.0),
+            child: Builder(
               builder: (headerContext) =>
                   _buildHeader(headerContext, isDesktop, theme),
             ),
-            const SizedBox(height: 32),
-            _buildChatInterface(isDark),
-            const SizedBox(height: 100),
-          ],
-        ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 32.0 : 16.0,
+                vertical: 8.0,
+              ),
+              child: _buildChatInterface(isDark),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -101,7 +113,6 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
 
   Widget _buildChatInterface(bool isDark) {
     return Container(
-      height: 600,
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(32),
@@ -233,13 +244,16 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
     );
   }
 
+  // ✅ Widget de bolha de chat COM suporte a Markdown
   Widget _buildChatBubble(bool isUser, String text, bool isDark) {
+    // Limpeza básica do texto (remove quebras excessivas)
+    final cleanText = text.replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
+
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         constraints: BoxConstraints(maxWidth: Get.width * 0.75),
         decoration: BoxDecoration(
           color: isUser
@@ -252,15 +266,108 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
             bottomRight: Radius.circular(isUser ? 0 : 16),
           ),
         ),
-        child: Text(
-          text,
-          style: GoogleFonts.inter(
-            color: isUser
-                ? Colors.white
-                : (isDark ? Colors.white70 : Colors.black87),
-            fontSize: 13,
-          ),
-        ),
+        child: isUser
+            ? Text(
+                cleanText,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              )
+            : MarkdownBody(
+                data: cleanText,
+                selectable: true,
+                shrinkWrap: true,
+                styleSheet: MarkdownStyleSheet(
+                  // Parágrafo base
+                  p: GoogleFonts.inter(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                  // Negrito
+                  strong: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  // Itálico
+                  em: GoogleFonts.inter(
+                    fontStyle: FontStyle.italic,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                  // Títulos
+                  h1: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  h2: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  h3: GoogleFonts.outfit(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  // Listas
+                  listBullet: GoogleFonts.inter(
+                    color: AppColors.primary,
+                    fontSize: 13,
+                  ),
+                  // Código inline
+                  code: GoogleFonts.robotoMono(
+                    fontSize: 12,
+                    backgroundColor: isDark ? Colors.black45 : Colors.grey[200],
+                    color: AppColors.primary,
+                  ),
+                  // Blocos de código
+                  codeblockDecoration: BoxDecoration(
+                    color: isDark ? Colors.black45 : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  // Links
+                  a: GoogleFonts.inter(
+                    color: AppColors.primary,
+                    decoration: TextDecoration.underline,
+                  ),
+                  // Citação
+                  blockquote: GoogleFonts.inter(
+                    fontStyle: FontStyle.italic,
+                    color: isDark ? Colors.white54 : Colors.black54,
+                  ),
+                  blockquoteDecoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(
+                        color: AppColors.primary.withOpacity(0.5),
+                        width: 3,
+                      ),
+                    ),
+                  ),
+                  // Separador horizontal
+                  horizontalRuleDecoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: isDark ? Colors.white10 : Colors.black12,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                // Customização de checkboxes se a IA retornar listas de tarefas
+                checkboxBuilder: (bool value) {
+                  return Transform.scale(
+                    scale: 0.8,
+                    child: Checkbox(
+                      value: value,
+                      onChanged: null,
+                      activeColor: AppColors.primary,
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }
