@@ -7,3 +7,4 @@ class LandingController extends GetxController {
     Get.toNamed(Routes.login);
   }
 }
+
