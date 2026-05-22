@@ -92,7 +92,6 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildSidebarHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(24),
       child: Text('SMART SECAGEM', style: GoogleFonts.outfit(fontWeight: FontWeight.w900, fontSize: 20, color: theme.primaryColor)),
@@ -153,46 +152,95 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildDashboardContent(BuildContext context) {
     final theme = Theme.of(context);
-    final bool isDesktop = MediaQuery.of(context).size.width >= 1100;
     return Container(
-      padding: EdgeInsets.all(isDesktop ? 32 : 16),
-      child: Column(
+      padding: const EdgeInsets.all(32),
+      child: Obx(() => Column(
         children: [
           Row(
             children: [
-              Text('Dashboard', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+              Text('Painel Executivo', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
               const Spacer(),
-              Obx(() => controller.isAnalyzing.value
-                  ? const CircularProgressIndicator()
-                  : IconButton(icon: const Icon(Icons.refresh), onPressed: () => controller.onInit())),
+              if (controller.responseTime.isNotEmpty)
+                Padding(padding: const EdgeInsets.only(right: 16), child: Text('Latência: ${controller.responseTime}', style: TextStyle(color: Colors.green))),
+              IconButton(icon: const Icon(Icons.refresh), onPressed: controller.fetchDashboardData),
             ],
           ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: isDesktop
-                ? Row(children: [Expanded(flex: 2, child: _buildAISummaryCard(context)), const SizedBox(width: 24), Expanded(flex: 1, child: _buildAIChat(context))])
-                : Column(children: [_buildAISummaryCard(context), const SizedBox(height: 24), Expanded(child: _buildAIChat(context))]),
-          ),
+          const SizedBox(height: 32),
+          if (controller.isAnalyzing.value) 
+            const Expanded(child: Center(child: CircularProgressIndicator()))
+          else if (controller.dashboardData.isEmpty)
+            const Expanded(child: Center(child: Text("Nenhum dado disponível.")))
+          else
+            Expanded(
+              child: Column(
+                children: [
+                  // KPI Row
+                  Row(
+                    children: List.generate((controller.dashboardData['kpis'] as List).length, (i) {
+                      final kpi = controller.dashboardData['kpis'][i];
+                      return Expanded(child: _buildKpiCard(kpi));
+                    }),
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(child: _buildAlertsPanel(controller.dashboardData['alertas'])),
+                        const SizedBox(width: 24),
+                        Expanded(child: _buildSummaryPanel(controller.dashboardData['resumo_executivo'])),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      )),
+    );
+  }
+
+  Widget _buildKpiCard(Map<String, dynamic> kpi) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(kpi['title'], style: const TextStyle(color: Colors.grey, fontSize: 14)),
+          const SizedBox(height: 8),
+          Text(kpi['value'], style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+          Text(kpi['trend'], style: const TextStyle(color: Colors.green)),
         ],
       ),
     );
   }
 
-  Widget _buildAISummaryCard(BuildContext context) {
+  Widget _buildAlertsPanel(List alerts) {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(24)),
-      child: Obx(() => Text(controller.aiSummary.value, style: const TextStyle(color: Colors.white, fontSize: 16))),
+      decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(20)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Alertas Críticos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.red)),
+          const SizedBox(height: 16),
+          ...alerts.map((a) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [const Icon(Icons.warning, color: Colors.red, size: 16), const SizedBox(width: 8), Text(a)]))),
+        ],
+      ),
     );
   }
 
-  Widget _buildAIChat(BuildContext context) {
+  Widget _buildSummaryPanel(String summary) {
     return Container(
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(24)),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(20)),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: Obx(() => ListView.builder(itemCount: controller.chatMessages.length, itemBuilder: (c, i) => Text(controller.chatMessages[i]['text'])))),
-          TextField(controller: controller.chatController, onSubmitted: controller.sendMessage),
+          const Text('Resumo Executivo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.blue)),
+          const SizedBox(height: 16),
+          Text(summary, style: const TextStyle(fontSize: 16)),
         ],
       ),
     );
