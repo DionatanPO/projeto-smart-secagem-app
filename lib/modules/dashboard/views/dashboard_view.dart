@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import '../controllers/dashboard_controller.dart';
+import '../../../core/services/pdf_service.dart';
 
 class RespostaIA extends StatelessWidget {
   final String resposta;
@@ -157,7 +155,7 @@ class DashboardView extends GetView<DashboardController> {
           icon: const Icon(Icons.picture_as_pdf, size: 18),
           color: color,
           tooltip: 'Baixar PDF',
-          onPressed: () => _generatePdf(controller.modelResponse.value, updated),
+          onPressed: () => PdfService().generateDashboardPdf(controller.modelResponse.value, updated),
         ),
         Icon(Icons.speed, size: 14, color: color),
         const SizedBox(width: 4),
@@ -168,36 +166,6 @@ class DashboardView extends GetView<DashboardController> {
       ],
     );
   }
-
-  Future<void> _generatePdf(String text, DateTime? updated) async {
-    final pdf = pw.Document();
-    pdf.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
-        build: (context) => [
-          pw.Header(
-            level: 0,
-            child: pw.Text('Resumo Operacional - ${_formatDate(updated ?? DateTime.now())}',
-              style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-            ),
-          ),
-          pw.SizedBox(height: 16),
-          pw.Paragraph(text: text),
-        ],
-      ),
-    );
-    await Printing.sharePdf(
-      bytes: await pdf.save(),
-      filename: 'resumo_operacional_${_formatDateFile(updated ?? DateTime.now())}.pdf',
-    );
-  }
-
-  String _formatDate(DateTime dt) =>
-      '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
-
-  String _formatDateFile(DateTime dt) =>
-      '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
 
   String _formatTime(DateTime dt) =>
       '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
