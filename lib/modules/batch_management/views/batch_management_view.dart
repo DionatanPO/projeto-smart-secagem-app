@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/models/batch_model.dart';
 import '../../../core/models/farm_model.dart';
 import '../../../core/models/silo_model.dart';
@@ -184,6 +185,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                     spacing: 16,
                     runSpacing: 10,
                     children: [
+                      _buildInfoItem(Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy HH:mm').format(batch.dataEntrada!.toLocal()) : '---'),
                       _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
                       _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
                       if (batch.clienteNome != null) _buildInfoItem(Icons.person_outline_rounded, batch.clienteNome!),
@@ -240,6 +242,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                           spacing: 16,
                           runSpacing: 4,
                           children: [
+                            _buildInfoItem(Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy HH:mm').format(batch.dataEntrada!.toLocal()) : '---'),
                             _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
                             _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
                             if (batch.clienteNome != null) _buildInfoItem(Icons.person_outline_rounded, batch.clienteNome!),

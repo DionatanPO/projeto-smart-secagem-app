@@ -134,6 +134,32 @@ class ProcessosView extends GetView<ProcessosController> {
                     ],
                   ],
                 ),
+                if (p.siloNome != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.storage_rounded, size: 14, color: theme.hintColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Silo ${p.siloNome}',
+                        style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ],
+                if (p.tipoProcesso == 'Secagem' && p.secadorNome != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.settings_input_component_rounded, size: 14, color: theme.hintColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Secador ${p.secadorNome}',
+                        style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -207,7 +233,11 @@ class ProcessosView extends GetView<ProcessosController> {
   Widget _buildQuickActions(ProcessoModel p) {
     final theme = Theme.of(Get.context!);
     if (p.status == 'Finalizada' || p.status == 'Cancelada') {
-      return const SizedBox.shrink(); // Remove a opção de deletar
+      return _ActionButton(
+        icon: Icons.delete_outline_rounded,
+        color: Colors.red,
+        onTap: () => _confirmDelete(p),
+      );
     }
 
     return Row(
@@ -242,7 +272,34 @@ class ProcessosView extends GetView<ProcessosController> {
           color: Colors.red, 
           onTap: () => controller.changeStatus(p, 'Cancelada')
         ),
+        if (p.status != 'Iniciada' && p.status != 'Pausada') ...[
+          const SizedBox(width: 8),
+          _ActionButton(
+            icon: Icons.delete_outline_rounded,
+            color: Colors.red.withOpacity(0.6),
+            onTap: () => _confirmDelete(p),
+          ),
+        ],
       ],
+    );
+  }
+
+  void _confirmDelete(ProcessoModel p) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Excluir Atividade?'),
+        content: const Text('Esta ação não pode ser desfeita.'),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              if (p.id != null) controller.deleteProcesso(p.id!);
+            },
+            child: const Text('Excluir', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -268,113 +325,146 @@ class ProcessosView extends GetView<ProcessosController> {
   // Formulário simplificado
   void _showProcessoForm(BuildContext context, {ProcessoModel? processo}) {
     final isEditing = processo != null;
-    final typeNotifier = ValueNotifier<String>(processo?.tipoProcesso ?? 'Secagem');
-    var selectedLoteId = processo?.loteId ?? (controller.availableBatches.isNotEmpty ? controller.availableBatches.first.id : null);
+
+    // Estado declarado UMA VEZ, fora do builder
+    String selectedTipo = processo?.tipoProcesso ?? 'Secagem';
+    int? selectedLoteId = processo?.loteId ?? (controller.availableBatches.isNotEmpty ? controller.availableBatches.first.id : null);
+    int? selectedSecadorId = processo?.secadorId;
+    int? selectedSiloId = processo?.siloId;
 
     Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          width: 500,
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(isEditing ? 'Editar Atividade' : 'Iniciar Nova Operação', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              ValueListenableBuilder<String>(
-                valueListenable: typeNotifier,
-                builder: (context, currentType, _) {
-                  return Column(
+      StatefulBuilder(
+        builder: (context, setState) {
+          // Lógica de seleção exclusiva
+          void onSecadorChanged(int? val) {
+            setState(() {
+              selectedSecadorId = val;
+              if (val != null) selectedSiloId = null;
+            });
+          }
+
+          void onSiloChanged(int? val) {
+            setState(() {
+              selectedSiloId = val;
+              if (val != null) selectedSecadorId = null;
+            });
+          }
+
+          final secadorItems = controller.availableDryers
+              .where((d) => d.status == 'Disponível')
+              .map((d) => DropdownMenuItem<int>(
+                    value: d.id,
+                    child: Text('${d.nome} (${d.fonteCalor})'),
+                  ))
+              .toList();
+
+          final siloItems = controller.availableSilos
+              .where((s) => s.status == 'disponivel')
+              .map((s) => DropdownMenuItem<int>(
+                    value: s.id,
+                    child: Text(s.name, overflow: TextOverflow.ellipsis),
+                  ))
+              .toList();
+
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Container(
+              width: 500,
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(isEditing ? 'Editar Atividade' : 'Iniciar Nova Operação', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 24),
+                  _buildDropdownField<String>(
+                    label: 'Tipo de Atividade',
+                    value: selectedTipo,
+                    items: ['Secagem', 'Resfriamento']
+                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                        .toList(),
+                    onChanged: (val) => setState(() {
+                      selectedTipo = val!;
+                      if (val != 'Secagem') selectedSecadorId = null;
+                      if (val != 'Resfriamento') {
+                        selectedSecadorId = null;
+                        selectedSiloId = null;
+                      }
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildDropdownField<int>(
+                    label: 'Lote / Grãos',
+                    value: selectedLoteId,
+                    items: controller.availableBatches
+                        .map((b) => DropdownMenuItem(value: b.id, child: Text('${b.numeroLote} - ${b.cultura} (${b.status})')))
+                        .toList(),
+                    onChanged: (val) => setState(() => selectedLoteId = val),
+                  ),
+                  if (selectedTipo == 'Secagem') ...[
+                    const SizedBox(height: 16),
+                    _buildDropdownField<int>(
+                      label: 'Secador',
+                      value: selectedSecadorId,
+                      items: secadorItems,
+                      onChanged: onSecadorChanged,
+                    ),
+                  ],
+                  if (selectedTipo == 'Resfriamento') ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: _buildDropdownField<int>(
+                            label: 'Secador',
+                            value: selectedSecadorId,
+                            items: secadorItems,
+                            onChanged: onSecadorChanged,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text('OU', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                        ),
+                        Flexible(
+                          child: _buildDropdownField<int>(
+                            label: 'Silo',
+                            value: selectedSiloId,
+                            items: siloItems,
+                            onChanged: onSiloChanged,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _buildDropdownField<String>(
-                        label: 'Tipo de Atividade',
-                        value: currentType,
-                        items: ['Secagem', 'Aeração'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                        onChanged: (val) => typeNotifier.value = val!,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildDropdownField<int>(
-                        label: 'Lote / Grãos',
-                        value: selectedLoteId,
-                        items: controller.availableBatches
-                            .map((b) => DropdownMenuItem(
-                                  value: b.id, 
-                                  child: Text('${b.numeroLote} - ${b.cultura} (${b.status})')
-                                ))
-                            .toList(),
-                        onChanged: (val) {
-                          selectedLoteId = val;
-                          typeNotifier.notifyListeners();
+                      TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
+                      const SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          final newProcesso = ProcessoModel(
+                            id: processo?.id,
+                            tipoProcesso: selectedTipo,
+                            loteId: selectedLoteId,
+                            secadorId: selectedSecadorId,
+                            siloId: selectedSiloId,
+                            dataInicio: processo?.dataInicio ?? DateTime.now(),
+                            status: processo?.status ?? 'Iniciada',
+                          );
+                          if (isEditing) controller.updateProcesso(newProcesso);
+                          else controller.createProcesso(newProcesso);
                         },
+                        child: Text(isEditing ? 'Salvar' : 'Iniciar Agora'),
                       ),
                     ],
-                  );
-                },
-              ),
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (selectedLoteId != null) {
-                        final batch = controller.availableBatches.firstWhere((b) => b.id == selectedLoteId);
-                        
-                        // Regra de Negócio: Lote não pode ter 2 atividades ativas
-                        final isBusy = batch.status.contains('Iniciada') || batch.status.contains('Pausada');
-                        
-                        // Só bloqueia se for uma NOVA atividade ou se estiver trocando para um lote ocupado
-                        if (isBusy && batch.id != processo?.loteId) {
-                          Get.dialog(
-                            AlertDialog(
-                              title: Row(
-                                children: [
-                                  const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                                  const SizedBox(width: 8),
-                                  Text('Lote Ocupado', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                              content: Text(
-                                'O lote ${batch.numeroLote} já possui uma atividade: ${batch.status}.\n\nVocê precisa finalizar ou cancelar a atividade atual antes de iniciar uma nova para este grão.',
-                                style: GoogleFonts.inter(),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Get.back(),
-                                  child: const Text('Entendido'),
-                                ),
-                              ],
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            ),
-                          );
-                          return;
-                        }
-                      }
-
-                      final newProcesso = ProcessoModel(
-                        id: processo?.id,
-                        tipoProcesso: typeNotifier.value,
-                        loteId: selectedLoteId,
-                        dataInicio: processo?.dataInicio ?? DateTime.now(),
-                        status: processo?.status ?? 'Iniciada',
-                      );
-                      if (isEditing) {
-                        controller.updateProcesso(newProcesso);
-                      } else {
-                        controller.createProcesso(newProcesso);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16)),
-                    child: Text(isEditing ? 'Salvar' : 'Iniciar Agora'),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -395,6 +485,7 @@ class ProcessosView extends GetView<ProcessosController> {
       value: value,
       items: items,
       onChanged: onChanged,
+      isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

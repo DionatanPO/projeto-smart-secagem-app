@@ -30,7 +30,7 @@ class SecadorModel {
       tipo: json['tipo'] ?? json['type'],
       capacidade: (json['capacidade'] ?? json['capacity'] ?? 0.0).toDouble(),
       fonteCalor: json['fonte_calor'] ?? json['fuel_source'] ?? 'Lenha',
-      status: json['status'] ?? 'Ativo',
+      status: json['status'] ?? 'Disponível',
       observacoes: json['observacoes'] ?? json['observations'],
     );
   }

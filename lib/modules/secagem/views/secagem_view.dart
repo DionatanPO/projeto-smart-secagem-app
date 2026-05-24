@@ -187,8 +187,9 @@ class SecagemView extends GetView<SecagemController> {
   Widget _buildStatusBadge(String status) {
     Color color;
     switch (status) {
-      case 'Ativo': color = Colors.green; break;
-      case 'Manutenção': color = Colors.orange; break;
+      case 'Disponível': color = Colors.green; break;
+      case 'Em Uso': color = Colors.blue; break;
+      case 'Em Manutenção': color = Colors.orange; break;
       default: color = Colors.grey;
     }
     return Container(
@@ -227,7 +228,7 @@ class SecagemView extends GetView<SecagemController> {
     var selectedFarmId = secador?.farmId ?? (controller.availableFarms.isNotEmpty ? controller.availableFarms.first.id : null);
     var selectedType = secador?.tipo ?? 'Coluna';
     var selectedFuel = secador?.fonteCalor ?? 'Lenha';
-    var selectedStatus = secador?.status ?? 'Ativo';
+    var selectedStatus = secador?.status ?? 'Disponível';
 
     Get.dialog(
       Dialog(
@@ -296,7 +297,7 @@ class SecagemView extends GetView<SecagemController> {
                             child: _buildDropdownField<String>(
                               label: 'Status Operacional',
                               value: selectedStatus,
-                              items: ['Ativo', 'Manutenção', 'Inativo']
+                              items: ['Disponível', 'Em Uso', 'Em Manutenção', 'Desativado']
                                   .map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
                               onChanged: (val) => selectedStatus = val!,
                             ),

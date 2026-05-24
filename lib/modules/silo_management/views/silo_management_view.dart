@@ -900,9 +900,9 @@ class SiloManagementView extends GetView<SiloManagementController> {
     final observationsController = TextEditingController(text: silo?.observations ?? '');
     
     // Garantir que o status inicial seja válido para não quebrar o Dropdown
-    final validStatuses = ['disponivel', 'em_uso', 'manutencao', 'desativado'];
-    final currentStatus = silo?.status ?? 'disponivel';
-    final status = (validStatuses.contains(currentStatus) ? currentStatus : 'disponivel').obs;
+              final validStatuses = ['disponivel', 'em_uso', 'manutencao', 'desativado'];
+              final currentStatus = silo?.status ?? 'disponivel';
+              final status = (validStatuses.contains(currentStatus) ? currentStatus : 'disponivel').obs;
     
     final selectedFarmId = (silo?.farmId).obs;
 

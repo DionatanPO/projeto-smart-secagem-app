@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
+import '../../dashboard/bindings/dashboard_binding.dart';
 import '../../farm_management/controllers/farm_management_controller.dart';
 import '../../batch_management/controllers/batch_management_controller.dart';
 import '../../silo_management/controllers/silo_management_controller.dart';
@@ -17,5 +18,6 @@ class HomeBinding extends Bindings {
     Get.lazyPut<SecagemController>(() => SecagemController());
     Get.lazyPut<ProcessosController>(() => ProcessosController());
     Get.lazyPut<ClientesController>(() => ClientesController());
+    DashboardBinding().dependencies();
   }
 }

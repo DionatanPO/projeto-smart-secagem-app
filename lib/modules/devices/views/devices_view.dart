@@ -189,11 +189,29 @@ class DevicesView extends GetView<DevicesController> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.warehouse_rounded, size: 16, color: Colors.grey),
+              Icon(sensor.siloId != null ? Icons.warehouse_rounded : Icons.settings_input_component_rounded, size: 16, color: Colors.grey),
               const SizedBox(width: 8),
-              Text(sensor.siloName ?? 'Silo #${sensor.siloId}',
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w500)),
+              Text(
+                sensor.siloId != null
+                    ? (sensor.siloName ?? 'Silo #${sensor.siloId}')
+                    : (sensor.secadorName ?? 'Secador #${sensor.secadorId}'),
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(sensor.siloId != null ? Icons.warehouse_rounded : Icons.settings_input_component_rounded, size: 16, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(
+                sensor.siloId != null
+                    ? (sensor.siloName ?? 'Silo #${sensor.siloId}')
+                    : (sensor.secadorName ?? 'Secador #${sensor.secadorId}'),
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w500),
+              ),
             ],
           ),
           Row(
@@ -239,8 +257,11 @@ extension DevicesViewExtension on DevicesView {
     final isEditing = sensor != null;
     final gatewayIdController = TextEditingController(text: sensor?.sensorId ?? '');
     final descriptionController = TextEditingController(text: sensor?.description ?? '');
-    final selectedSiloId = (sensor?.siloId ?? (controller.silos.isNotEmpty ? controller.silos[0].id : null)).obs;
-    final status = (sensor?.status ?? 'ativo').obs;
+    final selectedSiloId = (sensor?.siloId ?? null).obs;
+    final selectedSecadorId = (sensor?.secadorId ?? null).obs;
+    final validStatuses = ['ativo', 'manutencao', 'falha', 'desativado'];
+    final rawStatus = sensor?.status?.toLowerCase() ?? 'ativo';
+    final status = (validStatuses.contains(rawStatus) ? rawStatus : 'ativo').obs;
     final formKey = GlobalKey<FormState>();
 
     final theme = Theme.of(context);
@@ -324,18 +345,44 @@ extension DevicesViewExtension on DevicesView {
                     validator: (v) => v!.isEmpty ? 'Obrigatório' : null,
                   ),
                   const SizedBox(height: 24),
-                  _buildFieldLabel('SILO VINCULADO'),
+                  _buildFieldLabel('VINCULAR A'),
                   const SizedBox(height: 8),
                   Obx(() => DropdownButtonFormField<int>(
                         value: selectedSiloId.value,
                         style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : AppColors.textPrimary),
                         dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
-                        items: controller.silos.map((silo) => DropdownMenuItem(
-                          value: silo.id,
-                          child: Text(silo.name),
-                        )).toList(),
-                        onChanged: (v) => selectedSiloId.value = v!,
+                        hint: const Text('Silo'),
+                        items: [
+                          const DropdownMenuItem(value: null, child: Text('Nenhum')),
+                          ...controller.silos.map((silo) => DropdownMenuItem(
+                            value: silo.id,
+                            child: Text('Silo: ${silo.name}'),
+                          )),
+                        ],
+                        onChanged: (v) {
+                          selectedSiloId.value = v;
+                          if (v != null) selectedSecadorId.value = null;
+                        },
                         decoration: _buildInputDecoration('', Icons.warehouse_rounded, isDark),
+                      )),
+                  const SizedBox(height: 12),
+                  Obx(() => DropdownButtonFormField<int>(
+                        value: selectedSecadorId.value,
+                        style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : AppColors.textPrimary),
+                        dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                        hint: const Text('Secador'),
+                        items: [
+                          const DropdownMenuItem(value: null, child: Text('Nenhum')),
+                          ...controller.secadores.map((sec) => DropdownMenuItem(
+                            value: sec.id,
+                            child: Text('Secador: ${sec.nome}'),
+                          )),
+                        ],
+                        onChanged: (v) {
+                          selectedSecadorId.value = v;
+                          if (v != null) selectedSiloId.value = null;
+                        },
+                        decoration: _buildInputDecoration('', Icons.settings_input_component_rounded, isDark),
                       )),
                   const SizedBox(height: 24),
                   _buildFieldLabel('STATUS OPERACIONAL'),
@@ -346,8 +393,8 @@ extension DevicesViewExtension on DevicesView {
                         dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
                         items: const [
                           DropdownMenuItem(value: 'ativo', child: Text('Ativo')),
-                          DropdownMenuItem(value: 'manutencao', child: Text('Manutenção')),
-                          DropdownMenuItem(value: 'falha', child: Text('Falha')),
+                          DropdownMenuItem(value: 'manutencao', child: Text('Em Manutenção')),
+                          DropdownMenuItem(value: 'falha', child: Text('Falha de Leitura')),
                           DropdownMenuItem(value: 'desativado', child: Text('Desativado')),
                         ],
                         onChanged: (v) => status.value = v!,
@@ -376,7 +423,8 @@ extension DevicesViewExtension on DevicesView {
                                 id: sensor?.id,
                                 sensorId: gatewayIdController.text,
                                 description: descriptionController.text,
-                                siloId: selectedSiloId.value!,
+                                siloId: selectedSiloId.value,
+                                secadorId: selectedSecadorId.value,
                                 status: status.value,
                               );
                               if (isEditing) {

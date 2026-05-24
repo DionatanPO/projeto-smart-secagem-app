@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/services/api_service.dart';
@@ -26,6 +27,10 @@ void main() async {
 
   // Initialize the controller at the top level
   final settingsController = Get.put(SettingsController());
+
+  // Preload Google Fonts to prevent font flash
+  GoogleFonts.outfit();
+  GoogleFonts.inter();
 
   runApp(
     Obx(() => GetMaterialApp(

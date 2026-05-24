@@ -6,6 +6,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/telemetry_model.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../../core/models/silo_model.dart';
+import '../../../core/models/secador_model.dart';
 
 class DevicesController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
@@ -13,6 +14,7 @@ class DevicesController extends GetxController {
 
   final sensors = <SensorModel>[].obs;
   final silos = <SiloModel>[].obs;
+  final secadores = <SecadorModel>[].obs;
   final telemetry = <TelemetryModel>[].obs;
   final isLoading = false.obs;
   final isLoadingTelemetry = false.obs;
@@ -24,6 +26,7 @@ class DevicesController extends GetxController {
     super.onInit();
     getSensors();
     getSilos();
+    getSecadores();
   }
 
   Future<void> getSensors() async {
@@ -50,6 +53,18 @@ class DevicesController extends GetxController {
       }
     } catch (e) {
       print('Erro ao carregar silos: $e');
+    }
+  }
+
+  Future<void> getSecadores() async {
+    try {
+      final response = await _apiService.dio.get('secadores/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        secadores.assignAll(data.map((json) => SecadorModel.fromJson(json)).toList());
+      }
+    } catch (e) {
+      print('Erro ao carregar secadores: $e');
     }
   }
 

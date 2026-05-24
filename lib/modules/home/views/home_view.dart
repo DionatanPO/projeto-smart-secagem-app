@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/values/app_colors.dart';
 import '../controllers/home_controller.dart';
+import '../../dashboard/views/dashboard_view.dart';
 import '../../settings/views/settings_view.dart';
 import '../../access_management/views/access_management_view.dart';
 import '../../silo_management/views/silo_management_view.dart';
@@ -131,7 +132,7 @@ class HomeView extends GetView<HomeController> {
   Widget _buildContent(BuildContext context, int index) {
     switch (index) {
       case 0: return const SiloViewerView();
-      case 1: return _buildDashboardContent(context);
+      case 1: return const DashboardView();
       case 2: return const FarmManagementView();
       case 3: return const SiloManagementView();
       case 4: return const DevicesView();
@@ -146,103 +147,8 @@ class HomeView extends GetView<HomeController> {
       case 13: return const SecagemView();
       case 14: return const ProcessosView();
       case 15: return const ClientesView();
-      default: return _buildDashboardContent(context);
+      default: return const DashboardView();
     }
   }
 
-  Widget _buildDashboardContent(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(32),
-      child: Obx(() => Column(
-        children: [
-          Row(
-            children: [
-              Text('Painel Executivo', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
-              const Spacer(),
-              if (controller.responseTime.isNotEmpty)
-                Padding(padding: const EdgeInsets.only(right: 16), child: Text('Latência: ${controller.responseTime}', style: TextStyle(color: Colors.green))),
-              IconButton(icon: const Icon(Icons.refresh), onPressed: controller.fetchDashboardData),
-            ],
-          ),
-          const SizedBox(height: 32),
-          if (controller.isAnalyzing.value) 
-            const Expanded(child: Center(child: CircularProgressIndicator()))
-          else if (controller.dashboardData.isEmpty)
-            const Expanded(child: Center(child: Text("Nenhum dado disponível.")))
-          else
-            Expanded(
-              child: Column(
-                children: [
-                  // KPI Row
-                  Row(
-                    children: List.generate((controller.dashboardData['kpis'] as List).length, (i) {
-                      final kpi = controller.dashboardData['kpis'][i];
-                      return Expanded(child: _buildKpiCard(kpi));
-                    }),
-                  ),
-                  const SizedBox(height: 24),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(child: _buildAlertsPanel(controller.dashboardData['alertas'])),
-                        const SizedBox(width: 24),
-                        Expanded(child: _buildSummaryPanel(controller.dashboardData['resumo_executivo'])),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      )),
-    );
-  }
-
-  Widget _buildKpiCard(Map<String, dynamic> kpi) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(kpi['title'], style: const TextStyle(color: Colors.grey, fontSize: 14)),
-          const SizedBox(height: 8),
-          Text(kpi['value'], style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-          Text(kpi['trend'], style: const TextStyle(color: Colors.green)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAlertsPanel(List alerts) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(20)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Alertas Críticos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.red)),
-          const SizedBox(height: 16),
-          ...alerts.map((a) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [const Icon(Icons.warning, color: Colors.red, size: 16), const SizedBox(width: 8), Text(a)]))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryPanel(String summary) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(20)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Resumo Executivo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.blue)),
-          const SizedBox(height: 16),
-          Text(summary, style: const TextStyle(fontSize: 16)),
-        ],
-      ),
-    );
-  }
 }

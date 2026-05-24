@@ -51,6 +51,22 @@ class ProcessosController extends GetxController {
       );
       if (response.statusCode == 201) {
         processos.insert(0, ProcessoModel.fromJson(response.data));
+        if (processo.tipoProcesso == 'Secagem' && processo.secadorId != null) {
+          await _apiService.dio.patch('secadores/${processo.secadorId}/', data: {'status': 'Em Uso'});
+        }
+        if (processo.tipoProcesso == 'Resfriamento' && processo.siloId != null) {
+          final batch = availableBatches.firstWhere(
+            (b) => b.id == processo.loteId,
+            orElse: () => BatchModel(
+              farm: 0, cultura: '', safra: '', pesoInicial: 0,
+              umidadeInicial: 0, status: '',
+            ),
+          );
+          await _apiService.dio.patch('silos/${processo.siloId}/', data: {
+            'status': 'em_uso',
+            'current_quantity': batch?.pesoInicial ?? 0,
+          });
+        }
         _refreshData();
         Get.back();
         Get.snackbar('Sucesso', 'Processo iniciado com sucesso');
@@ -87,10 +103,16 @@ class ProcessosController extends GetxController {
 
       if (newStatus == 'Finalizada' || newStatus == 'Cancelada') {
         data['data_fim'] = now.toIso8601String();
+        
+        if (processo.tipoProcesso == 'Secagem' && processo.secadorId != null) {
+          await _apiService.dio.patch('secadores/${processo.secadorId}/', data: {'status': 'Disponível'});
+        }
+        if (processo.tipoProcesso == 'Resfriamento' && processo.siloId != null) {
+          await _apiService.dio.patch('silos/${processo.siloId}/', data: {'status': 'disponivel'});
+        }
       } else if (newStatus == 'Pausada') {
         data['data_fim'] = now.toIso8601String();
       } else if (newStatus == 'Iniciada') {
-        // Se estava pausado e vai retomar
         if (processo.status == 'Pausada' && processo.dataFim != null) {
           final tempoParado = now.difference(processo.dataFim!);
           final novaDataInicio = processo.dataInicio.add(tempoParado);

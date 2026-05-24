@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/values/app_colors.dart';
 
 import '../widgets/web_footer.dart';
@@ -49,12 +50,22 @@ class LandingView extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Background Image
+          // Background Video
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/hero_tractor.png',
-              fit: BoxFit.cover,
-            ),
+            child: Obx(() {
+              if (controller.isVideoInitialized.value && !controller.hasVideoError.value) {
+                return FittedBox(
+                  fit: BoxFit.cover,
+                  clipBehavior: Clip.hardEdge,
+                  child: SizedBox(
+                    width: controller.videoController.value.size.width,
+                    height: controller.videoController.value.size.height,
+                    child: VideoPlayer(controller.videoController),
+                  ),
+                );
+              }
+              return Container(color: Colors.black);
+            }),
           ),
           // Gradient Overlay for Readability
           Positioned.fill(

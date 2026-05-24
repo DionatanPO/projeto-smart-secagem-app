@@ -63,7 +63,7 @@ class SmartSenseIAController extends GetxController {
           'prompt': text,
           'history': history,
           'use_rag': false,
-          'temperature': 0.2,
+          'temperature': 0.1,
         },
       );
 
