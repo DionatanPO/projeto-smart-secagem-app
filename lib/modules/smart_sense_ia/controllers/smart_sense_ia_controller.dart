@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
 
 class SmartSenseIAController extends GetxController {
@@ -59,6 +60,10 @@ class SmartSenseIAController extends GetxController {
     try {
       final response = await _apiService.dio.post(
         'chat/',
+        options: Options(
+          sendTimeout: const Duration(seconds: 300),
+          receiveTimeout: const Duration(seconds: 300),
+        ),
         data: {
           'prompt': text,
           'history': history,

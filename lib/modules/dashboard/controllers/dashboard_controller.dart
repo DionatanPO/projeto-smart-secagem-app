@@ -32,10 +32,15 @@ class DashboardController extends GetxController {
     final stopwatch = Stopwatch()..start();
 
     try {
-      final response = await _apiService.dio.post('chat/', data: {
-        'prompt': 'Forneça um resumo operacional do dia em texto livre, sem formatação JSON. Ao final, detecte possíveis anomalias com base nos dados disponíveis.',
-        'use_rag': false,
-      });
+      final response = await _apiService.dio.post('chat/',
+        options: Options(
+          sendTimeout: const Duration(seconds: 300),
+          receiveTimeout: const Duration(seconds: 300),
+        ),
+        data: {
+          'prompt': 'Forneça um resumo operacional de ${DateTime.now().toIso8601String()} em texto livre, sem formatação JSON. Ao final, detecte possíveis anomalias com base nos dados disponíveis.',
+          'use_rag': false,
+        });
 
       stopwatch.stop();
       responseTime.value = _formatResponseTime(stopwatch.elapsedMilliseconds);

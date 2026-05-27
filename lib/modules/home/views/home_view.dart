@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/values/app_colors.dart';
 import '../controllers/home_controller.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../../settings/views/settings_view.dart';
@@ -29,7 +28,7 @@ class HomeView extends GetView<HomeController> {
     final bool isDesktop = size.width >= 1100;
 
     return Scaffold(
-      drawer: isDesktop ? null : SafeArea(child: Builder(builder: (drawerContext) => _buildSidebar(drawerContext))),
+      drawer: isDesktop ? null : _buildDrawer(context),
       body: SafeArea(
         child: Row(
           children: [
@@ -47,41 +46,67 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  NavigationDrawer _buildDrawer(BuildContext context) {
+    return NavigationDrawer(
+      selectedIndex: controller.selectedIndex.value,
+      onDestinationSelected: (index) {
+        controller.changePage(index);
+        Navigator.pop(context);
+      },
+      children: [
+        _buildDrawerHeader(context),
+        ..._buildAllDestinations(context: context, useDrawer: true),
+      ],
+    );
+  }
+
+  Padding _buildDrawerHeader(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 28, 28, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                colors: [colorScheme.primary, colorScheme.tertiary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: const Icon(Icons.agriculture_rounded, color: Colors.white, size: 24),
+          ),
+          const SizedBox(height: 16),
+          Text('Smart Secagem', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: colorScheme.onSurface)),
+          const SizedBox(height: 4),
+          Text('Plataforma de Gestão', style: GoogleFonts.inter(fontSize: 13, color: colorScheme.onSurfaceVariant)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSidebar(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       width: 280,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        border: Border(right: BorderSide(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5))),
+        color: colorScheme.surfaceContainerLow,
       ),
       child: Column(
         children: [
           _buildSidebarHeader(context),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
-                children: [
-                  _buildMenuItem(context, 0, 'Projeto', Icons.architecture_rounded),
-                  _buildMenuItem(context, 1, 'Dashboard', Icons.dashboard_rounded),
-                  _buildMenuItem(context, 2, 'Gestão de Fazendas', Icons.location_on_rounded),
-                  _buildMenuItem(context, 3, 'Gestão de Silos', Icons.warehouse_rounded),
-                  _buildMenuItem(context, 12, 'Gestão de Lotes', Icons.inventory_2_rounded),
-                  _buildMenuItem(context, 13, 'Controle de Secagem', Icons.waves_rounded),
-                  _buildMenuItem(context, 14, 'Processos Ativos', Icons.history_rounded),
-                  _buildMenuItem(context, 15, 'Gestão de Clientes', Icons.people_alt_rounded),
-                  _buildMenuItem(context, 4, 'Dispositivos', Icons.hub_rounded),
-                  _buildMenuItem(context, 5, 'Notificações', Icons.notifications_rounded),
-                  _buildMenuItem(context, 7, 'Gestão de Acesso', Icons.admin_panel_settings_rounded),
-                  _buildMenuItem(context, 9, 'Smart Sense IA', Icons.psychology_rounded),
-                  _buildMenuItem(context, 10, 'Simulador Interativo', Icons.science_rounded),
-                  const Divider(),
-                  _buildMenuItem(context, 11, 'Meu Perfil', Icons.person_rounded),
-                ],
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _buildAllDestinations(context: context),
               ),
             ),
           ),
@@ -92,40 +117,168 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildSidebarHeader(BuildContext context) {
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(24),
-      child: Text('SMART SECAGEM', style: GoogleFonts.outfit(fontWeight: FontWeight.w900, fontSize: 20, color: theme.primaryColor)),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [colorScheme.primary, colorScheme.tertiary],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: const Icon(Icons.agriculture_rounded, color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Smart Secagem', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: colorScheme.onSurface)),
+              Text('Plataforma de Gestão', style: GoogleFonts.inter(fontSize: 11, color: colorScheme.onSurfaceVariant)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
+  List<Widget> _buildAllDestinations({required BuildContext context, bool useDrawer = false}) {
+    final sections = [
+      ('Principal', [
+        (0, 'Projeto', Icons.architecture_rounded),
+        (1, 'Dashboard', Icons.dashboard_rounded),
+      ]),
+      ('Monitoramento', [
+        (2, 'Fazendas', Icons.location_on_rounded),
+        (3, 'Silos', Icons.warehouse_rounded),
+        (12, 'Lotes', Icons.inventory_2_rounded),
+        (13, 'Secagem', Icons.waves_rounded),
+        (14, 'Processos', Icons.history_rounded),
+        (15, 'Clientes', Icons.people_alt_rounded),
+      ]),
+      ('Sistema', [
+        (4, 'Dispositivos', Icons.hub_rounded),
+        (5, 'Notificações', Icons.notifications_rounded),
+        (7, 'Acesso', Icons.admin_panel_settings_rounded),
+      ]),
+      ('Inteligência', [
+        (9, 'Smart Sense IA', Icons.psychology_rounded),
+        (10, 'Simulador', Icons.science_rounded),
+      ]),
+    ];
+
+    final destinations = <Widget>[];
+
+    for (final section in sections) {
+      final title = section.$1;
+      final items = section.$2;
+
+      if (useDrawer) {
+        destinations.add(Padding(
+          padding: const EdgeInsets.fromLTRB(28, 16, 28, 4),
+          child: Text(title, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurfaceVariant, letterSpacing: 0.5)),
+        ));
+      } else {
+        destinations.add(Padding(
+          padding: const EdgeInsets.fromLTRB(12, 16, 12, 4),
+          child: Text(title, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurfaceVariant, letterSpacing: 0.5)),
+        ));
+      }
+
+      for (final item in items) {
+        final index = item.$1;
+        final label = item.$2;
+        final icon = item.$3;
+
+        if (useDrawer) {
+          destinations.add(NavigationDrawerDestination(
+            icon: Icon(icon),
+            selectedIcon: Icon(icon, fill: 1),
+            label: Text(label, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+          ));
+        } else {
+          destinations.add(_buildMenuItem(context, index, label, icon));
+        }
+      }
+    }
+
+    if (!useDrawer) {
+      destinations.add(const SizedBox(height: 8));
+      destinations.add(_buildMenuItem(context, 11, 'Meu Perfil', Icons.person_rounded));
+    }
+
+    return destinations;
+  }
+
   Widget _buildMenuItem(BuildContext context, int index, String title, IconData icon) {
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     return Obx(() {
       final isSelected = controller.selectedIndex.value == index;
-      return Container(
-        margin: const EdgeInsets.only(bottom: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primaryColor.withOpacity(0.1) : Colors.transparent,
+      final color = isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant;
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 2),
+        child: Material(
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-        ),
-        child: ListTile(
-          leading: Icon(icon, color: isSelected ? theme.primaryColor : Colors.grey),
-          title: Text(title, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.w500)),
-          onTap: () {
-            controller.changePage(index);
-            if (!MediaQuery.of(context).size.width.isGreaterThan(1100)) Navigator.pop(context);
-          },
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => controller.changePage(index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: isSelected ? colorScheme.primary.withOpacity(0.12) : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(icon, size: 22, color: color),
+                  const SizedBox(width: 12),
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     });
   }
 
   Widget _buildSidebarFooter(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.logout, color: Colors.red),
-      title: const Text('Sair', style: TextStyle(color: Colors.red)),
-      onTap: controller.logout,
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: controller.logout,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Icon(Icons.logout_rounded, size: 22, color: colorScheme.error),
+                const SizedBox(width: 12),
+                Text('Sair', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: colorScheme.error)),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

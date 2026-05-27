@@ -9,11 +9,15 @@ class AppTheme {
         colorScheme: ColorScheme.light(
           primary: primaryColor,
           secondary: AppColors.accent,
+          tertiary: const Color(0xFF7C4DFF),
           surface: AppColors.surface,
           error: AppColors.error,
           onPrimary: Colors.white,
           onSecondary: Colors.white,
+          onTertiary: Colors.white,
           onSurface: AppColors.textPrimary,
+          secondaryContainer: primaryColor.withOpacity(0.12),
+          onSecondaryContainer: primaryColor,
         ),
         scaffoldBackgroundColor: AppColors.background,
 
@@ -127,11 +131,15 @@ class AppTheme {
         colorScheme: ColorScheme.dark(
           primary: primaryColor,
           secondary: AppColors.accent,
+          tertiary: const Color(0xFF9E7AFF),
           surface: AppColors.surfaceDark,
           error: AppColors.error,
           onPrimary: Colors.white,
           onSecondary: Colors.white,
+          onTertiary: Colors.black,
           onSurface: Colors.white,
+          secondaryContainer: primaryColor.withOpacity(0.18),
+          onSecondaryContainer: const Color(0xFFA8D5A9),
         ),
         scaffoldBackgroundColor: AppColors.backgroundDark,
 
