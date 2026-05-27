@@ -893,260 +893,191 @@ class SiloManagementView extends GetView<SiloManagementController> {
   }
 
   void _showSiloForm(BuildContext context, {SiloModel? silo}) {
+    final cs = Theme.of(context).colorScheme;
     final isEditing = silo != null;
     final nameController = TextEditingController(text: silo?.name ?? '');
     final capacityController = TextEditingController(text: silo?.capacity.toString() ?? '');
     final quantityController = TextEditingController(text: silo?.currentQuantity.toString() ?? '');
     final observationsController = TextEditingController(text: silo?.observations ?? '');
-    
-    // Garantir que o status inicial seja válido para não quebrar o Dropdown
-              final validStatuses = ['disponivel', 'em_uso', 'manutencao', 'desativado'];
-              final currentStatus = silo?.status ?? 'disponivel';
-              final status = (validStatuses.contains(currentStatus) ? currentStatus : 'disponivel').obs;
-    
+    final validStatuses = ['disponivel', 'em_uso', 'manutencao', 'desativado'];
+    final currentStatus = silo?.status ?? 'disponivel';
+    final status = (validStatuses.contains(currentStatus) ? currentStatus : 'disponivel').obs;
     final selectedFarmId = (silo?.farmId).obs;
-
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 550),
-          width: MediaQuery.of(context).size.width * 0.95,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          width: 550,
+          decoration: BoxDecoration(color: cs.surface, borderRadius: BorderRadius.circular(28)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
+                ),
+                child: Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            isEditing ? 'Editar Silo' : 'Novo Silo',
-                            style: GoogleFonts.outfit(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppColors.textPrimary,
+                          Text(isEditing ? 'Editar Silo' : 'Novo Silo', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: cs.onPrimary)),
+                          const SizedBox(height: 4),
+                          Text(isEditing ? 'Atualize as informações do silo.' : 'Configure um novo silo para monitoramento.', style: GoogleFonts.inter(fontSize: 13, color: cs.onPrimary.withOpacity(0.8))),
+                        ],
+                      ),
+                    ),
+                    IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded), style: IconButton.styleFrom(backgroundColor: cs.onPrimary.withOpacity(0.15)), color: cs.onPrimary),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _fieldLabel(cs, 'FAZENDA / LOCALIZAÇÃO'),
+                      const SizedBox(height: 8),
+                      Obx(() => DropdownButtonFormField<int?>(
+                        value: selectedFarmId.value,
+                        style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                        dropdownColor: cs.surface,
+                        items: [
+                          const DropdownMenuItem(value: null, child: Text('Nenhuma (Unidade Independente)')),
+                          ...controller.availableFarms.map((f) => DropdownMenuItem(
+                            value: f.id,
+                            child: Text(f.name, style: GoogleFonts.inter(color: cs.onSurface)),
+                          )),
+                        ],
+                        onChanged: (v) => selectedFarmId.value = v,
+                        decoration: _fieldDeco(cs, 'Selecione onde este silo está...', Icons.location_on_rounded),
+                      )),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'NOME DO SILO'),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: nameController,
+                        style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                        decoration: _fieldDeco(cs, 'Ex: Silo Sul 01', Icons.warehouse_rounded),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            _fieldLabel(cs, 'CAPACIDADE (T)'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: capacityController,
+                              style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                              keyboardType: TextInputType.number,
+                              decoration: _fieldDeco(cs, '0.0', Icons.scale_rounded),
+                            ),
+                          ])),
+                          const SizedBox(width: 16),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            _fieldLabel(cs, 'QTD ATUAL (T)'),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: quantityController,
+                              style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                              keyboardType: TextInputType.number,
+                              decoration: _fieldDeco(cs, '0.0', Icons.inventory_2_rounded),
+                            ),
+                          ])),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'STATUS OPERACIONAL'),
+                      const SizedBox(height: 8),
+                      Obx(() => DropdownButtonFormField<String>(
+                        value: status.value,
+                        style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                        dropdownColor: cs.surface,
+                        items: const [
+                          DropdownMenuItem(value: 'disponivel', child: Text('Disponível')),
+                          DropdownMenuItem(value: 'em_uso', child: Text('Em Uso')),
+                          DropdownMenuItem(value: 'manutencao', child: Text('Manutenção')),
+                          DropdownMenuItem(value: 'desativado', child: Text('Desativado')),
+                        ],
+                        onChanged: (v) => status.value = v!,
+                        decoration: _fieldDeco(cs, '', Icons.info_outline_rounded),
+                      )),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'NOTAS E DIAGNÓSTICOS'),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: observationsController,
+                        maxLines: 3,
+                        style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                        decoration: _fieldDeco(cs, 'Detalhes do lote, datas de carga, notas técnicas...', Icons.notes_rounded),
+                      ),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Get.back(),
+                              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                              child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
                             ),
                           ),
-                          Text(
-                            isEditing ? 'Atualize as informações do silo.' : 'Configure um novo silo para monitoramento.',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: isDark ? Colors.grey[400] : AppColors.textSecondary,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: FilledButton(
+                              onPressed: () {
+                                final newSilo = SiloModel(
+                                  id: silo?.id,
+                                  farmId: selectedFarmId.value,
+                                  name: nameController.text,
+                                  capacity: double.tryParse(capacityController.text) ?? 0.0,
+                                  currentQuantity: double.tryParse(quantityController.text) ?? 0.0,
+                                  status: status.value,
+                                  observations: observationsController.text,
+                                );
+                                if (isEditing) { controller.updateSilo(newSilo); } else { controller.createSilo(newSilo); }
+                              },
+                              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                              child: Text(isEditing ? 'Atualizar Silo' : 'Cadastrar Silo', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.close_rounded),
-                      style: IconButton.styleFrom(
-                        backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 32),
-                _buildFieldLabel('FAZENDA / LOCALIZAÇÃO'),
-                const SizedBox(height: 8),
-                Obx(() => DropdownButtonFormField<int?>(
-                      value: selectedFarmId.value,
-                      style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : AppColors.textPrimary),
-                      dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
-                      items: [
-                        const DropdownMenuItem(value: null, child: Text('Nenhuma (Unidade Independente)')),
-                        ...controller.availableFarms.map((f) => DropdownMenuItem(
-                              value: f.id,
-                              child: Text(f.name),
-                            )),
-                      ],
-                      onChanged: (v) => selectedFarmId.value = v,
-                      decoration: _buildInputDecoration('Selecione onde este silo está...', Icons.location_on_rounded, isDark),
-                    )),
-                const SizedBox(height: 24),
-                _buildFieldLabel('NOME DO SILO'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: nameController,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: _buildInputDecoration('Ex: Silo Sul 01', Icons.warehouse_rounded, isDark),
-                ),
-                const SizedBox(height: 24),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isSmall = constraints.maxWidth < 350;
-                    return Flex(
-                      direction: isSmall ? Axis.vertical : Axis.horizontal,
-                      children: [
-                        Expanded(
-                          flex: isSmall ? 0 : 1,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildFieldLabel('CAPACIDADE (T)'),
-                              const SizedBox(height: 8),
-                              TextField(
-                                controller: capacityController,
-                                style: GoogleFonts.inter(fontSize: 14),
-                                keyboardType: TextInputType.number,
-                                decoration: _buildInputDecoration('0.0', Icons.scale_rounded, isDark),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (!isSmall) const SizedBox(width: 16) else const SizedBox(height: 24),
-                        Expanded(
-                          flex: isSmall ? 0 : 1,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildFieldLabel('QTD ATUAL (T)'),
-                              const SizedBox(height: 8),
-                              TextField(
-                                controller: quantityController,
-                                style: GoogleFonts.inter(fontSize: 14),
-                                keyboardType: TextInputType.number,
-                                decoration: _buildInputDecoration('0.0', Icons.inventory_2_rounded, isDark),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                ),
-                const SizedBox(height: 24),
-                _buildFieldLabel('STATUS OPERACIONAL'),
-                const SizedBox(height: 8),
-                Obx(() => DropdownButtonFormField<String>(
-                      value: status.value,
-                      style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : AppColors.textPrimary),
-                      dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
-                      items: const [
-                        DropdownMenuItem(value: 'disponivel', child: Text('Disponível')),
-                        DropdownMenuItem(value: 'em_uso', child: Text('Em Uso')),
-                        DropdownMenuItem(value: 'manutencao', child: Text('Manutenção')),
-                        DropdownMenuItem(value: 'desativado', child: Text('Desativado')),
-                      ],
-                      onChanged: (v) => status.value = v!,
-                      decoration: _buildInputDecoration('', Icons.info_outline_rounded, isDark),
-                    )),
-                const SizedBox(height: 24),
-                _buildFieldLabel('NOTAS E DIAGNÓSTICOS'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: observationsController,
-                  maxLines: 3,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: _buildInputDecoration('Detalhes do lote, datas de carga, notas técnicas...', Icons.notes_rounded, isDark),
-                ),
-                const SizedBox(height: 40),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Get.back(),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.grey)),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final newSilo = SiloModel(
-                            id: silo?.id,
-                            farmId: selectedFarmId.value,
-                            name: nameController.text,
-                            capacity: double.tryParse(capacityController.text) ?? 0.0,
-                            currentQuantity: double.tryParse(quantityController.text) ?? 0.0,
-                            status: status.value,
-                            observations: observationsController.text,
-                          );
-                          if (isEditing) {
-                            controller.updateSilo(newSilo);
-                          } else {
-                            controller.createSilo(newSilo);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          isEditing ? 'Atualizar Silo' : 'Cadastrar Silo',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFieldLabel(String label) {
+  Widget _fieldLabel(ColorScheme cs, String label) {
     return Text(
       label,
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w900,
-        color: AppColors.primary,
-        letterSpacing: 1.1,
-      ),
+      style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.8),
     );
   }
 
-  InputDecoration _buildInputDecoration(String hint, IconData icon, bool isDark) {
+  InputDecoration _fieldDeco(ColorScheme cs, String hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, size: 20, color: AppColors.primary.withOpacity(0.5)),
+      hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5)),
+      prefixIcon: Icon(icon, size: 20, color: cs.primary.withOpacity(0.6)),
       filled: true,
-      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: cs.primary)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     );
   }
 

@@ -7,12 +7,24 @@ class FarmManagementController extends GetxController {
 
   var farms = <FarmModel>[].obs;
   var isLoading = false.obs;
+  var searchQuery = ''.obs;
+
+  List<FarmModel> get filteredFarms {
+    if (searchQuery.value.isEmpty) return farms;
+    final q = searchQuery.value.toLowerCase();
+    return farms.where((f) =>
+      f.name.toLowerCase().contains(q) ||
+      (f.location?.toLowerCase().contains(q) ?? false)
+    ).toList();
+  }
 
   @override
   void onInit() {
     super.onInit();
     getFarms();
   }
+
+  void filterFarms(String query) => searchQuery.value = query;
 
   Future<void> getFarms() async {
     try {

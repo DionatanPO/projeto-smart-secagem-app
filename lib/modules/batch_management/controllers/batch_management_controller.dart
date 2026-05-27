@@ -7,8 +7,22 @@ class BatchManagementController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   var batches = <BatchModel>[].obs;
-  var clients = <dynamic>[].obs; // Usando dynamic para evitar conflito se o modelo não estiver importado corretamente, mas vamos importar
+  var clients = <dynamic>[].obs;
   var isLoading = false.obs;
+  var searchQuery = ''.obs;
+
+  List<BatchModel> get filteredBatches {
+    if (searchQuery.value.isEmpty) return batches;
+    final q = searchQuery.value.toLowerCase();
+    return batches.where((b) =>
+      (b.numeroLote?.toLowerCase().contains(q) ?? false) ||
+      b.cultura.toLowerCase().contains(q) ||
+      b.safra.toLowerCase().contains(q) ||
+      (b.farmName?.toLowerCase().contains(q) ?? false) ||
+      (b.clienteNome?.toLowerCase().contains(q) ?? false) ||
+      b.status.toLowerCase().contains(q)
+    ).toList();
+  }
 
   @override
   void onInit() {
@@ -16,6 +30,8 @@ class BatchManagementController extends GetxController {
     getBatches();
     getClients();
   }
+
+  void filterBatches(String query) => searchQuery.value = query;
 
   Future<void> getBatches() async {
     try {
@@ -39,7 +55,6 @@ class BatchManagementController extends GetxController {
       final response = await _apiService.dio.post('lotes/', data: batch.toJson());
       if (response.statusCode == 201) {
         getBatches();
-        // Atualiza a lista de silos pois o status mudou para 'ocupado' no backend
         if (Get.isRegistered<SiloManagementController>()) {
           Get.find<SiloManagementController>().getSilos();
         }
@@ -59,7 +74,6 @@ class BatchManagementController extends GetxController {
       final response = await _apiService.dio.patch('lotes/${batch.id}/', data: batch.toJson());
       if (response.statusCode == 200) {
         getBatches();
-        // Atualiza a lista de silos pois o status pode ter mudado para 'livre' no backend
         if (Get.isRegistered<SiloManagementController>()) {
           Get.find<SiloManagementController>().getSilos();
         }
@@ -92,7 +106,7 @@ class BatchManagementController extends GetxController {
         clients.assignAll(response.data);
       }
     } catch (e) {
-      print("Erro ao buscar clientes: $e");
+      // silent
     }
   }
 }

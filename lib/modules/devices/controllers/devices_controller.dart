@@ -7,19 +7,37 @@ import '../../../core/models/telemetry_model.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../../core/models/silo_model.dart';
 import '../../../core/models/secador_model.dart';
+import '../../../core/models/farm_model.dart';
 
 class DevicesController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
-
   final sensors = <SensorModel>[].obs;
   final silos = <SiloModel>[].obs;
   final secadores = <SecadorModel>[].obs;
+  final farms = <FarmModel>[].obs;
   final telemetry = <TelemetryModel>[].obs;
   final isLoading = false.obs;
   final isLoadingTelemetry = false.obs;
   final rxSelectedDate = DateTime.now().obs;
-  String? _currentSensorId; // Para recarregar quando a data mudar
+  String? _currentSensorId;
+
+  final searchQuery = ''.obs;
+
+  List<SensorModel> get filteredSensors {
+    final query = searchQuery.value.toLowerCase().trim();
+    if (query.isEmpty) return sensors;
+    return sensors.where((s) =>
+      s.sensorId.toLowerCase().contains(query) ||
+      s.description.toLowerCase().contains(query) ||
+      s.status.toLowerCase().contains(query) ||
+      (s.siloName?.toLowerCase().contains(query) ?? false) ||
+      (s.secadorName?.toLowerCase().contains(query) ?? false) ||
+      (s.farmName?.toLowerCase().contains(query) ?? false)
+    ).toList();
+  }
+
+  void filterSensors(String query) => searchQuery.value = query;
 
   @override
   void onInit() {
@@ -27,6 +45,7 @@ class DevicesController extends GetxController {
     getSensors();
     getSilos();
     getSecadores();
+    getFarms();
   }
 
   Future<void> getSensors() async {
@@ -68,11 +87,23 @@ class DevicesController extends GetxController {
     }
   }
 
+  Future<void> getFarms() async {
+    try {
+      final response = await _apiService.dio.get('fazendas/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        farms.assignAll(data.map((json) => FarmModel.fromJson(json)).toList());
+      }
+    } catch (e) {
+      print('Erro ao carregar fazendas: $e');
+    }
+  }
+
   Future<void> createSensor(SensorModel sensor) async {
     try {
       final response = await _apiService.dio.post('sensores/', data: sensor.toJson());
       if (response.statusCode == 201) {
-        getSensors(); // Refresh to get names and related data
+        getSensors();
         Get.back();
         Get.snackbar('Sucesso', 'Sensor cadastrado');
       }
@@ -108,22 +139,22 @@ class DevicesController extends GetxController {
 
   Future<void> getTelemetry(SensorModel sensor, {bool resetDate = false}) async {
     isLoadingTelemetry.value = true;
-    
+
     if (resetDate) {
-       rxSelectedDate.value = DateTime.now();
+      rxSelectedDate.value = DateTime.now();
     }
-    
-    resetTelemetry(); // Limpa tudo antes de começar a nova busca
+
+    resetTelemetry();
     try {
       _currentSensorId = sensor.sensorId;
-      final sensorDbId = sensor.id; // ID numérico do banco
-      
+      final sensorDbId = sensor.id;
+
       final response = await _apiService.dio.get(
         'telemetria/',
         queryParameters: {
-          'sensor': sensorDbId, // Parâmetro comum para chaves estrangeiras no Django
-          'sensor_id': sensor.sensorId, 
-          'sensor_physical_id': sensor.sensorId, 
+          'sensor': sensorDbId,
+          'sensor_id': sensor.sensorId,
+          'sensor_physical_id': sensor.sensorId,
           'data': DateFormat('yyyy-MM-dd').format(rxSelectedDate.value),
         },
       );
@@ -140,9 +171,8 @@ class DevicesController extends GetxController {
     }
   }
 
-
   final filteredTelemetryList = <TelemetryModel>[].obs;
-  
+
   final reativeAvgTemp = 0.0.obs;
   final reativeMaxTemp = 0.0.obs;
   final reativeMinTemp = 0.0.obs;
@@ -152,7 +182,7 @@ class DevicesController extends GetxController {
 
   final tempSpots = <FlSpot>[].obs;
   final humSpots = <FlSpot>[].obs;
-  final chartLabels = <String>[].obs; // Ex: 10:30, 11:00
+  final chartLabels = <String>[].obs;
 
   void resetTelemetry() {
     telemetry.clear();
@@ -169,7 +199,6 @@ class DevicesController extends GetxController {
   }
 
   void processTelemetryData() {
-    // Filtrar a lista completa pelo dia selecionado E pelo sensor atual (segurança extra)
     final listFilteredByDate = telemetry.where((t) =>
       t.sensorPhysicalId == _currentSensorId &&
       t.timestamp.year == rxSelectedDate.value.year &&
@@ -179,7 +208,6 @@ class DevicesController extends GetxController {
     listFilteredByDate.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     filteredTelemetryList.assignAll(listFilteredByDate);
 
-    // Gráfico: apenas leituras do DIA ATUAL e deste sensor, agrupadas em buckets de 30min
     tempSpots.clear();
     humSpots.clear();
     chartLabels.clear();
@@ -196,14 +224,13 @@ class DevicesController extends GetxController {
       for (int i = 0; i < chartData.length; i++) {
         final item = chartData[i];
         final timeLabel = '${item.timestamp.hour.toString().padLeft(2, '0')}:${item.timestamp.minute.toString().padLeft(2, '0')}';
-        
+
         tempSpots.add(FlSpot(i.toDouble(), item.temperature));
         humSpots.add(FlSpot(i.toDouble(), item.humidity));
         chartLabels.add(timeLabel);
       }
     }
 
-    // Stats gerais do dia selecionado
     if (listFilteredByDate.isNotEmpty) {
       double totalTemp = 0;
       double maxT = listFilteredByDate[0].temperature;
@@ -236,7 +263,6 @@ class DevicesController extends GetxController {
     }
   }
 
-
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -260,8 +286,6 @@ class DevicesController extends GetxController {
     );
     if (picked != null && picked != rxSelectedDate.value) {
       rxSelectedDate.value = picked;
-      // Precisamos do objeto sensor completo ou apenas o ID dele
-      // Para manter o funcionamento, vou buscar o sensor atual na lista de sensores
       if (_currentSensorId != null) {
         final currentSensor = sensors.firstWhereOrNull((s) => s.sensorId == _currentSensorId);
         if (currentSensor != null) {
@@ -286,4 +310,3 @@ class DevicesController extends GetxController {
     );
   }
 }
-

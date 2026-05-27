@@ -335,7 +335,8 @@ class ProcessosView extends GetView<ProcessosController> {
     Get.dialog(
       StatefulBuilder(
         builder: (context, setState) {
-          // Lógica de seleção exclusiva
+          final cs = Theme.of(context).colorScheme;
+
           void onSecadorChanged(int? val) {
             setState(() {
               selectedSecadorId = val;
@@ -354,7 +355,7 @@ class ProcessosView extends GetView<ProcessosController> {
               .where((d) => d.status == 'Disponível')
               .map((d) => DropdownMenuItem<int>(
                     value: d.id,
-                    child: Text('${d.nome} (${d.fonteCalor})'),
+                    child: Text('${d.nome} (${d.fonteCalor})', style: GoogleFonts.inter(color: cs.onSurface)),
                   ))
               .toList();
 
@@ -362,103 +363,165 @@ class ProcessosView extends GetView<ProcessosController> {
               .where((s) => s.status == 'disponivel')
               .map((s) => DropdownMenuItem<int>(
                     value: s.id,
-                    child: Text(s.name, overflow: TextOverflow.ellipsis),
+                    child: Text(s.name, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(color: cs.onSurface)),
                   ))
               .toList();
 
           return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            backgroundColor: Colors.transparent,
             child: Container(
               width: 500,
-              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(color: cs.surface, borderRadius: BorderRadius.circular(28)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(isEditing ? 'Editar Atividade' : 'Iniciar Nova Operação', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 24),
-                  _buildDropdownField<String>(
-                    label: 'Tipo de Atividade',
-                    value: selectedTipo,
-                    items: ['Secagem', 'Resfriamento']
-                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                        .toList(),
-                    onChanged: (val) => setState(() {
-                      selectedTipo = val!;
-                      if (val != 'Secagem') selectedSecadorId = null;
-                      if (val != 'Resfriamento') {
-                        selectedSecadorId = null;
-                        selectedSiloId = null;
-                      }
-                    }),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDropdownField<int>(
-                    label: 'Lote / Grãos',
-                    value: selectedLoteId,
-                    items: controller.availableBatches
-                        .map((b) => DropdownMenuItem(value: b.id, child: Text('${b.numeroLote} - ${b.cultura} (${b.status})')))
-                        .toList(),
-                    onChanged: (val) => setState(() => selectedLoteId = val),
-                  ),
-                  if (selectedTipo == 'Secagem') ...[
-                    const SizedBox(height: 16),
-                    _buildDropdownField<int>(
-                      label: 'Secador',
-                      value: selectedSecadorId,
-                      items: secadorItems,
-                      onChanged: onSecadorChanged,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
                     ),
-                  ],
-                  if (selectedTipo == 'Resfriamento') ...[
-                    const SizedBox(height: 16),
-                    Row(
+                    child: Row(
                       children: [
-                        Flexible(
-                          child: _buildDropdownField<int>(
-                            label: 'Secador',
-                            value: selectedSecadorId,
-                            items: secadorItems,
-                            onChanged: onSecadorChanged,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(isEditing ? 'Editar Atividade' : 'Iniciar Nova Operação', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: cs.onPrimary)),
+                              const SizedBox(height: 4),
+                              Text(isEditing ? 'Atualize os dados da operação.' : 'Configure uma nova operação no sistema.', style: GoogleFonts.inter(fontSize: 13, color: cs.onPrimary.withOpacity(0.8))),
+                            ],
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text('OU', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
-                        ),
-                        Flexible(
-                          child: _buildDropdownField<int>(
-                            label: 'Silo',
-                            value: selectedSiloId,
-                            items: siloItems,
-                            onChanged: onSiloChanged,
-                          ),
-                        ),
+                        IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded), style: IconButton.styleFrom(backgroundColor: cs.onPrimary.withOpacity(0.15)), color: cs.onPrimary),
                       ],
                     ),
-                  ],
-                  const SizedBox(height: 32),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
-                      const SizedBox(width: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          final newProcesso = ProcessoModel(
-                            id: processo?.id,
-                            tipoProcesso: selectedTipo,
-                            loteId: selectedLoteId,
-                            secadorId: selectedSecadorId,
-                            siloId: selectedSiloId,
-                            dataInicio: processo?.dataInicio ?? DateTime.now(),
-                            status: processo?.status ?? 'Iniciada',
-                          );
-                          if (isEditing) controller.updateProcesso(newProcesso);
-                          else controller.createProcesso(newProcesso);
-                        },
-                        child: Text(isEditing ? 'Salvar' : 'Iniciar Agora'),
+                  ),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _fieldLabel(cs, 'TIPO DE ATIVIDADE'),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            value: selectedTipo,
+                            style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                            dropdownColor: cs.surface,
+                            decoration: _fieldDeco(cs, Icons.category_rounded),
+                            items: ['Secagem', 'Resfriamento']
+                                .map((t) => DropdownMenuItem(value: t, child: Text(t, style: GoogleFonts.inter(color: cs.onSurface))))
+                                .toList(),
+                            onChanged: (val) => setState(() {
+                              selectedTipo = val!;
+                              if (val != 'Secagem') selectedSecadorId = null;
+                              if (val != 'Resfriamento') {
+                                selectedSecadorId = null;
+                                selectedSiloId = null;
+                              }
+                            }),
+                          ),
+                          const SizedBox(height: 20),
+                          _fieldLabel(cs, 'LOTE / GRÃOS'),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<int>(
+                            value: selectedLoteId,
+                            isExpanded: true,
+                            style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                            dropdownColor: cs.surface,
+                            decoration: _fieldDeco(cs, Icons.grass),
+                            items: controller.availableBatches
+                                .map((b) => DropdownMenuItem(value: b.id, child: Text('${b.numeroLote} - ${b.cultura} (${b.status})', style: GoogleFonts.inter(color: cs.onSurface))))
+                                .toList(),
+                            onChanged: (val) => setState(() => selectedLoteId = val),
+                          ),
+                          if (selectedTipo == 'Secagem') ...[
+                            const SizedBox(height: 20),
+                            _fieldLabel(cs, 'SECADOR'),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<int>(
+                              value: selectedSecadorId,
+                              isExpanded: true,
+                              style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                              dropdownColor: cs.surface,
+                              decoration: _fieldDeco(cs, Icons.settings_input_component_rounded),
+                              items: secadorItems,
+                              onChanged: onSecadorChanged,
+                            ),
+                          ],
+                          if (selectedTipo == 'Resfriamento') ...[
+                            const SizedBox(height: 20),
+                            _fieldLabel(cs, 'DESTINO'),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: DropdownButtonFormField<int>(
+                                    value: selectedSecadorId,
+                                    isExpanded: true,
+                                    style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                                    dropdownColor: cs.surface,
+                                    decoration: _fieldDeco(cs, Icons.settings_input_component_rounded),
+                                    items: secadorItems,
+                                    onChanged: onSecadorChanged,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Text('OU', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: cs.onSurfaceVariant)),
+                                ),
+                                Flexible(
+                                  child: DropdownButtonFormField<int>(
+                                    value: selectedSiloId,
+                                    isExpanded: true,
+                                    style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                                    dropdownColor: cs.surface,
+                                    decoration: _fieldDeco(cs, Icons.warehouse_rounded),
+                                    items: siloItems,
+                                    onChanged: onSiloChanged,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          const SizedBox(height: 32),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextButton(
+                                  onPressed: () => Get.back(),
+                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                                  child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 2,
+                                child: FilledButton(
+                                  onPressed: () {
+                                    final newProcesso = ProcessoModel(
+                                      id: processo?.id,
+                                      tipoProcesso: selectedTipo,
+                                      loteId: selectedLoteId,
+                                      secadorId: selectedSecadorId,
+                                      siloId: selectedSiloId,
+                                      dataInicio: processo?.dataInicio ?? DateTime.now(),
+                                      status: processo?.status ?? 'Iniciada',
+                                    );
+                                    if (isEditing) controller.updateProcesso(newProcesso);
+                                    else controller.createProcesso(newProcesso);
+                                  },
+                                  style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                                  child: Text(isEditing ? 'Salvar' : 'Iniciar Agora', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -466,6 +529,21 @@ class ProcessosView extends GetView<ProcessosController> {
           );
         },
       ),
+    );
+  }
+
+  Widget _fieldLabel(ColorScheme cs, String label) {
+    return Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.8));
+  }
+
+  InputDecoration _fieldDeco(ColorScheme cs, IconData icon) {
+    return InputDecoration(
+      prefixIcon: Icon(icon, size: 20, color: cs.primary.withOpacity(0.6)),
+      filled: true, fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: cs.primary)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     );
   }
 

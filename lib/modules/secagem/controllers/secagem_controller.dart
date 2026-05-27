@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/secador_model.dart';
@@ -11,14 +10,28 @@ class SecagemController extends GetxController {
 
   final secadores = <SecadorModel>[].obs;
   List<FarmModel> get availableFarms => _farmController.farms;
-  
   final isLoading = false.obs;
+  final searchQuery = ''.obs;
+
+  List<SecadorModel> get filteredSecadores {
+    if (searchQuery.value.isEmpty) return secadores;
+    final q = searchQuery.value.toLowerCase();
+    return secadores.where((s) =>
+      s.nome.toLowerCase().contains(q) ||
+      s.tipo.toLowerCase().contains(q) ||
+      s.fonteCalor.toLowerCase().contains(q) ||
+      s.status.toLowerCase().contains(q) ||
+      (s.farmName?.toLowerCase().contains(q) ?? false)
+    ).toList();
+  }
 
   @override
   void onInit() {
     super.onInit();
     getSecadores();
   }
+
+  void filterSecadores(String query) => searchQuery.value = query;
 
   Future<void> getSecadores() async {
     isLoading.value = true;
@@ -29,7 +42,7 @@ class SecagemController extends GetxController {
         secadores.assignAll(data.map((json) => SecadorModel.fromJson(json)).toList());
       }
     } catch (e) {
-      print('Erro ao carregar secadores: $e');
+      Get.snackbar('Erro', 'Falha ao carregar secadores');
     } finally {
       isLoading.value = false;
     }
@@ -37,10 +50,7 @@ class SecagemController extends GetxController {
 
   Future<void> createSecador(SecadorModel secador) async {
     try {
-      final response = await _apiService.dio.post(
-        'secadores/',
-        data: secador.toJson(),
-      );
+      final response = await _apiService.dio.post('secadores/', data: secador.toJson());
       if (response.statusCode == 201) {
         secadores.add(SecadorModel.fromJson(response.data));
         Get.back();
@@ -53,10 +63,7 @@ class SecagemController extends GetxController {
 
   Future<void> updateSecador(SecadorModel secador) async {
     try {
-      final response = await _apiService.dio.put(
-        'secadores/${secador.id}/',
-        data: secador.toJson(),
-      );
+      final response = await _apiService.dio.put('secadores/${secador.id}/', data: secador.toJson());
       if (response.statusCode == 200) {
         final index = secadores.indexWhere((s) => s.id == secador.id);
         if (index != -1) {

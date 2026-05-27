@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/values/app_colors.dart';
 import '../../../core/models/user_model.dart';
 import '../controllers/access_management_controller.dart';
 
@@ -14,38 +13,74 @@ class AccessManagementView extends GetView<AccessManagementController> {
       Get.put(AccessManagementController());
     }
 
-    final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width >= 1100;
+    final cs = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width >= 1100;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
+        padding: EdgeInsets.all(isDesktop ? 32 : 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(context),
-            const SizedBox(height: 16),
+            Row(
+              children: [
+                if (!isDesktop) ...[
+                  IconButton(
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    icon: const Icon(Icons.menu_rounded),
+                    color: cs.primary,
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Gestão de Acesso',
+                          style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
+                        ),
+                      ),
+                      if (isDesktop)
+                        Text('Gerencie os usuários e permissões do sistema.', style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 24, bottom: 20),
+              child: SearchBar(
+                hintText: 'Buscar usuário...',
+                hintStyle: WidgetStatePropertyAll(GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                leading: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+                backgroundColor: WidgetStatePropertyAll(cs.surfaceContainerHighest.withOpacity(0.5)),
+                elevation: const WidgetStatePropertyAll(0),
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                textStyle: WidgetStatePropertyAll(GoogleFonts.inter(fontSize: 14, color: cs.onSurface)),
+                onChanged: controller.filterUsers,
+              ),
+            ),
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value) {
+                final list = controller.filteredUsers;
+                if (controller.isLoading.value && list.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (controller.users.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.people_outline_rounded, size: 64, color: theme.hintColor),
-                        const SizedBox(height: 16),
-                        Text('Nenhum usuário cadastrado', style: theme.textTheme.titleMedium),
-                      ],
-                    ),
-                  );
+                if (list.isEmpty) {
+                  return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-                return _buildUsersList(context);
+                return ListView.separated(
+                  padding: const EdgeInsets.all(4),
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (_, i) => _buildUserCard(context, list[i]),
+                );
               }),
             ),
           ],
@@ -53,445 +88,264 @@ class AccessManagementView extends GetView<AccessManagementController> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showUserForm(context),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        highlightElevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: cs.primary,
+        foregroundColor: cs.onPrimary,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         icon: const Icon(Icons.person_add_rounded),
-        label: Text(
-          'Novo Usuário',
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 0.5),
-        ),
+        label: Text('Novo Usuário', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final isDesktop = MediaQuery.of(context).size.width >= 1100;
+  Widget _buildUserCard(BuildContext context, UserModel user) {
+    final cs = Theme.of(context).colorScheme;
+    final avatarColor = user.isStaff ? cs.primary : Colors.orange;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
+    return Card(
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showUserForm(context, user: user),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
           child: Row(
             children: [
-              if (!isDesktop) ...[
-                IconButton(
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                  icon: const Icon(Icons.menu_rounded),
-                  color: theme.primaryColor,
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  color: avatarColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 8),
-              ],
+                child: Center(
+                  child: Text(user.username.substring(0, 1).toUpperCase(),
+                    style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: avatarColor),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Gestão de Acesso',
-                        style: (isDesktop
-                                ? theme.textTheme.headlineSmall
-                                : theme.textTheme.titleLarge)
-                            ?.copyWith(
-                          fontWeight: FontWeight.bold,
+                    Row(
+                      children: [
+                        Flexible(child: Text(user.username, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface), overflow: TextOverflow.ellipsis)),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: (user.isStaff ? cs.primary : Colors.orange).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(user.accountType.toUpperCase(), style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: avatarColor, letterSpacing: 0.3)),
                         ),
-                      ),
+                      ],
                     ),
-                    Text(
-                      'Gerencie os usuários e permissões do sistema.',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: isDark ? Colors.grey[400] : AppColors.textSecondary,
-                      ),
-                    ),
+                    const SizedBox(height: 2),
+                    Text(user.email, style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant)),
                   ],
                 ),
+              ),
+              PopupMenuButton<int>(
+                icon: Icon(Icons.more_vert_rounded, size: 20, color: cs.onSurfaceVariant),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 2,
+                color: cs.surfaceContainerLow,
+                onSelected: (value) {
+                  if (value == 0) _showUserForm(context, user: user);
+                  if (value == 1) _confirmDelete(context, user);
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                  PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
+                ],
               ),
             ],
           ),
         ),
-      ],
-    );
-  }
-
-
-  Widget _buildUsersList(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color:
-              isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5),
-        ),
-      ),
-      child: ListView.separated(
-        padding: const EdgeInsets.all(8),
-        itemCount: controller.users.length,
-        separatorBuilder: (context, index) => Divider(
-          height: 1,
-          color: isDark
-              ? Colors.white.withOpacity(0.05)
-              : Colors.black.withOpacity(0.05),
-        ),
-        itemBuilder: (context, index) {
-          final user = controller.users[index];
-          return _buildUserTile(context, user);
-        },
       ),
     );
   }
 
-  Widget _buildUserTile(BuildContext context, UserModel user) {
-    final theme = Theme.of(context);
-    final avatarColor = user.isStaff ? Colors.blue : Colors.green;
-
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: avatarColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Center(
-          child: Text(
-            user.username.substring(0, 1).toUpperCase(),
-            style: TextStyle(
-              color: avatarColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-        ),
-      ),
-      title: Text(
-        user.username,
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(user.email),
-            Text('•', style: TextStyle(color: theme.hintColor)),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: (user.isStaff ? AppColors.primary : Colors.orange).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                user.accountType.toUpperCase(),
-                style: TextStyle(
-                  color: user.isStaff ? AppColors.primary : Colors.orange,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      trailing: Row(
+  Widget _buildEmptyState(BuildContext context, bool hasSearch) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            icon: Icon(Icons.edit_outlined, color: theme.hintColor),
-            onPressed: () => _showUserForm(context, user: user),
+          Container(
+            width: 88, height: 88,
+            decoration: BoxDecoration(color: cs.surfaceContainerHighest.withOpacity(0.5), borderRadius: BorderRadius.circular(28)),
+            child: Icon(hasSearch ? Icons.search_off_rounded : Icons.people_outline_rounded, size: 40, color: cs.onSurfaceVariant.withOpacity(0.4)),
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
-            onPressed: () => _confirmDelete(context, user),
-          ),
+          const SizedBox(height: 20),
+          Text(hasSearch ? 'Nenhum resultado encontrado' : 'Nenhum usuário cadastrado', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+          const SizedBox(height: 8),
+          Text(hasSearch ? 'Tente buscar por nome, e-mail ou nível de acesso.' : 'Adicione um novo usuário para liberar o acesso ao sistema.', textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant.withOpacity(0.7))),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, UserModel user) {
+    final cs = Theme.of(context).colorScheme;
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: cs.surfaceContainerLow,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(width: 40, height: 40, decoration: BoxDecoration(color: cs.error.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.delete_forever_rounded, color: cs.error, size: 22)),
+            const SizedBox(width: 12),
+            Text('Excluir Usuário', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: cs.onSurface)),
+          ],
+        ),
+        content: Text('Deseja remover o usuário "${user.username}"? Esta ação não poderá ser desfeita.', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+        actions: [
+          TextButton(onPressed: () => Get.back(), style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Cancelar', style: GoogleFonts.inter(color: cs.onSurfaceVariant))),
+          FilledButton(onPressed: () { controller.deleteUser(user.id!); Get.back(); }, style: FilledButton.styleFrom(backgroundColor: cs.error, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Excluir', style: GoogleFonts.inter(fontWeight: FontWeight.w600))),
         ],
       ),
     );
   }
 
   void _showUserForm(BuildContext context, {UserModel? user}) {
+    final cs = Theme.of(context).colorScheme;
     final isEditing = user != null;
-    final usernameController = TextEditingController(text: user?.username ?? '');
-    final emailController = TextEditingController(text: user?.email ?? '');
-    final passwordController = TextEditingController();
+    final usernameCtl = TextEditingController(text: user?.username ?? '');
+    final emailCtl = TextEditingController(text: user?.email ?? '');
+    final passwordCtl = TextEditingController();
     final accountType = (user?.accountType ?? 'operador').obs;
     final formKey = GlobalKey<FormState>();
-
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
-          width: 500,
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
+          width: 520,
+          decoration: BoxDecoration(color: cs.surface, borderRadius: BorderRadius.circular(28)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(isEditing ? 'Editar Usuário' : 'Novo Usuário', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: cs.onPrimary)),
+                          const SizedBox(height: 4),
+                          Text(isEditing ? 'Atualize as permissões ou dados do usuário.' : 'Cadastre um novo colaborador no sistema.', style: GoogleFonts.inter(fontSize: 13, color: cs.onPrimary.withOpacity(0.8))),
+                        ],
+                      ),
+                    ),
+                    IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded), style: IconButton.styleFrom(backgroundColor: cs.onPrimary.withOpacity(0.15)), color: cs.onPrimary),
+                  ],
+                ),
               ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(32),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isEditing ? 'Editar Usuário' : 'Novo Usuário',
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : AppColors.textPrimary,
-                              ),
-                            ),
-                            Text(
-                              isEditing ? 'Atualize as permissões ou dados do usuário.' : 'Cadastre um novo colaborador no sistema.',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: isDark ? Colors.grey[400] : AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Get.back(),
-                        icon: const Icon(Icons.close_rounded),
-                        style: IconButton.styleFrom(
-                          backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  _buildFieldLabel('NOME DE USUÁRIO'),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: usernameController,
-                    style: GoogleFonts.inter(fontSize: 14),
-                    decoration: _buildInputDecoration('Ex: dionatan.p', Icons.person_outline_rounded, isDark),
-                    validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildFieldLabel('ENDEREÇO DE E-MAIL'),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: emailController,
-                    style: GoogleFonts.inter(fontSize: 14),
-                    decoration: _buildInputDecoration('Ex: contato@empresa.com', Icons.email_outlined, isDark),
-                    validator: (v) => GetUtils.isEmail(v!) ? null : 'E-mail inválido',
-                  ),
-                  const SizedBox(height: 24),
-                  _buildFieldLabel(isEditing ? 'NOVA SENHA (OPCIONAL)' : 'SENHA DE ACESSO'),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: passwordController,
-                    style: GoogleFonts.inter(fontSize: 14),
-                    obscureText: true,
-                    decoration: _buildInputDecoration('••••••••', Icons.lock_outline_rounded, isDark),
-                    validator: (v) => !isEditing && v!.isEmpty ? 'Campo obrigatório' : null,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildFieldLabel('NÍVEL DE ACESSO'),
-                  const SizedBox(height: 8),
-                  Obx(() => DropdownButtonFormField<String>(
+                      _fieldLabel(cs, 'NOME DE USUÁRIO'),
+                      const SizedBox(height: 8),
+                      _field(cs, usernameCtl, 'Ex: dionatan.p', Icons.person_outline_rounded, validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'E-MAIL'),
+                      const SizedBox(height: 8),
+                      _field(cs, emailCtl, 'Ex: contato@empresa.com', Icons.email_outlined, validator: (v) => GetUtils.isEmail(v!) ? null : 'E-mail inválido'),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, isEditing ? 'NOVA SENHA (OPCIONAL)' : 'SENHA'),
+                      const SizedBox(height: 8),
+                      _field(cs, passwordCtl, '••••••••', Icons.lock_outline_rounded, obscure: true, validator: (v) => !isEditing && v!.isEmpty ? 'Campo obrigatório' : null),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'NÍVEL DE ACESSO'),
+                      const SizedBox(height: 8),
+                      Obx(() => DropdownButtonFormField<String>(
                         value: accountType.value,
-                        style: GoogleFonts.inter(fontSize: 14, color: isDark ? Colors.white : AppColors.textPrimary),
-                        dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                        style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                        dropdownColor: cs.surfaceContainerLow,
+                        decoration: _dropDeco(cs, Icons.admin_panel_settings_outlined),
                         items: const [
                           DropdownMenuItem(value: 'admin', child: Text('Administrador')),
                           DropdownMenuItem(value: 'operador', child: Text('Operador')),
                         ],
                         onChanged: (v) => accountType.value = v!,
-                        decoration: _buildInputDecoration('', Icons.admin_panel_settings_outlined, isDark),
                       )),
-                  const SizedBox(height: 40),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => Get.back(),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                          child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.grey)),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 2,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              final newUser = UserModel(
-                                id: user?.id,
-                                username: usernameController.text,
-                                email: emailController.text,
-                                password: passwordController.text,
-                                accountType: accountType.value,
-                              );
-                              if (isEditing) {
-                                controller.updateUser(newUser);
-                              } else {
-                                controller.createUser(newUser);
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(child: TextButton(
+                            onPressed: () => Get.back(),
+                            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                            child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                          )),
+                          const SizedBox(width: 12),
+                          Expanded(flex: 2, child: FilledButton(
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                final u = UserModel(id: user?.id, username: usernameCtl.text, email: emailCtl.text, password: passwordCtl.text, accountType: accountType.value);
+                                if (isEditing) { controller.updateUser(u); } else { controller.createUser(u); }
                               }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            isEditing ? 'Atualizar Dados' : 'Criar Conta',
-                            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                            },
+                            style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                            child: Text(isEditing ? 'Atualizar' : 'Criar Conta', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                          )),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFieldLabel(String label) {
-    return Text(
-      label,
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w900,
-        color: AppColors.primary,
-        letterSpacing: 1.1,
-      ),
-    );
-  }
-
-  InputDecoration _buildInputDecoration(String hint, IconData icon, bool isDark) {
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: Icon(icon, size: 20, color: AppColors.primary.withOpacity(0.5)),
-      filled: true,
-      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-    );
-  }
-
-  void _confirmDelete(BuildContext context, UserModel user) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    Get.dialog(
-      Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          width: 400,
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.1),
-                  shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.delete_forever_rounded, color: AppColors.error, size: 40),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Excluir Usuário',
-                style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Deseja realmente remover o usuário ${user.username}? Esta ação não poderá ser desfeita.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(color: Colors.grey, fontSize: 14),
-              ),
-              const SizedBox(height: 32),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Get.back(),
-                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                      child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.grey)),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        controller.deleteUser(user.id!);
-                        Get.back();
-                      },
-                      child: Text('Excluir', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _fieldLabel(ColorScheme cs, String label) {
+    return Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.8));
+  }
+
+  Widget _field(ColorScheme cs, TextEditingController ctl, String hint, IconData icon, {bool obscure = false, String? Function(String?)? validator}) {
+    return TextFormField(
+      controller: ctl, obscureText: obscure, validator: validator,
+      style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5)),
+        prefixIcon: Icon(icon, size: 20, color: cs.primary.withOpacity(0.6)),
+        filled: true, fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: cs.primary)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      ),
+    );
+  }
+
+  InputDecoration _dropDeco(ColorScheme cs, IconData icon) {
+    return InputDecoration(
+      prefixIcon: Icon(icon, size: 20, color: cs.primary.withOpacity(0.6)),
+      filled: true, fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/values/app_colors.dart';
+import 'package:intl/intl.dart';
 import '../../../core/models/cliente_model.dart';
 import '../controllers/clientes_controller.dart';
 
@@ -10,26 +10,73 @@ class ClientesView extends GetView<ClientesController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
+    final cs = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width >= 1100;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Padding(
-        padding: const EdgeInsets.all(32),
+      body: Container(
+        padding: EdgeInsets.all(isDesktop ? 32 : 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(context),
-            const SizedBox(height: 32),
+            Row(
+              children: [
+                if (!isDesktop) ...[
+                  IconButton(
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    icon: const Icon(Icons.menu_rounded),
+                    color: cs.primary,
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Clientes',
+                          style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
+                        ),
+                      ),
+                      if (isDesktop)
+                        Text('Gerencie o cadastro dos seus clientes.', style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 24, bottom: 20),
+              child: SearchBar(
+                hintText: 'Buscar cliente...',
+                hintStyle: WidgetStatePropertyAll(GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                leading: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+                backgroundColor: WidgetStatePropertyAll(cs.surfaceContainerHighest.withOpacity(0.5)),
+                elevation: const WidgetStatePropertyAll(0),
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                textStyle: WidgetStatePropertyAll(GoogleFonts.inter(fontSize: 14, color: cs.onSurface)),
+                onChanged: controller.filterClientes,
+              ),
+            ),
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value) {
+                final list = controller.filteredClientes;
+                if (controller.isLoading.value && list.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (controller.clientes.isEmpty) {
-                  return _buildEmptyState(context);
+                if (list.isEmpty) {
+                  return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-                return _buildClientesList(context);
+                return ListView.separated(
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, i) => _buildClienteCard(context, list[i]),
+                );
               }),
             ),
           ],
@@ -37,157 +84,173 @@ class ClientesView extends GetView<ClientesController> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showClienteForm(context),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.person_add_alt_1_rounded),
-        label: Text('Novo Cliente', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        backgroundColor: cs.primary,
+        foregroundColor: cs.onPrimary,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: const Icon(Icons.person_add_rounded),
+        label: Text('Novo Cliente', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Gestão de Clientes',
-          style: GoogleFonts.outfit(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Gerencie o cadastro e informações dos seus clientes.',
-          style: GoogleFonts.inter(fontSize: 16, color: theme.hintColor),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people_alt_outlined, size: 80, color: Colors.grey.withOpacity(0.3)),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhum cliente cadastrado',
-            style: GoogleFonts.inter(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildClientesList(BuildContext context) {
-    return ListView.separated(
-      itemCount: controller.clientes.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
-      itemBuilder: (context, index) => _buildClienteCard(context, controller.clientes[index]),
     );
   }
 
   Widget _buildClienteCard(BuildContext context, ClienteModel cliente) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: theme.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
-            child: Icon(Icons.person_rounded, color: theme.primaryColor, size: 28),
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  cliente.nome,
-                  style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showClienteForm(context, cliente: cliente),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                const SizedBox(height: 4),
-                Row(
+                child: Icon(Icons.person_rounded, color: cs.onPrimary, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (cliente.email != null) ...[
-                      Icon(Icons.email_outlined, size: 14, color: theme.hintColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        cliente.email!,
-                        style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
+                    Text(cliente.nome, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface)),
+                    const SizedBox(height: 6),
+                    if (cliente.email != null || cliente.telefone != null)
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 4,
+                        children: [
+                          if (cliente.email != null)
+                            _infoRow(cs, Icons.email_outlined, cliente.email!),
+                          if (cliente.telefone != null)
+                            _infoRow(cs, Icons.phone_outlined, cliente.telefone!),
+                        ],
                       ),
-                      const SizedBox(width: 16),
+                    if (cliente.cpfCnpj != null) ...[
+                      const SizedBox(height: 2),
+                      _infoRow(cs, Icons.badge_outlined, '${cliente.cpfCnpj}'),
                     ],
-                    if (cliente.telefone != null) ...[
-                      Icon(Icons.phone_outlined, size: 14, color: theme.hintColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        cliente.telefone!,
-                        style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
+                    if (cliente.endereco != null) ...[
+                      const SizedBox(height: 2),
+                      _infoRow(cs, Icons.location_on_outlined, cliente.endereco!),
+                    ],
+                    if (cliente.createdAt != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.schedule_rounded, size: 12, color: cs.onSurfaceVariant.withOpacity(0.5)),
+                          const SizedBox(width: 4),
+                          Text(DateFormat('dd/MM/yyyy').format(cliente.createdAt!), style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.5))),
+                        ],
                       ),
                     ],
                   ],
                 ),
-                if (cliente.cpfCnpj != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'Doc: ${cliente.cpfCnpj}',
-                    style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
-                  ),
+              ),
+              PopupMenuButton<int>(
+                icon: Icon(Icons.more_vert_rounded, size: 20, color: cs.onSurfaceVariant),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 2,
+                color: cs.surfaceContainerLow,
+                onSelected: (value) {
+                  if (value == 0) _showClienteForm(context, cliente: cliente);
+                  if (value == 1) _confirmDelete(context, cliente);
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                  PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                 ],
-              ],
-            ),
+              ),
+            ],
           ),
-          _buildQuickActions(context, cliente),
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(ColorScheme cs, IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: cs.onSurfaceVariant),
+        const SizedBox(width: 4),
+        Text(text, style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant)),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, bool hasSearch) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 88,
+            height: 88,
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Icon(hasSearch ? Icons.search_off_rounded : Icons.people_alt_outlined, size: 40, color: cs.onSurfaceVariant.withOpacity(0.4)),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            hasSearch ? 'Nenhum resultado encontrado' : 'Nenhum cliente cadastrado',
+            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            hasSearch ? 'Tente buscar por nome, e-mail, telefone ou documento.' : 'Adicione um novo cliente para começar.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant.withOpacity(0.7)),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickActions(BuildContext context, ClienteModel cliente) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        _ActionButton(
-          icon: Icons.edit_outlined, 
-          color: theme.primaryColor, 
-          onTap: () => _showClienteForm(context, cliente: cliente)
-        ),
-        const SizedBox(width: 8),
-        _ActionButton(
-          icon: Icons.delete_outline_rounded, 
-          color: Colors.red, 
-          onTap: () => _confirmDelete(cliente)
-        ),
-      ],
-    );
-  }
-
-  void _confirmDelete(ClienteModel cliente) {
+  void _confirmDelete(BuildContext context, ClienteModel cliente) {
+    final cs = Theme.of(context).colorScheme;
     Get.dialog(
       AlertDialog(
-        title: const Text('Remover Cliente?'),
-        content: Text('Tem certeza que deseja remover o cliente "${cliente.nome}"?'),
+        backgroundColor: cs.surfaceContainerLow,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(color: cs.error.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+              child: Icon(Icons.delete_outline_rounded, color: cs.error, size: 22),
+            ),
+            const SizedBox(width: 12),
+            Text('Remover Cliente?', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: cs.onSurface)),
+          ],
+        ),
+        content: Text('Tem certeza que deseja remover "${cliente.nome}"?', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
           TextButton(
-            onPressed: () {
-              Get.back();
-              controller.deleteCliente(cliente.id!);
-            },
-            child: const Text('Remover', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            onPressed: () => Get.back(),
+            style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+            child: Text('Cancelar', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+          ),
+          FilledButton(
+            onPressed: () { Get.back(); controller.deleteCliente(cliente.id!); },
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text('Remover', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -195,107 +258,134 @@ class ClientesView extends GetView<ClientesController> {
   }
 
   void _showClienteForm(BuildContext context, {ClienteModel? cliente}) {
+    final cs = Theme.of(context).colorScheme;
     final isEditing = cliente != null;
-    final nomeController = TextEditingController(text: cliente?.nome);
-    final emailController = TextEditingController(text: cliente?.email);
-    final telefoneController = TextEditingController(text: cliente?.telefone);
-    final cpfCnpjController = TextEditingController(text: cliente?.cpfCnpj);
-    final enderecoController = TextEditingController(text: cliente?.endereco);
+    final nomeCtl = TextEditingController(text: cliente?.nome);
+    final emailCtl = TextEditingController(text: cliente?.email);
+    final telCtl = TextEditingController(text: cliente?.telefone);
+    final docCtl = TextEditingController(text: cliente?.cpfCnpj);
+    final endCtl = TextEditingController(text: cliente?.endereco);
 
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.transparent,
         child: Container(
-          width: 500,
-          padding: const EdgeInsets.all(32),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  isEditing ? 'Editar Cliente' : 'Cadastrar Novo Cliente', 
-                  style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)
+          width: 520,
+          decoration: BoxDecoration(color: cs.surface, borderRadius: BorderRadius.circular(28)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
                 ),
-                const SizedBox(height: 24),
-                _buildTextField(label: 'Nome Completo', controller: nomeController, icon: Icons.person_outlined),
-                const SizedBox(height: 16),
-                _buildTextField(label: 'E-mail', controller: emailController, icon: Icons.email_outlined),
-                const SizedBox(height: 16),
-                _buildTextField(label: 'Telefone', controller: telefoneController, icon: Icons.phone_outlined),
-                const SizedBox(height: 16),
-                _buildTextField(label: 'CPF/CNPJ', controller: cpfCnpjController, icon: Icons.badge_outlined),
-                const SizedBox(height: 16),
-                _buildTextField(label: 'Endereço', controller: enderecoController, icon: Icons.location_on_outlined),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Row(
                   children: [
-                    TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
-                    const SizedBox(width: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (nomeController.text.isEmpty) {
-                          Get.snackbar('Erro', 'O nome é obrigatório');
-                          return;
-                        }
-                        final newCliente = ClienteModel(
-                          id: cliente?.id,
-                          nome: nomeController.text,
-                          email: emailController.text.isEmpty ? null : emailController.text,
-                          telefone: telefoneController.text.isEmpty ? null : telefoneController.text,
-                          cpfCnpj: cpfCnpjController.text.isEmpty ? null : cpfCnpjController.text,
-                          endereco: enderecoController.text.isEmpty ? null : enderecoController.text,
-                        );
-                        if (isEditing) {
-                          controller.updateCliente(newCliente);
-                        } else {
-                          controller.createCliente(newCliente);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16)),
-                      child: Text(isEditing ? 'Salvar Alterações' : 'Cadastrar'),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(isEditing ? 'Editar Cliente' : 'Novo Cliente', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: cs.onPrimary)),
+                          const SizedBox(height: 4),
+                          Text(isEditing ? 'Atualize as informações do cliente.' : 'Cadastre um novo cliente.', style: GoogleFonts.inter(fontSize: 13, color: cs.onPrimary.withOpacity(0.8))),
+                        ],
+                      ),
                     ),
+                    IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded), style: IconButton.styleFrom(backgroundColor: cs.onPrimary.withOpacity(0.15)), color: cs.onPrimary),
                   ],
                 ),
-              ],
-            ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _fieldLabel(cs, 'NOME COMPLETO'),
+                      const SizedBox(height: 8),
+                      _field(cs, nomeCtl, 'Ex: João Silva', Icons.person_outlined),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'E-MAIL'),
+                      const SizedBox(height: 8),
+                      _field(cs, emailCtl, 'Ex: joao@email.com', Icons.email_outlined),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'TELEFONE'),
+                      const SizedBox(height: 8),
+                      _field(cs, telCtl, 'Ex: (64) 99999-8888', Icons.phone_outlined),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'CPF / CNPJ'),
+                      const SizedBox(height: 8),
+                      _field(cs, docCtl, 'Ex: 000.000.000-00', Icons.badge_outlined),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'ENDEREÇO'),
+                      const SizedBox(height: 8),
+                      _field(cs, endCtl, 'Ex: Fazenda Boa Esperança - Zona Rural', Icons.location_on_outlined),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Get.back(),
+                              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                              child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: FilledButton(
+                              onPressed: () {
+                                if (nomeCtl.text.isEmpty) {
+                                  Get.snackbar('Erro', 'O nome é obrigatório');
+                                  return;
+                                }
+                                final c = ClienteModel(
+                                  id: cliente?.id, nome: nomeCtl.text,
+                                  email: emailCtl.text.isEmpty ? null : emailCtl.text,
+                                  telefone: telCtl.text.isEmpty ? null : telCtl.text,
+                                  cpfCnpj: docCtl.text.isEmpty ? null : docCtl.text,
+                                  endereco: endCtl.text.isEmpty ? null : endCtl.text,
+                                );
+                                if (isEditing) { controller.updateCliente(c); } else { controller.createCliente(c); }
+                              },
+                              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                              child: Text(isEditing ? 'Atualizar' : 'Cadastrar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTextField({required String label, required TextEditingController controller, required IconData icon}) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, size: 20),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+  Widget _fieldLabel(ColorScheme cs, String label) {
+    return Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.8));
   }
-}
 
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionButton({required this.icon, required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: color.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Icon(icon, color: color, size: 20),
-        ),
+  Widget _field(ColorScheme cs, TextEditingController ctl, String hint, IconData icon) {
+    return TextField(
+      controller: ctl,
+      style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5)),
+        prefixIcon: Icon(icon, size: 20, color: cs.primary.withOpacity(0.6)),
+        filled: true,
+        fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: cs.primary)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       ),
     );
   }

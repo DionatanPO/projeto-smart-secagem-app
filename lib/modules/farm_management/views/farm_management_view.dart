@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/models/farm_model.dart';
-import '../../../core/values/app_colors.dart';
 import '../controllers/farm_management_controller.dart';
 
 class FarmManagementView extends GetView<FarmManagementController> {
@@ -10,10 +10,9 @@ class FarmManagementView extends GetView<FarmManagementController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final bool isDesktop = MediaQuery.of(context).size.width >= 1100;
+    final cs = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width >= 1100;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -23,73 +22,65 @@ class FarmManagementView extends GetView<FarmManagementController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                if (!isDesktop) ...[
+                  IconButton(
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    icon: const Icon(Icons.menu_rounded),
+                    color: cs.primary,
+                  ),
+                  const SizedBox(width: 4),
+                ],
                 Expanded(
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (!isDesktop) ...[
-                        IconButton(
-                          onPressed: () => Scaffold.of(context).openDrawer(),
-                          icon: const Icon(Icons.menu_rounded),
-                          color: theme.primaryColor,
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Gestão de Fazendas',
-                                style: GoogleFonts.outfit(
-                                  fontSize: isDesktop ? 28 : 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            if (isDesktop)
-                              Text(
-                                'Gerencie as unidades de armazenamento e suas localizações.',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: isDark ? Colors.grey[400] : AppColors.textSecondary,
-                                ),
-                              ),
-                          ],
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Fazendas',
+                          style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
                         ),
                       ),
+                      if (isDesktop)
+                        Text('Gerencie as unidades de armazenamento', style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant)),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            Padding(
+              padding: const EdgeInsets.only(top: 24, bottom: 20),
+              child: SearchBar(
+                hintText: 'Buscar fazenda...',
+                hintStyle: WidgetStatePropertyAll(GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                leading: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+                backgroundColor: WidgetStatePropertyAll(cs.surfaceContainerHighest.withOpacity(0.5)),
+                elevation: const WidgetStatePropertyAll(0),
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                textStyle: WidgetStatePropertyAll(GoogleFonts.inter(fontSize: 14, color: cs.onSurface)),
+                onChanged: controller.filterFarms,
+              ),
+            ),
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value && controller.farms.isEmpty) {
+                final farms = controller.filteredFarms;
+                if (controller.isLoading.value && farms.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
-  
-                if (controller.farms.isEmpty) {
-                  return _buildEmptyState(context);
+                if (farms.isEmpty) {
+                  return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-  
                 return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 450,
-                    mainAxisExtent: 200,
-                    crossAxisSpacing: 24,
-                    mainAxisSpacing: 24,
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 420,
+                    mainAxisExtent: isDesktop ? 176 : 200,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
                   ),
-                  itemCount: controller.farms.length,
-                  itemBuilder: (context, index) {
-                    return _buildFarmCard(context, controller.farms[index]);
-                  },
+                  itemCount: farms.length,
+                  itemBuilder: (_, i) => _buildFarmCard(context, farms[i]),
                 );
               }),
             ),
@@ -98,100 +89,122 @@ class FarmManagementView extends GetView<FarmManagementController> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showFarmForm(context),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        highlightElevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        icon: const Icon(Icons.add_location_alt_rounded),
-        label: Text(
-          'Nova Unidade',
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 0.5),
-        ),
+        backgroundColor: cs.primary,
+        foregroundColor: cs.onPrimary,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: const Icon(Icons.add_rounded),
+        label: Text('Nova Unidade', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
       ),
     );
   }
 
   Widget _buildFarmCard(BuildContext context, FarmModel farm) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5)),
-        boxShadow: [
-          if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 8)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showFarmForm(context, farm: farm),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.agriculture_rounded, color: AppColors.primary, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      farm.name,
-                      style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    Text(
-                      farm.location ?? 'Sem localização definida',
-                      style: GoogleFonts.inter(fontSize: 13, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton(
-                icon: const Icon(Icons.more_vert_rounded, size: 20),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    onTap: () => Future.delayed(Duration.zero, () => _showFarmForm(context, farm: farm)),
-                    child: const Row(children: [Icon(Icons.edit_rounded, size: 18), SizedBox(width: 8), Text('Editar')]),
+                    child: Icon(Icons.agriculture_rounded, color: cs.onPrimary, size: 22),
                   ),
-                  PopupMenuItem(
-                    onTap: () => controller.deleteFarm(farm.id!),
-                    child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red), SizedBox(width: 8), Text('Excluir', style: TextStyle(color: Colors.red))]),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(farm.name, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on_rounded, size: 14, color: cs.onSurfaceVariant),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(farm.location ?? 'Sem localização', style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuButton<int>(
+                    icon: Icon(Icons.more_vert_rounded, size: 20, color: cs.onSurfaceVariant),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 2,
+                    color: cs.surfaceContainerLow,
+                    onSelected: (value) {
+                      if (value == 0) _showFarmForm(context, farm: farm);
+                      if (value == 1) controller.deleteFarm(farm.id!);
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                      PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
+                    ],
                   ),
                 ],
               ),
+              if (farm.description != null && farm.description!.isNotEmpty) ...[
+                const Spacer(),
+                Text(farm.description!, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant.withOpacity(0.8)), maxLines: 2, overflow: TextOverflow.ellipsis),
+              ],
+              const Spacer(),
+              if (farm.createdAt != null)
+                Row(
+                  children: [
+                    Icon(Icons.schedule_rounded, size: 14, color: cs.onSurfaceVariant.withOpacity(0.6)),
+                    const SizedBox(width: 4),
+                    Text(DateFormat('dd/MM/yyyy').format(farm.createdAt!), style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.6))),
+                  ],
+                ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, bool hasSearch) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.location_off_rounded, size: 80, color: Colors.grey.withOpacity(0.3)),
-          const SizedBox(height: 16),
+          Container(
+            width: 88,
+            height: 88,
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Icon(hasSearch ? Icons.search_off_rounded : Icons.location_off_rounded, size: 40, color: cs.onSurfaceVariant.withOpacity(0.4)),
+          ),
+          const SizedBox(height: 20),
           Text(
-            'Nenhuma fazenda cadastrada',
-            style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),
+            hasSearch ? 'Nenhum resultado encontrado' : 'Nenhuma fazenda cadastrada',
+            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Text(
-            'Comece adicionando uma fazenda ou armazém para organizar seus silos.',
+            hasSearch ? 'Tente buscar por outro nome ou localização.' : 'Adicione uma fazenda ou armazém para organizar seus silos.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(color: Colors.grey),
+            style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant.withOpacity(0.7)),
           ),
         ],
       ),
@@ -199,178 +212,116 @@ class FarmManagementView extends GetView<FarmManagementController> {
   }
 
   void _showFarmForm(BuildContext context, {FarmModel? farm}) {
+    final cs = Theme.of(context).colorScheme;
     final isEditing = farm != null;
-    final nameController = TextEditingController(text: farm?.name ?? '');
-    final locationController = TextEditingController(text: farm?.location ?? '');
-    final descController = TextEditingController(text: farm?.description ?? '');
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final nameCtl = TextEditingController(text: farm?.name ?? '');
+    final locationCtl = TextEditingController(text: farm?.location ?? '');
+    final descCtl = TextEditingController(text: farm?.description ?? '');
 
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
-          width: 500,
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          width: 520,
+          decoration: BoxDecoration(color: cs.surface, borderRadius: BorderRadius.circular(28)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
+                ),
+                child: Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            isEditing ? 'Editar Unidade' : 'Nova Unidade',
-                            style: GoogleFonts.outfit(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppColors.textPrimary,
+                          Text(isEditing ? 'Editar Unidade' : 'Nova Unidade', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: cs.onPrimary)),
+                          const SizedBox(height: 4),
+                          Text(isEditing ? 'Atualize as informações da fazenda.' : 'Cadastre uma nova localidade.', style: GoogleFonts.inter(fontSize: 13, color: cs.onPrimary.withOpacity(0.8))),
+                        ],
+                      ),
+                    ),
+                    IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded), style: IconButton.styleFrom(backgroundColor: cs.onPrimary.withOpacity(0.15)), color: cs.onPrimary),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildFieldLabel(cs, 'NOME'),
+                      const SizedBox(height: 8),
+                      _buildField(cs, nameCtl, 'Ex: Fazenda Santa Fé', Icons.business_rounded),
+                      const SizedBox(height: 20),
+                      _buildFieldLabel(cs, 'LOCALIZAÇÃO'),
+                      const SizedBox(height: 8),
+                      _buildField(cs, locationCtl, 'Ex: Rio Verde - GO', Icons.location_on_rounded),
+                      const SizedBox(height: 20),
+                      _buildFieldLabel(cs, 'DESCRIÇÃO'),
+                      const SizedBox(height: 8),
+                      _buildField(cs, descCtl, 'Notas técnicas da unidade...', Icons.notes_rounded, maxLines: 3),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Get.back(),
+                              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                              child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
                             ),
                           ),
-                          Text(
-                            isEditing ? 'Atualize as informações da fazenda ou armazém.' : 'Cadastre uma nova localidade para seus silos.',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: isDark ? Colors.grey[400] : AppColors.textSecondary,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: FilledButton(
+                              onPressed: () {
+                                final f = FarmModel(id: farm?.id, name: nameCtl.text, location: locationCtl.text, description: descCtl.text);
+                                if (isEditing) { controller.updateFarm(f); } else { controller.createFarm(f); }
+                              },
+                              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                              child: Text(isEditing ? 'Atualizar' : 'Cadastrar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.close_rounded),
-                      style: IconButton.styleFrom(
-                        backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 32),
-                _buildFieldLabel('NOME DA FAZENDA/ARMAZÉM'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: nameController,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: _buildInputDecoration('Ex: Fazenda Santa Fé', Icons.business_rounded, isDark),
-                ),
-                const SizedBox(height: 24),
-                _buildFieldLabel('LOCALIZAÇÃO / CIDADE'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: locationController,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: _buildInputDecoration('Ex: Rio Verde - GO', Icons.location_on_rounded, isDark),
-                ),
-                const SizedBox(height: 24),
-                _buildFieldLabel('DESCRIÇÃO / OBSERVAÇÕES'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: descController,
-                  maxLines: 3,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: _buildInputDecoration('Notas técnicas ou histórico da unidade...', Icons.notes_rounded, isDark),
-                ),
-                const SizedBox(height: 40),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Get.back(),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.grey)),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final newFarm = FarmModel(
-                            id: farm?.id,
-                            name: nameController.text,
-                            location: locationController.text,
-                            description: descController.text,
-                          );
-                          if (isEditing) {
-                            controller.updateFarm(newFarm);
-                          } else {
-                            controller.createFarm(newFarm);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          isEditing ? 'Atualizar Unidade' : 'Cadastrar Unidade',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFieldLabel(String label) {
-    return Text(
-      label,
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w900,
-        color: AppColors.primary,
-        letterSpacing: 1.1,
-      ),
-    );
+  Widget _buildFieldLabel(ColorScheme cs, String label) {
+    return Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.8));
   }
 
-  InputDecoration _buildInputDecoration(String hint, IconData icon, bool isDark) {
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: Icon(icon, size: 20, color: AppColors.primary.withOpacity(0.5)),
-      filled: true,
-      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
+  Widget _buildField(ColorScheme cs, TextEditingController ctl, String hint, IconData icon, {int maxLines = 1}) {
+    return TextField(
+      controller: ctl,
+      maxLines: maxLines,
+      style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5)),
+        prefixIcon: Icon(icon, size: 20, color: cs.primary.withOpacity(0.6)),
+        filled: true,
+        fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: cs.primary)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
     );
   }
 }

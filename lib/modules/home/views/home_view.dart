@@ -11,7 +11,6 @@ import '../../notifications/views/notifications_view.dart';
 import '../../support/views/support_view.dart';
 import '../../smart_sense_ia/views/smart_sense_ia_view.dart';
 import '../../profile/views/profile_view.dart';
-import '../../simulation/views/simulation_view.dart';
 import '../../silo_viewer/views/silo_viewer_view.dart';
 import '../../farm_management/views/farm_management_view.dart';
 import '../../batch_management/views/batch_management_view.dart';
@@ -152,7 +151,6 @@ class HomeView extends GetView<HomeController> {
     final sections = [
       ('Principal', [
         (0, 'Projeto', Icons.architecture_rounded),
-        (1, 'Dashboard', Icons.dashboard_rounded),
       ]),
       ('Monitoramento', [
         (2, 'Fazendas', Icons.location_on_rounded),
@@ -168,8 +166,8 @@ class HomeView extends GetView<HomeController> {
         (7, 'Acesso', Icons.admin_panel_settings_rounded),
       ]),
       ('Inteligência', [
+        (1, 'Resumo IA', Icons.dashboard_rounded),
         (9, 'Smart Sense IA', Icons.psychology_rounded),
-        (10, 'Simulador', Icons.science_rounded),
       ]),
     ];
 
@@ -294,7 +292,6 @@ class HomeView extends GetView<HomeController> {
       case 7: return const AccessManagementView();
       case 8: return const SettingsView();
       case 9: return const SmartSenseIAView();
-      case 10: return const SimulationView();
       case 11: return const ProfileView();
       case 12: return const BatchManagementView();
       case 13: return const SecagemView();

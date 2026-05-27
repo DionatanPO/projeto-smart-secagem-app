@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
@@ -9,12 +8,26 @@ class ClientesController extends GetxController {
 
   final clientes = <ClienteModel>[].obs;
   final isLoading = false.obs;
+  final searchQuery = ''.obs;
+
+  List<ClienteModel> get filteredClientes {
+    if (searchQuery.value.isEmpty) return clientes;
+    final q = searchQuery.value.toLowerCase();
+    return clientes.where((c) =>
+      c.nome.toLowerCase().contains(q) ||
+      (c.email?.toLowerCase().contains(q) ?? false) ||
+      (c.telefone?.contains(q) ?? false) ||
+      (c.cpfCnpj?.contains(q) ?? false)
+    ).toList();
+  }
 
   @override
   void onInit() {
     super.onInit();
     getClientes();
   }
+
+  void filterClientes(String query) => searchQuery.value = query;
 
   Future<void> getClientes() async {
     isLoading.value = true;
@@ -25,7 +38,6 @@ class ClientesController extends GetxController {
         clientes.assignAll(data.map((json) => ClienteModel.fromJson(json)).toList());
       }
     } catch (e) {
-      print('Erro ao carregar clientes: $e');
       Get.snackbar('Erro', 'Falha ao carregar clientes');
     } finally {
       isLoading.value = false;
@@ -45,30 +57,15 @@ class ClientesController extends GetxController {
       }
     } on DioException catch (e) {
       String errorMsg = 'Falha ao cadastrar cliente';
-      
-      // Verifica se é um erro de validação (duplicidade de CPF, por exemplo)
       if (e.response?.data != null) {
         final data = e.response!.data;
         if (data is Map && data.containsKey('cpf_cnpj')) {
           errorMsg = 'Este CPF/CNPJ já está cadastrado no sistema.';
         }
       }
-      
-      Get.snackbar(
-        'Erro de Cadastro', 
-        errorMsg,
-        backgroundColor: Colors.red.withOpacity(0.1),
-        colorText: Colors.red,
-        snackPosition: SnackPosition.BOTTOM
-      );
+      Get.snackbar('Erro', errorMsg, snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
-      Get.snackbar(
-        'Erro de Cadastro', 
-        'Falha ao cadastrar cliente',
-        backgroundColor: Colors.red.withOpacity(0.1),
-        colorText: Colors.red,
-        snackPosition: SnackPosition.BOTTOM
-      );
+      Get.snackbar('Erro', 'Falha ao cadastrar cliente', snackPosition: SnackPosition.BOTTOM);
     }
   }
 

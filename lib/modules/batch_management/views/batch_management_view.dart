@@ -3,11 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/models/batch_model.dart';
-import '../../../core/models/farm_model.dart';
-import '../../../core/models/silo_model.dart';
-import '../../../core/values/app_colors.dart';
 import '../../farm_management/controllers/farm_management_controller.dart';
-import '../../silo_management/controllers/silo_management_controller.dart';
 import '../controllers/batch_management_controller.dart';
 
 class BatchManagementView extends GetView<BatchManagementController> {
@@ -15,10 +11,9 @@ class BatchManagementView extends GetView<BatchManagementController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final bool isDesktop = MediaQuery.of(context).size.width >= 1100;
+    final cs = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width >= 1100;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -28,70 +23,61 @@ class BatchManagementView extends GetView<BatchManagementController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                if (!isDesktop) ...[
+                  IconButton(
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    icon: const Icon(Icons.menu_rounded),
+                    color: cs.primary,
+                  ),
+                  const SizedBox(width: 4),
+                ],
                 Expanded(
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (!isDesktop) ...[
-                        IconButton(
-                          onPressed: () => Scaffold.of(context).openDrawer(),
-                          icon: const Icon(Icons.menu_rounded),
-                          color: theme.primaryColor,
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Gestão de Lotes',
-                                style: (isDesktop
-                                        ? theme.textTheme.headlineSmall
-                                        : theme.textTheme.titleLarge)
-                                    ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            if (isDesktop)
-                              Text(
-                                'Monitore e controle os ciclos de secagem de cada lote.',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: isDark ? Colors.grey[400] : AppColors.textSecondary,
-                                ),
-                              ),
-                          ],
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Lotes',
+                          style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
                         ),
                       ),
+                      if (isDesktop)
+                        Text('Monitore os ciclos de secagem de cada lote.', style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant)),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            Padding(
+              padding: const EdgeInsets.only(top: 24, bottom: 20),
+              child: SearchBar(
+                hintText: 'Buscar lote...',
+                hintStyle: WidgetStatePropertyAll(GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                leading: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
+                backgroundColor: WidgetStatePropertyAll(cs.surfaceContainerHighest.withOpacity(0.5)),
+                elevation: const WidgetStatePropertyAll(0),
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                textStyle: WidgetStatePropertyAll(GoogleFonts.inter(fontSize: 14, color: cs.onSurface)),
+                onChanged: controller.filterBatches,
+              ),
+            ),
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value && controller.batches.isEmpty) {
+                final list = controller.filteredBatches;
+                if (controller.isLoading.value && list.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
-                if (controller.batches.isEmpty) {
-                  return _buildEmptyState(context);
+                if (list.isEmpty) {
+                  return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-
                 return ListView.separated(
                   padding: const EdgeInsets.all(4),
-                  itemCount: controller.batches.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    return _buildBatchCard(context, controller.batches[index]);
-                  },
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, i) => _buildBatchCard(context, list[i]),
                 );
               }),
             ),
@@ -100,126 +86,48 @@ class BatchManagementView extends GetView<BatchManagementController> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showBatchForm(context),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        highlightElevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: cs.primary,
+        foregroundColor: cs.onPrimary,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         icon: const Icon(Icons.add_rounded),
-        label: Text(
-          'Novo Lote',
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold, letterSpacing: 0.5),
-        ),
+        label: Text('Novo Lote', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
       ),
     );
   }
 
   Widget _buildBatchCard(BuildContext context, BatchModel batch) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final width = MediaQuery.of(context).size.width;
-    final isCompact = width < 700;
+    final cs = Theme.of(context).colorScheme;
+    final w = MediaQuery.of(context).size.width;
+    final compact = w < 700;
+    final statusColor = _getStatusColor(batch.status);
 
-    return Container(
-      padding: EdgeInsets.all(isCompact ? 16 : 24),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5)),
-        boxShadow: [
-          if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          isCompact
-            ? Column(
+    return Card(
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _showBatchForm(context, batch: batch),
+        child: Padding(
+          padding: EdgeInsets.all(compact ? 16 : 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: _getStatusColor(batch.status).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(_getStatusIcon(batch.status), color: _getStatusColor(batch.status), size: 24),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Lote ${batch.numeroLote ?? '---'}',
-                              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            _buildStatusChip(batch.status),
-                          ],
-                        ),
-                      ),
-                      PopupMenuButton(
-                        icon: const Icon(Icons.more_vert_rounded, size: 20),
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            onTap: () => Future.delayed(Duration.zero, () => _showBatchForm(context, batch: batch)),
-                            child: const Row(children: [Icon(Icons.edit_rounded, size: 18), SizedBox(width: 8), Text('Editar')]),
-                          ),
-                          PopupMenuItem(
-                            onTap: () => controller.deleteBatch(batch.id!),
-                            child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red), SizedBox(width: 8), Text('Excluir', style: TextStyle(color: Colors.red))]),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(height: 1),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 10,
-                    children: [
-                      _buildInfoItem(Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy HH:mm').format(batch.dataEntrada!.toLocal()) : '---'),
-                      _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
-                      _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
-                      if (batch.clienteNome != null) _buildInfoItem(Icons.person_outline_rounded, batch.clienteNome!),
-                      if (batch.siloName != null) _buildInfoItem(Icons.warehouse_outlined, batch.siloName!),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    width: compact ? 44 : 52,
+                    height: compact ? 44 : 52,
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-                      borderRadius: BorderRadius.circular(12),
+                      color: statusColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildMetricItem('Peso Inicial', '${batch.pesoInicial.toStringAsFixed(0)} kg', isDark),
-                        _buildMetricItem('Umidade', '${batch.umidadeInicial}%', isDark, crossAxisAlignment: CrossAxisAlignment.end),
-                      ],
-                    ),
+                    child: Icon(_getStatusIcon(batch.status), color: statusColor, size: compact ? 22 : 26),
                   ),
-                ],
-              )
-            : Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(batch.status).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(_getStatusIcon(batch.status), color: _getStatusColor(batch.status), size: 28),
-                  ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,154 +135,145 @@ class BatchManagementView extends GetView<BatchManagementController> {
                         Row(
                           children: [
                             Flexible(
-                              child: Text(
-                                'Lote ${batch.numeroLote ?? '---'}',
-                                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              child: Text('Lote ${batch.numeroLote ?? '---'}', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface), overflow: TextOverflow.ellipsis),
                             ),
-                            const SizedBox(width: 12),
-                            _buildStatusChip(batch.status),
+                            const SizedBox(width: 8),
+                            _buildStatusChip(batch.status, statusColor),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Wrap(
-                          spacing: 16,
-                          runSpacing: 4,
-                          children: [
-                            _buildInfoItem(Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy HH:mm').format(batch.dataEntrada!.toLocal()) : '---'),
-                            _buildInfoItem(Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
-                            _buildInfoItem(Icons.location_on_outlined, batch.farmName ?? 'N/A'),
-                            if (batch.clienteNome != null) _buildInfoItem(Icons.person_outline_rounded, batch.clienteNome!),
-                            if (batch.siloName != null) _buildInfoItem(Icons.warehouse_outlined, batch.siloName!),
-                          ],
-                        ),
+                        if (!compact)
+                          Wrap(
+                            spacing: 14, runSpacing: 4,
+                            children: [
+                              _infoRow(cs, Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy').format(batch.dataEntrada!.toLocal()) : '---'),
+                              _infoRow(cs, Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
+                              _infoRow(cs, Icons.location_on_outlined, batch.farmName ?? 'N/A'),
+                              if (batch.clienteNome != null) _infoRow(cs, Icons.person_outline_rounded, batch.clienteNome!),
+                              if (batch.siloName != null) _infoRow(cs, Icons.warehouse_outlined, batch.siloName!),
+                            ],
+                          ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 24),
-                  _buildMetricItem('Peso Inicial', '${batch.pesoInicial.toStringAsFixed(0)} kg', isDark, crossAxisAlignment: CrossAxisAlignment.end),
-                  const SizedBox(width: 24),
-                  _buildMetricItem('Umidade', '${batch.umidadeInicial}%', isDark, crossAxisAlignment: CrossAxisAlignment.end),
-                  const SizedBox(width: 16),
-                  PopupMenuButton(
-                    icon: const Icon(Icons.more_vert_rounded),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        onTap: () => Future.delayed(Duration.zero, () => _showBatchForm(context, batch: batch)),
-                        child: const Row(children: [Icon(Icons.edit_rounded, size: 18), SizedBox(width: 8), Text('Editar')]),
-                      ),
-                      PopupMenuItem(
-                        onTap: () => controller.deleteBatch(batch.id!),
-                        child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red), SizedBox(width: 8), Text('Excluir', style: TextStyle(color: Colors.red))]),
-                      ),
+                  PopupMenuButton<int>(
+                    icon: Icon(Icons.more_vert_rounded, size: 20, color: cs.onSurfaceVariant),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 2,
+                    color: cs.surfaceContainerLow,
+                    onSelected: (value) {
+                      if (value == 0) _showBatchForm(context, batch: batch);
+                      if (value == 1) _confirmDelete(context, batch);
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                      PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                     ],
                   ),
                 ],
               ),
-          if (batch.observacoes != null && batch.observacoes!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+              if (compact) ...[
+                const SizedBox(height: 12),
+                Wrap(spacing: 12, runSpacing: 6, children: [
+                  _infoRow(cs, Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy').format(batch.dataEntrada!.toLocal()) : '---'),
+                  _infoRow(cs, Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
+                ]),
+              ],
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    _metricItem(cs, 'Peso Inicial', '${batch.pesoInicial.toStringAsFixed(0)} kg'),
+                    const Spacer(),
+                    _metricItem(cs, 'Umidade', '${batch.umidadeInicial}%', alignEnd: true),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              if (batch.observacoes != null && batch.observacoes!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.assignment_outlined, size: 14, color: theme.primaryColor),
+                      Icon(Icons.assignment_outlined, size: 14, color: cs.primary),
                       const SizedBox(width: 8),
-                      Text(
-                        'NOTAS E DIAGNÓSTICOS',
-                        style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: theme.primaryColor, letterSpacing: 0.5),
+                      Expanded(
+                        child: Text(batch.observacoes!, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant, height: 1.4)),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    batch.observacoes!,
-                    style: GoogleFonts.inter(fontSize: 12, color: isDark ? Colors.grey[400] : Colors.grey[700], height: 1.5),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildInfoItem(IconData icon, String text) {
+  Widget _infoRow(ColorScheme cs, IconData icon, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: Colors.grey[600]),
+        Icon(icon, size: 13, color: cs.onSurfaceVariant),
         const SizedBox(width: 4),
-        Flexible(
-          child: Text(
-            text,
-            style: GoogleFonts.inter(fontSize: 13, color: Colors.grey[600]),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        Text(text, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
       ],
     );
   }
 
-  Widget _buildMetricItem(String label, String value, bool isDark, {CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start}) {
+  Widget _metricItem(ColorScheme cs, String label, String value, {bool alignEnd = false}) {
     return Column(
-      crossAxisAlignment: crossAxisAlignment,
+      crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w600, letterSpacing: 0.5),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : AppColors.textPrimary),
-        ),
+        Text(label, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant, letterSpacing: 0.5)),
+        Text(value, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: cs.onSurface)),
       ],
     );
   }
 
-  Widget _buildStatusChip(String status) {
-    final color = _getStatusColor(status);
+  Widget _buildStatusChip(String status, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
         _getStatusText(status).toUpperCase(),
-        style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: color),
+        style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: color, letterSpacing: 0.3),
       ),
     );
   }
 
   Color _getStatusColor(String status) {
     if (status.contains('Pausado')) return Colors.orangeAccent;
-    if (status.contains('Secagem')) return AppColors.primary;
+    if (status.contains('Secagem')) return const Color(0xFF518C52);
     if (status.contains('Aeração')) return Colors.blue;
     if (status.contains('Transilagem')) return Colors.purple;
     if (status.contains('Expurgo')) return Colors.red;
     if (status.contains('Expedição')) return Colors.green;
     if (status == 'finalizado') return Colors.teal;
     if (status == 'despachado') return Colors.grey;
-    return Colors.orange; // aguardando
+    return Colors.orange;
   }
 
   String _getStatusText(String status) {
     if (status == 'aguardando') return 'Aguardando';
     if (status == 'finalizado') return 'Finalizado';
     if (status == 'despachado') return 'Despachado';
-    return status; // Retorna a string composta (ex: Secagem (Executando))
+    return status;
   }
 
   IconData _getStatusIcon(String status) {
@@ -389,257 +288,242 @@ class BatchManagementView extends GetView<BatchManagementController> {
     return Icons.timer_outlined;
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, bool hasSearch) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey.withOpacity(0.3)),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhum lote cadastrado',
-            style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),
+          Container(
+            width: 88, height: 88,
+            decoration: BoxDecoration(color: cs.surfaceContainerHighest.withOpacity(0.5), borderRadius: BorderRadius.circular(28)),
+            child: Icon(hasSearch ? Icons.search_off_rounded : Icons.inventory_2_outlined, size: 40, color: cs.onSurfaceVariant.withOpacity(0.4)),
           ),
+          const SizedBox(height: 20),
+          Text(hasSearch ? 'Nenhum resultado encontrado' : 'Nenhum lote cadastrado', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
           const SizedBox(height: 8),
-          Text(
-            'Adicione lotes de grãos para iniciar o monitoramento da secagem.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(color: Colors.grey),
-          ),
+          Text(hasSearch ? 'Tente buscar por número, cultura, safra ou cliente.' : 'Adicione um lote para iniciar o monitoramento.', textAlign: TextAlign.center, style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant.withOpacity(0.7))),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, BatchModel batch) {
+    final cs = Theme.of(context).colorScheme;
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: cs.surfaceContainerLow,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(width: 40, height: 40, decoration: BoxDecoration(color: cs.error.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.delete_outline_rounded, color: cs.error, size: 22)),
+            const SizedBox(width: 12),
+            Text('Remover Lote?', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: cs.onSurface)),
+          ],
+        ),
+        content: Text('Tem certeza que deseja remover o lote ${batch.numeroLote ?? ''}?', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+        actions: [
+          TextButton(onPressed: () => Get.back(), style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Cancelar', style: GoogleFonts.inter(color: cs.onSurfaceVariant))),
+          FilledButton(onPressed: () { Get.back(); controller.deleteBatch(batch.id!); }, style: FilledButton.styleFrom(backgroundColor: cs.error, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Remover', style: GoogleFonts.inter(fontWeight: FontWeight.w600))),
         ],
       ),
     );
   }
 
   void _showBatchForm(BuildContext context, {BatchModel? batch}) {
+    final cs = Theme.of(context).colorScheme;
     final isEditing = batch != null;
     final farmController = Get.find<FarmManagementController>();
 
-    final numeroController = TextEditingController(text: batch?.numeroLote ?? '');
-    final culturaController = TextEditingController(text: batch?.cultura ?? '');
-    final safraController = TextEditingController(text: batch?.safra ?? '2023/2024');
-    final pesoController = TextEditingController(text: batch?.pesoInicial.toString() ?? '');
-    final umidadeController = TextEditingController(text: batch?.umidadeInicial.toString() ?? '');
-    final observacoesController = TextEditingController(text: batch?.observacoes ?? '');
-    
+    final numeroCtl = TextEditingController(text: batch?.numeroLote ?? '');
+    final safraCtl = TextEditingController(text: batch?.safra ?? '2023/2024');
+    final pesoCtl = TextEditingController(text: batch?.pesoInicial.toString() ?? '');
+    final umidadeCtl = TextEditingController(text: batch?.umidadeInicial.toString() ?? '');
+    final obsCtl = TextEditingController(text: batch?.observacoes ?? '');
+
     final grainTypes = ['Milho', 'Soja', 'Arroz', 'Trigo', 'Sorgo', 'Café', 'Feijão', 'Outros'];
     final initialCultura = batch?.cultura ?? 'Milho';
     final selectedCultura = (grainTypes.contains(initialCultura) ? initialCultura : 'Outros').obs;
-    
-    var selectedFarmId = batch?.farm.obs ?? (farmController.farms.isNotEmpty ? farmController.farms.first.id : null).obs;
-    var selectedClientId = batch?.cliente.obs ?? (controller.clients.isNotEmpty ? controller.clients.first['id'] as int : null).obs;
-    var selectedStatus = (batch?.status ?? 'aguardando').obs;
-
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final selectedFarmId = Rx<int?>(batch?.farm ?? (farmController.farms.isNotEmpty ? farmController.farms.first.id : null));
+    final selectedClientId = Rx<int?>(batch?.cliente ?? (controller.clients.isNotEmpty ? controller.clients.first['id'] as int : null));
 
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           width: 600,
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isEditing ? 'Editar Lote' : 'Novo Lote',
-                  style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+          decoration: BoxDecoration(color: cs.surface, borderRadius: BorderRadius.circular(28)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(32, 28, 32, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
                 ),
-                const SizedBox(height: 24),
-                
-                Row(
+                child: Row(
                   children: [
-                    if (isEditing) ...[
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildFieldLabel('NÚMERO DO LOTE'),
-                            const SizedBox(height: 8),
-                            TextField(
-                              controller: numeroController,
-                              readOnly: true,
-                              enabled: false,
-                              style: GoogleFonts.inter(color: Colors.grey),
-                              decoration: _buildInputDecoration('', Icons.tag, isDark),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(isEditing ? 'Editar Lote' : 'Novo Lote', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: cs.onPrimary)),
+                          const SizedBox(height: 4),
+                          Text(isEditing ? 'Atualize as informações do lote.' : 'Cadastre um novo lote de grãos.', style: GoogleFonts.inter(fontSize: 13, color: cs.onPrimary.withOpacity(0.8))),
+                        ],
+                      ),
+                    ),
+                    IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close_rounded), style: IconButton.styleFrom(backgroundColor: cs.onPrimary.withOpacity(0.15)), color: cs.onPrimary),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          if (isEditing) ...[
+                            Expanded(
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                _fieldLabel(cs, 'NÚMERO DO LOTE'),
+                                const SizedBox(height: 8),
+                                _field(cs, numeroCtl, '', Icons.tag, readOnly: true),
+                              ]),
                             ),
+                            const SizedBox(width: 16),
                           ],
-                        ),
+                          Expanded(
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              _fieldLabel(cs, 'SAFRA'),
+                              const SizedBox(height: 8),
+                              _field(cs, safraCtl, 'Ex: 2023/24', Icons.calendar_today),
+                            ]),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'CLIENTE / PRODUTOR'),
+                      const SizedBox(height: 8),
+                      Obx(() => DropdownButtonFormField<int>(
+                        value: selectedClientId.value,
+                        isExpanded: true,
+                        decoration: _dropDeco(cs, Icons.person_outlined),
+                        items: controller.clients.map((c) => DropdownMenuItem(value: c['id'] as int, child: Text(c['nome'] ?? '', style: GoogleFonts.inter(color: cs.onSurface)))).toList(),
+                        onChanged: (val) => selectedClientId.value = val,
+                        style: GoogleFonts.inter(color: cs.onSurface),
+                      )),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'CULTURA / GRÃO'),
+                      const SizedBox(height: 8),
+                      Obx(() => DropdownButtonFormField<String>(
+                        value: selectedCultura.value,
+                        decoration: _dropDeco(cs, Icons.grass),
+                        items: grainTypes.map((t) => DropdownMenuItem(value: t, child: Text(t, style: GoogleFonts.inter(color: cs.onSurface)))).toList(),
+                        onChanged: (val) => selectedCultura.value = val!,
+                        style: GoogleFonts.inter(color: cs.onSurface),
+                      )),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            _fieldLabel(cs, 'PESO INICIAL (KG)'),
+                            const SizedBox(height: 8),
+                            _field(cs, pesoCtl, '0.0', Icons.scale, keyboardType: TextInputType.number),
+                          ])),
+                          const SizedBox(width: 16),
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            _fieldLabel(cs, 'UMIDADE INICIAL (%)'),
+                            const SizedBox(height: 8),
+                            _field(cs, umidadeCtl, '0.0', Icons.water_drop, keyboardType: TextInputType.number),
+                          ])),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'FAZENDA / UNIDADE'),
+                      const SizedBox(height: 8),
+                      Obx(() => DropdownButtonFormField<int>(
+                        value: selectedFarmId.value,
+                        decoration: _dropDeco(cs, Icons.agriculture),
+                        items: farmController.farms.map((f) => DropdownMenuItem(value: f.id, child: Text(f.name, style: GoogleFonts.inter(color: cs.onSurface)))).toList(),
+                        onChanged: (val) => selectedFarmId.value = val,
+                        style: GoogleFonts.inter(color: cs.onSurface),
+                      )),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'NOTAS E DIAGNÓSTICOS'),
+                      const SizedBox(height: 8),
+                      _field(cs, obsCtl, 'Detalhes adicionais sobre o lote...', Icons.notes_rounded, maxLines: 3),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(child: TextButton(
+                            onPressed: () => Get.back(),
+                            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                            child: Text('Cancelar', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                          )),
+                          const SizedBox(width: 12),
+                          Expanded(flex: 2, child: FilledButton(
+                            onPressed: () {
+                              final b = BatchModel(
+                                id: batch?.id, numeroLote: numeroCtl.text, farm: selectedFarmId.value!,
+                                cultura: selectedCultura.value, safra: safraCtl.text,
+                                pesoInicial: double.tryParse(pesoCtl.text) ?? 0,
+                                umidadeInicial: double.tryParse(umidadeCtl.text) ?? 0,
+                                status: batch?.status ?? 'aguardando', silo: batch?.silo,
+                                cliente: selectedClientId.value, observacoes: obsCtl.text,
+                              );
+                              if (isEditing) { controller.updateBatch(b); } else { controller.createBatch(b); }
+                            },
+                            style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                            child: Text(isEditing ? 'Atualizar' : 'Criar Lote', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                          )),
+                        ],
+                      ),
                     ],
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFieldLabel('SAFRA'),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: safraController,
-                            decoration: _buildInputDecoration('Ex: 2023/24', Icons.calendar_today, isDark),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                
-                const SizedBox(height: 24),
-                _buildFieldLabel('CLIENTE / PRODUTOR'),
-                const SizedBox(height: 8),
-                Obx(() => DropdownButtonFormField<int>(
-                  value: selectedClientId.value,
-                  isExpanded: true,
-                  decoration: _buildInputDecoration('Selecione o cliente', Icons.person_add_alt_1_rounded, isDark),
-                  items: controller.clients.map((c) => DropdownMenuItem<int>(
-                    value: c['id'], 
-                    child: Text(c['nome'] ?? 'Sem nome')
-                  )).toList(),
-                  onChanged: (val) => selectedClientId.value = val,
-                  validator: (value) => value == null ? 'Selecione um cliente' : null,
-                )),
-
-                const SizedBox(height: 24),
-                _buildFieldLabel('CULTURA / GRÃO'),
-                const SizedBox(height: 8),
-                Obx(() => DropdownButtonFormField<String>(
-                  value: selectedCultura.value,
-                  decoration: _buildInputDecoration('Selecione o grão', Icons.grass, isDark),
-                  items: grainTypes.map((type) => DropdownMenuItem(value: type, child: Text(type))).toList(),
-                  onChanged: (val) => selectedCultura.value = val!,
-                )),
-                
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFieldLabel('PESO INICIAL (KG)'),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: pesoController,
-                            keyboardType: TextInputType.number,
-                            decoration: _buildInputDecoration('0.0', Icons.scale, isDark),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFieldLabel('UMIDADE INICIAL (%)'),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: umidadeController,
-                            keyboardType: TextInputType.number,
-                            decoration: _buildInputDecoration('0.0', Icons.water_drop, isDark),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-                _buildFieldLabel('FAZENDA / UNIDADE'),
-                const SizedBox(height: 8),
-                Obx(() => DropdownButtonFormField<int>(
-                  value: selectedFarmId.value,
-                  decoration: _buildInputDecoration('Selecione a fazenda', Icons.agriculture, isDark),
-                  items: farmController.farms.map((f) => DropdownMenuItem(value: f.id, child: Text(f.name))).toList(),
-                  onChanged: (val) => selectedFarmId.value = val,
-                )),
-
-                const SizedBox(height: 24),
-                _buildFieldLabel('NOTAS E DIAGNÓSTICOS'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: observacoesController,
-                  maxLines: 3,
-                  style: GoogleFonts.inter(fontSize: 14),
-                  decoration: _buildInputDecoration('Detalhes adicionais sobre o lote...', Icons.notes_rounded, isDark),
-                ),
-
-                const SizedBox(height: 40),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Get.back(),
-                        child: const Text('Cancelar'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final peso = double.tryParse(pesoController.text) ?? 0;
-
-                          final newBatch = BatchModel(
-                            id: batch?.id,
-                            numeroLote: numeroController.text,
-                            farm: selectedFarmId.value!,
-                            cultura: selectedCultura.value,
-                            safra: safraController.text,
-                            pesoInicial: peso,
-                            umidadeInicial: double.tryParse(umidadeController.text) ?? 0,
-                             status: batch?.status ?? 'aguardando',
-                             silo: batch?.silo,
-                             cliente: selectedClientId.value,
-                             observacoes: observacoesController.text,
-                           );
-                          if (isEditing) {
-                            controller.updateBatch(newBatch);
-                          } else {
-                            controller.createBatch(newBatch);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: Text(isEditing ? 'Atualizar Lote' : 'Criar Lote'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFieldLabel(String label) {
-    return Text(
-      label,
-      style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1.1),
+  Widget _fieldLabel(ColorScheme cs, String label) {
+    return Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.8));
+  }
+
+  Widget _field(ColorScheme cs, TextEditingController ctl, String hint, IconData icon, {bool readOnly = false, TextInputType? keyboardType, int maxLines = 1}) {
+    return TextField(
+      controller: ctl, readOnly: readOnly, maxLines: maxLines, keyboardType: keyboardType,
+      style: GoogleFonts.inter(fontSize: 14, color: readOnly ? cs.onSurfaceVariant : cs.onSurface),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5)),
+        prefixIcon: Icon(icon, size: 20, color: cs.primary.withOpacity(0.6)),
+        filled: true,
+        fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: cs.primary)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String hint, IconData icon, bool isDark) {
+  InputDecoration _dropDeco(ColorScheme cs, IconData icon) {
     return InputDecoration(
-      hintText: hint,
-      prefixIcon: Icon(icon, size: 20, color: AppColors.primary.withOpacity(0.5)),
+      prefixIcon: Icon(icon, size: 20, color: cs.primary.withOpacity(0.6)),
       filled: true,
-      fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     );
   }
 }
