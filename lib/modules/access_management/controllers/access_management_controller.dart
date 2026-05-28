@@ -1,19 +1,25 @@
 import 'package:get/get.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/user_model.dart';
+import '../../../core/models/farm_model.dart';
 
 class AccessManagementController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   final users = <UserModel>[].obs;
+  final farms = <FarmModel>[].obs;
   final isLoading = false.obs;
   final searchQuery = ''.obs;
+  int? currentUserId;
 
   List<UserModel> get filteredUsers {
-    if (searchQuery.value.isEmpty) return users;
+    final list = currentUserId != null
+        ? users.where((u) => u.id != currentUserId).toList()
+        : users;
+    if (searchQuery.value.isEmpty) return list;
     final q = searchQuery.value.toLowerCase();
-    return users.where((u) =>
-      u.username.toLowerCase().contains(q) ||
+    return list.where((u) =>
+      u.displayName.toLowerCase().contains(q) ||
       u.email.toLowerCase().contains(q) ||
       u.accountType.toLowerCase().contains(q)
     ).toList();
@@ -22,10 +28,30 @@ class AccessManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    getCurrentUser();
     getUsers();
+    loadFarms();
+  }
+
+  Future<void> loadFarms() async {
+    try {
+      final response = await _apiService.dio.get('fazendas/');
+      if (response.statusCode == 200) {
+        farms.assignAll(
+          (response.data as List).map((e) => FarmModel.fromJson(e)).toList(),
+        );
+      }
+    } catch (_) {}
   }
 
   void filterUsers(String query) => searchQuery.value = query;
+
+  Future<void> getCurrentUser() async {
+    try {
+      final response = await _apiService.dio.get('me/');
+      currentUserId = response.data['id'] as int?;
+    } catch (_) {}
+  }
 
   Future<void> getUsers() async {
     isLoading.value = true;
@@ -57,7 +83,14 @@ class AccessManagementController extends GetxController {
 
   Future<void> updateUser(UserModel user) async {
     try {
-      final response = await _apiService.dio.put('usuarios/${user.id}/', data: user.toJson());
+      final data = <String, dynamic>{
+        'email': user.email,
+      };
+      if (user.firstName.isNotEmpty) data['first_name'] = user.firstName;
+      if (user.lastName.isNotEmpty) data['last_name'] = user.lastName;
+      if (user.telefone != null) data['telefone'] = user.telefone;
+      if (user.farm != null) data['farm'] = user.farm;
+      final response = await _apiService.dio.patch('usuarios/${user.id}/', data: data);
       if (response.statusCode == 200) {
         final index = users.indexWhere((u) => u.id == user.id);
         if (index != -1) {
@@ -72,6 +105,10 @@ class AccessManagementController extends GetxController {
   }
 
   Future<void> deleteUser(int id) async {
+    if (id == currentUserId) {
+      Get.snackbar('Erro', 'Você não pode excluir o próprio usuário');
+      return;
+    }
     try {
       final response = await _apiService.dio.delete('usuarios/$id/');
       if (response.statusCode == 204) {

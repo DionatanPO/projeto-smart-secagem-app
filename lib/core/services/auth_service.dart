@@ -46,9 +46,7 @@ class AuthService extends GetxService {
   Future<void> logout() async {
     try {
       await _apiService.dio.post('logout/');
-    } catch (e) {
-      // Mesmo se falhar a chamada na API, limpamos o token localmente
-      print('Erro ao deslogar na API: $e');
+    } catch (_) {
     } finally {
       await _storage.delete(key: 'token');
       isAuthenticated.value = false;

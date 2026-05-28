@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'auth_service.dart';
@@ -40,7 +39,6 @@ class ApiService extends GetxService {
             final authService = Get.find<AuthService>();
             authService.logout();
             Get.offAllNamed(Routes.login);
-            // Evitar múltiplos snacks se houver várias chamadas falhando
             if (!Get.isSnackbarOpen) {
               Get.snackbar(
                 'Sessão Expirada',
@@ -53,17 +51,6 @@ class ApiService extends GetxService {
         },
       ),
     );
-
-    if (kDebugMode) {
-      _dio.interceptors.add(LogInterceptor(
-        request: true,
-        requestHeader: true,
-        requestBody: true,
-        responseHeader: true,
-        responseBody: true,
-        error: true,
-      ));
-    }
   }
 
   Dio get dio => _dio;

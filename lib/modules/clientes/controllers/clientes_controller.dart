@@ -2,11 +2,13 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/cliente_model.dart';
+import '../../../core/models/farm_model.dart';
 
 class ClientesController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   final clientes = <ClienteModel>[].obs;
+  final farms = <FarmModel>[].obs;
   final isLoading = false.obs;
   final searchQuery = ''.obs;
 
@@ -25,6 +27,18 @@ class ClientesController extends GetxController {
   void onInit() {
     super.onInit();
     getClientes();
+    loadFarms();
+  }
+
+  Future<void> loadFarms() async {
+    try {
+      final response = await _apiService.dio.get('fazendas/');
+      if (response.statusCode == 200) {
+        farms.assignAll(
+          (response.data as List).map((e) => FarmModel.fromJson(e)).toList(),
+        );
+      }
+    } catch (_) {}
   }
 
   void filterClientes(String query) => searchQuery.value = query;

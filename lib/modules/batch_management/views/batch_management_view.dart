@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/models/batch_model.dart';
 import '../../farm_management/controllers/farm_management_controller.dart';
+import '../../home/controllers/home_controller.dart';
 import '../controllers/batch_management_controller.dart';
 
 class BatchManagementView extends GetView<BatchManagementController> {
@@ -167,6 +168,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                     },
                     itemBuilder: (_) => [
                       PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                      if (Get.find<HomeController>().isAdmin)
                       PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                     ],
                   ),

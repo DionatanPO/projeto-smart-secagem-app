@@ -46,8 +46,7 @@ class SiloManagementController extends GetxController {
         // Vamos buscar as telemetrias de HOJE para popular os cards
         await _calculateAllSiloMetrics(allSensors);
       }
-    } catch (e) {
-      print('Erro ao carregar dados de monitoramento: $e');
+    } catch (_) {
     }
   }
 
@@ -96,8 +95,7 @@ class SiloManagementController extends GetxController {
           siloLatestReadings[silo.id!] = currentSiloReadings;
         }
       }
-    } catch (e) {
-      print('Erro ao calcular métricas dos silos: $e');
+    } catch (_) {
     }
   }
 
@@ -184,8 +182,7 @@ class SiloManagementController extends GetxController {
         final allSensors = data.map((json) => SensorModel.fromJson(json)).toList();
         siloSensors.assignAll(allSensors.where((s) => s.siloId == siloId).toList());
       }
-    } catch (e) {
-      print('Erro ao carregar sensores do silo: $e');
+    } catch (_) {
     } finally {
       isLoadingSensors.value = false;
     }

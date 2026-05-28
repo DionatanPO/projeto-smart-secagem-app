@@ -36,8 +36,7 @@ class ProcessosController extends GetxController {
         final List<dynamic> data = response.data;
         processos.assignAll(data.map((json) => ProcessoModel.fromJson(json)).toList());
       }
-    } catch (e) {
-      print('Erro ao carregar processos: $e');
+    } catch (_) {
     } finally {
       isLoading.value = false;
     }
@@ -156,8 +155,6 @@ class ProcessosController extends GetxController {
     try {
       _batchController.getBatches();
       _siloController.getSilos();
-    } catch (e) {
-      print('Erro ao atualizar dados secundários: $e');
-    }
+    } catch (_) {}
   }
 }

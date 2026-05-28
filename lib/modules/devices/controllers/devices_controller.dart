@@ -71,7 +71,6 @@ class DevicesController extends GetxController {
         silos.assignAll(data.map((json) => SiloModel.fromJson(json)).toList());
       }
     } catch (e) {
-      print('Erro ao carregar silos: $e');
     }
   }
 
@@ -82,8 +81,7 @@ class DevicesController extends GetxController {
         final List<dynamic> data = response.data;
         secadores.assignAll(data.map((json) => SecadorModel.fromJson(json)).toList());
       }
-    } catch (e) {
-      print('Erro ao carregar secadores: $e');
+    } catch (_) {
     }
   }
 
@@ -94,8 +92,7 @@ class DevicesController extends GetxController {
         final List<dynamic> data = response.data;
         farms.assignAll(data.map((json) => FarmModel.fromJson(json)).toList());
       }
-    } catch (e) {
-      print('Erro ao carregar fazendas: $e');
+    } catch (_) {
     }
   }
 
@@ -163,8 +160,7 @@ class DevicesController extends GetxController {
         telemetry.assignAll(data.map((json) => TelemetryModel.fromJson(json)).toList());
         processTelemetryData();
       }
-    } catch (e) {
-      print('Erro ao buscar telemetria: $e');
+    } catch (_) {
       Get.snackbar('Erro', 'Falha ao buscar histórico de telemetria');
     } finally {
       isLoadingTelemetry.value = false;

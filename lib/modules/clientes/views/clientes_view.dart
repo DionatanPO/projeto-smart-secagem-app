@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/models/cliente_model.dart';
+import '../../../core/models/farm_model.dart';
+import '../../home/controllers/home_controller.dart';
 import '../controllers/clientes_controller.dart';
 
 class ClientesView extends GetView<ClientesController> {
@@ -144,6 +146,10 @@ class ClientesView extends GetView<ClientesController> {
                       const SizedBox(height: 2),
                       _infoRow(cs, Icons.location_on_outlined, cliente.endereco!),
                     ],
+                    if (cliente.farmName != null) ...[
+                      const SizedBox(height: 2),
+                      _infoRow(cs, Icons.agriculture_outlined, cliente.farmName!),
+                    ],
                     if (cliente.createdAt != null) ...[
                       const SizedBox(height: 6),
                       Row(
@@ -168,6 +174,7 @@ class ClientesView extends GetView<ClientesController> {
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                  if (Get.find<HomeController>().isAdmin)
                   PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                 ],
               ),
@@ -265,6 +272,7 @@ class ClientesView extends GetView<ClientesController> {
     final telCtl = TextEditingController(text: cliente?.telefone);
     final docCtl = TextEditingController(text: cliente?.cpfCnpj);
     final endCtl = TextEditingController(text: cliente?.endereco);
+    final selectedFarm = (cliente?.farm).obs;
 
     Get.dialog(
       Dialog(
@@ -323,6 +331,30 @@ class ClientesView extends GetView<ClientesController> {
                       _fieldLabel(cs, 'ENDEREÇO'),
                       const SizedBox(height: 8),
                       _field(cs, endCtl, 'Ex: Fazenda Boa Esperança - Zona Rural', Icons.location_on_outlined),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'FAZENDA'),
+                      const SizedBox(height: 8),
+                      Obx(() {
+                        final farms = controller.farms;
+                        return DropdownButtonFormField<int?>(
+                          value: selectedFarm.value,
+                          style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                          dropdownColor: cs.surfaceContainerLow,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.agriculture_outlined, size: 20, color: cs.primary.withOpacity(0.6)),
+                            filled: true, fillColor: cs.surfaceContainerHighest.withOpacity(0.4),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                          ),
+                          hint: Text('Selecione uma fazenda', style: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5))),
+                          items: farms.map((FarmModel f) => DropdownMenuItem(
+                            value: f.id,
+                            child: Text(f.name),
+                          )).toList(),
+                          onChanged: (v) => selectedFarm.value = v,
+                        );
+                      }),
                       const SizedBox(height: 32),
                       Row(
                         children: [
@@ -342,12 +374,17 @@ class ClientesView extends GetView<ClientesController> {
                                   Get.snackbar('Erro', 'O nome é obrigatório');
                                   return;
                                 }
+                                if (selectedFarm.value == null) {
+                                  Get.snackbar('Erro', 'Selecione uma fazenda');
+                                  return;
+                                }
                                 final c = ClienteModel(
                                   id: cliente?.id, nome: nomeCtl.text,
                                   email: emailCtl.text.isEmpty ? null : emailCtl.text,
                                   telefone: telCtl.text.isEmpty ? null : telCtl.text,
                                   cpfCnpj: docCtl.text.isEmpty ? null : docCtl.text,
                                   endereco: endCtl.text.isEmpty ? null : endCtl.text,
+                                  farm: selectedFarm.value,
                                 );
                                 if (isEditing) { controller.updateCliente(c); } else { controller.createCliente(c); }
                               },

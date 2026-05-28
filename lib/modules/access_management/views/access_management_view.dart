@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/models/farm_model.dart';
 import '../../../core/models/user_model.dart';
+import '../../home/controllers/home_controller.dart';
 import '../controllers/access_management_controller.dart';
 
 class AccessManagementView extends GetView<AccessManagementController> {
@@ -100,7 +102,8 @@ class AccessManagementView extends GetView<AccessManagementController> {
 
   Widget _buildUserCard(BuildContext context, UserModel user) {
     final cs = Theme.of(context).colorScheme;
-    final avatarColor = user.isStaff ? cs.primary : Colors.orange;
+    final isAdminRole = user.accountType == 'super_admin' || user.accountType == 'admin';
+    final avatarColor = isAdminRole ? cs.primary : Colors.orange;
 
     return Card(
       elevation: 0,
@@ -120,7 +123,7 @@ class AccessManagementView extends GetView<AccessManagementController> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
-                  child: Text(user.username.substring(0, 1).toUpperCase(),
+                  child: Text(user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : '?',
                     style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: avatarColor),
                   ),
                 ),
@@ -132,12 +135,12 @@ class AccessManagementView extends GetView<AccessManagementController> {
                   children: [
                     Row(
                       children: [
-                        Flexible(child: Text(user.username, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface), overflow: TextOverflow.ellipsis)),
+                        Flexible(child: Text(user.displayName, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface), overflow: TextOverflow.ellipsis)),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: (user.isStaff ? cs.primary : Colors.orange).withOpacity(0.12),
+                            color: (isAdminRole ? cs.primary : Colors.orange).withOpacity(0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(user.accountType.toUpperCase(), style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: avatarColor, letterSpacing: 0.3)),
@@ -160,6 +163,7 @@ class AccessManagementView extends GetView<AccessManagementController> {
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                  if (Get.find<HomeController>().isAdmin)
                   PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                 ],
               ),
@@ -203,7 +207,7 @@ class AccessManagementView extends GetView<AccessManagementController> {
             Text('Excluir Usuário', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: cs.onSurface)),
           ],
         ),
-        content: Text('Deseja remover o usuário "${user.username}"? Esta ação não poderá ser desfeita.', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+        content: Text('Deseja remover o usuário "${user.displayName}"? Esta ação não poderá ser desfeita.', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
         actions: [
           TextButton(onPressed: () => Get.back(), style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Cancelar', style: GoogleFonts.inter(color: cs.onSurfaceVariant))),
           FilledButton(onPressed: () { controller.deleteUser(user.id!); Get.back(); }, style: FilledButton.styleFrom(backgroundColor: cs.error, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Excluir', style: GoogleFonts.inter(fontWeight: FontWeight.w600))),
@@ -215,10 +219,22 @@ class AccessManagementView extends GetView<AccessManagementController> {
   void _showUserForm(BuildContext context, {UserModel? user}) {
     final cs = Theme.of(context).colorScheme;
     final isEditing = user != null;
-    final usernameCtl = TextEditingController(text: user?.username ?? '');
+    final firstNameCtl = TextEditingController(text: user?.firstName ?? '');
+    final lastNameCtl = TextEditingController(text: user?.lastName ?? '');
     final emailCtl = TextEditingController(text: user?.email ?? '');
+    final telefoneCtl = TextEditingController(text: user?.telefone ?? '');
     final passwordCtl = TextEditingController();
     final accountType = (user?.accountType ?? 'operador').obs;
+    int? initialFarm;
+    if (user != null) {
+      if (user.accountType == 'admin' || user.accountType == 'super_admin') {
+        final owned = controller.farms.where((f) => f.owner == user.id).toList();
+        initialFarm = owned.isNotEmpty ? owned.first.id : null;
+      } else {
+        initialFarm = user.farm;
+      }
+    }
+    final selectedFarm = initialFarm.obs;
     final formKey = GlobalKey<FormState>();
 
     Get.dialog(
@@ -261,13 +277,21 @@ class AccessManagementView extends GetView<AccessManagementController> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _fieldLabel(cs, 'NOME DE USUÁRIO'),
+                      _fieldLabel(cs, 'NOME'),
                       const SizedBox(height: 8),
-                      _field(cs, usernameCtl, 'Ex: dionatan.p', Icons.person_outline_rounded, validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
+                      _field(cs, firstNameCtl, 'Ex: Dionatan', Icons.person_outline_rounded),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'SOBRENOME'),
+                      const SizedBox(height: 8),
+                      _field(cs, lastNameCtl, 'Ex: Pereira', Icons.person_outline_rounded),
                       const SizedBox(height: 20),
                       _fieldLabel(cs, 'E-MAIL'),
                       const SizedBox(height: 8),
                       _field(cs, emailCtl, 'Ex: contato@empresa.com', Icons.email_outlined, validator: (v) => GetUtils.isEmail(v!) ? null : 'E-mail inválido'),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'TELEFONE'),
+                      const SizedBox(height: 8),
+                      _field(cs, telefoneCtl, 'Ex: (11) 99999-8888', Icons.phone_android_rounded),
                       const SizedBox(height: 20),
                       _fieldLabel(cs, isEditing ? 'NOVA SENHA (OPCIONAL)' : 'SENHA'),
                       const SizedBox(height: 8),
@@ -275,17 +299,48 @@ class AccessManagementView extends GetView<AccessManagementController> {
                       const SizedBox(height: 20),
                       _fieldLabel(cs, 'NÍVEL DE ACESSO'),
                       const SizedBox(height: 8),
-                      Obx(() => DropdownButtonFormField<String>(
-                        value: accountType.value,
-                        style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
-                        dropdownColor: cs.surfaceContainerLow,
-                        decoration: _dropDeco(cs, Icons.admin_panel_settings_outlined),
-                        items: const [
-                          DropdownMenuItem(value: 'admin', child: Text('Administrador')),
-                          DropdownMenuItem(value: 'operador', child: Text('Operador')),
-                        ],
-                        onChanged: (v) => accountType.value = v!,
-                      )),
+                      Obx(() {
+                        final isSuperAdmin = Get.find<HomeController>().isSuperAdmin;
+                        final items = <DropdownMenuItem<String>>[];
+                        if (isSuperAdmin) {
+                          items.add(const DropdownMenuItem(value: 'super_admin', child: Text('Super Admin')));
+                          items.add(const DropdownMenuItem(value: 'admin', child: Text('Admin')));
+                        }
+                        items.add(const DropdownMenuItem(value: 'operador', child: Text('Operador')));
+                        items.add(const DropdownMenuItem(value: 'visualizador', child: Text('Visualizador')));
+                        if (!items.any((e) => e.value == accountType.value)) {
+                          accountType.value = items.first.value!;
+                        }
+                        return DropdownButtonFormField<String>(
+                          value: accountType.value,
+                          style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                          dropdownColor: cs.surfaceContainerLow,
+                          decoration: _dropDeco(cs, Icons.admin_panel_settings_outlined),
+                          items: items,
+                          onChanged: (v) => accountType.value = v!,
+                        );
+                      }),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'FAZENDA'),
+                      const SizedBox(height: 8),
+                      Obx(() {
+                        final farms = controller.farms;
+                        return DropdownButtonFormField<int?>(
+                          value: selectedFarm.value,
+                          style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                          dropdownColor: cs.surfaceContainerLow,
+                          decoration: _dropDeco(cs, Icons.agriculture_outlined),
+                          hint: Text('Selecione uma fazenda', style: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5))),
+                          items: [
+                            const DropdownMenuItem(value: null, child: Text('Sem fazenda')),
+                            ...farms.map((FarmModel f) => DropdownMenuItem(
+                              value: f.id,
+                              child: Text(f.name),
+                            )),
+                          ],
+                          onChanged: (v) => selectedFarm.value = v,
+                        );
+                      }),
                       const SizedBox(height: 32),
                       Row(
                         children: [
@@ -298,7 +353,8 @@ class AccessManagementView extends GetView<AccessManagementController> {
                           Expanded(flex: 2, child: FilledButton(
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
-                                final u = UserModel(id: user?.id, username: usernameCtl.text, email: emailCtl.text, password: passwordCtl.text, accountType: accountType.value);
+                                final username = user?.username ?? emailCtl.text.split('@').first;
+                                final u = UserModel(id: user?.id, username: username, email: emailCtl.text, password: passwordCtl.text.isNotEmpty ? passwordCtl.text : null, accountType: accountType.value, firstName: firstNameCtl.text, lastName: lastNameCtl.text, telefone: telefoneCtl.text.isNotEmpty ? telefoneCtl.text : null, farm: selectedFarm.value);
                                 if (isEditing) { controller.updateUser(u); } else { controller.createUser(u); }
                               }
                             },

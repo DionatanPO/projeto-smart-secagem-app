@@ -6,6 +6,7 @@ import '../../../core/values/app_colors.dart';
 import '../../../core/models/silo_model.dart';
 import '../../../core/models/telemetry_model.dart';
 import '../../devices/widgets/telemetry_history_dialog.dart';
+import '../../home/controllers/home_controller.dart';
 import '../controllers/silo_management_controller.dart';
 
 class SiloManagementView extends GetView<SiloManagementController> {
@@ -318,6 +319,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
                 onTap: () => Future.delayed(Duration.zero, () => _showSiloForm(context, silo: silo)),
                 child: const Row(children: [Icon(Icons.edit_rounded, size: 20), SizedBox(width: 12), Text('Editar Silo')]),
               ),
+              if (Get.find<HomeController>().isAdmin)
               PopupMenuItem(
                 onTap: () => controller.deleteSilo(silo.id!),
                 child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red), SizedBox(width: 12), Text('Remover', style: TextStyle(color: Colors.red))]),

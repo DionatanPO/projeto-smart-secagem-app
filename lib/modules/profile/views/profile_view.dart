@@ -20,90 +20,99 @@ class ProfileView extends GetView<ProfileController> {
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: Wrap(
-              spacing: 20,
-              runSpacing: 16,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              alignment: WrapAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!isDesktop) ...[
-                      IconButton(
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                        icon: const Icon(Icons.menu_rounded),
-                        color: theme.primaryColor,
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Meu Perfil',
-                              style: (isDesktop
-                                      ? theme.textTheme.headlineSmall
-                                      : theme.textTheme.titleLarge)
-                                  ?.copyWith(
-                                fontWeight: FontWeight.bold,
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.only(top: 80),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                spacing: 20,
+                runSpacing: 16,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                alignment: WrapAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!isDesktop) ...[
+                        IconButton(
+                          onPressed: () => Scaffold.of(context).openDrawer(),
+                          icon: const Icon(Icons.menu_rounded),
+                          color: theme.primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Meu Perfil',
+                                style: (isDesktop
+                                        ? theme.textTheme.headlineSmall
+                                        : theme.textTheme.titleLarge)
+                                    ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Gerencie suas credenciais',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.textTheme.bodyMedium?.color
-                                  ?.withOpacity(0.6),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Gerencie suas credenciais',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.textTheme.bodyMedium?.color
+                                    ?.withOpacity(0.6),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Obx(() => ElevatedButton(
-                      onPressed: controller.isSaving.value
-                          ? null
-                          : controller.saveProfile,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: isDesktop ? 24 : 16,
-                            vertical: isDesktop ? 20 : 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: controller.isSaving.value
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
-                            )
-                          : Text(
-                              'Salvar Alterações',
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: isDesktop ? 16 : 14),
-                            ),
-                    )),
-              ],
+                    ],
+                  ),
+                  Obx(() => ElevatedButton(
+                        onPressed: controller.isSaving.value
+                            ? null
+                            : controller.saveProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: isDesktop ? 24 : 16,
+                              vertical: isDesktop ? 20 : 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: controller.isSaving.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2),
+                              )
+                            : Text(
+                                'Salvar Alterações',
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: isDesktop ? 16 : 14),
+                              ),
+                      )),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 40),
+            const SizedBox(height: 40),
           LayoutBuilder(
             builder: (context, constraints) {
               final isDesktop = constraints.maxWidth > 800;
@@ -117,8 +126,6 @@ class ProfileView extends GetView<ProfileController> {
                   flex: isDesktop ? 1 : 0,
                   child: Column(
                     children: [
-                      _buildSecurityCard(context, isDark),
-                      const SizedBox(height: 32),
                       _buildPreferencesCard(context, isDark),
                       const SizedBox(height: 32),
                       _buildSystemSupportCard(context, isDark),
@@ -137,8 +144,6 @@ class ProfileView extends GetView<ProfileController> {
                   children: [
                     _buildPersonalInfoCard(context, isDark),
                     const SizedBox(height: 32),
-                    _buildSecurityCard(context, isDark),
-                    const SizedBox(height: 32),
                     _buildPreferencesCard(context, isDark),
                     const SizedBox(height: 32),
                     _buildSystemSupportCard(context, isDark),
@@ -149,7 +154,8 @@ class ProfileView extends GetView<ProfileController> {
           ),
           const SizedBox(height: 80),
         ],
-      ),
+      );
+    }),
     );
   }
 
@@ -188,7 +194,7 @@ class ProfileView extends GetView<ProfileController> {
                     radius: 50,
                     backgroundColor: AppColors.primary.withOpacity(0.1),
                     child: Text(
-                      'JS',
+                      controller.initials,
                       style: GoogleFonts.outfit(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -239,6 +245,17 @@ class ProfileView extends GetView<ProfileController> {
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          Center(
+            child: Text(
+              controller.displayName,
+              style: GoogleFonts.outfit(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppColors.textPrimary,
+              ),
+            ),
+          ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 32),
             child: Divider(),
@@ -250,7 +267,10 @@ class ProfileView extends GetView<ProfileController> {
             ),
           ),
           const SizedBox(height: 24),
-          _buildTextField('Nome Completo', controller.nameController,
+          _buildTextField('Nome', controller.firstNameController,
+              Icons.person_outline_rounded, isDark),
+          const SizedBox(height: 20),
+          _buildTextField('Sobrenome', controller.lastNameController,
               Icons.person_outline_rounded, isDark),
           const SizedBox(height: 20),
           _buildTextField('E-mail Corporativo', controller.emailController,
@@ -338,84 +358,6 @@ class ProfileView extends GetView<ProfileController> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSecurityCard(BuildContext context, bool isDark) {
-    final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width > 900;
-    return Container(
-      padding: EdgeInsets.all(isDesktop ? 32 : 20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-            color: isDark
-                ? AppColors.borderDark
-                : AppColors.border.withOpacity(0.5)),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.lock_rounded, color: AppColors.error),
-              const SizedBox(width: 12),
-              Text(
-                'Segurança',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          OutlinedButton(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              side: BorderSide(
-                  color: isDark ? AppColors.borderDark : AppColors.border),
-            ),
-            child: Text(
-              'Alterar Minha Senha',
-              style: GoogleFonts.inter(
-                color: isDark ? Colors.white : AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Obx(() => SwitchListTile(
-                value: controller.twoFactorAuth.value,
-                onChanged: controller.toggle2FA,
-                title: Text(
-                  'Autenticação 2 Fatores',
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: isDark ? Colors.white : AppColors.textPrimary,
-                  ),
-                ),
-                subtitle: Text(
-                  'Mais proteção via SMS',
-                  style: GoogleFonts.inter(fontSize: 13),
-                ),
-                activeColor: AppColors.primary,
-                contentPadding: EdgeInsets.zero,
-              )),
-        ],
-      ),
     );
   }
 

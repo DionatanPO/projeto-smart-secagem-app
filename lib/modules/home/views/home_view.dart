@@ -54,7 +54,9 @@ class HomeView extends GetView<HomeController> {
       },
       children: [
         _buildDrawerHeader(context),
-        ..._buildAllDestinations(context: context, useDrawer: true),
+        Obx(() => Column(
+          children: _buildAllDestinations(context: context, useDrawer: true),
+        )),
       ],
     );
   }
@@ -103,10 +105,10 @@ class HomeView extends GetView<HomeController> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
+              child: Obx(() => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: _buildAllDestinations(context: context),
-              ),
+              )),
             ),
           ),
           _buildSidebarFooter(context),
@@ -193,6 +195,8 @@ class HomeView extends GetView<HomeController> {
         final index = item.$1;
         final label = item.$2;
         final icon = item.$3;
+
+        if (index == 7 && !controller.isAdmin) continue;
 
         if (useDrawer) {
           destinations.add(NavigationDrawerDestination(
@@ -289,7 +293,7 @@ class HomeView extends GetView<HomeController> {
       case 4: return const DevicesView();
       case 5: return const NotificationsView();
       case 6: return const SupportView();
-      case 7: return const AccessManagementView();
+      case 7: return controller.isAdmin ? const AccessManagementView() : const DashboardView();
       case 8: return const SettingsView();
       case 9: return const SmartSenseIAView();
       case 11: return const ProfileView();

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../devices/widgets/telemetry_history_dialog.dart';
+import '../../home/controllers/home_controller.dart';
 import '../controllers/devices_controller.dart';
 
 class DevicesView extends GetView<DevicesController> {
@@ -233,6 +234,7 @@ class DevicesView extends GetView<DevicesController> {
                     },
                     itemBuilder: (_) => [
                       PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                      if (Get.find<HomeController>().isAdmin)
                       PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                     ],
                   ),

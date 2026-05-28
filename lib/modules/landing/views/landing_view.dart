@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -11,7 +10,15 @@ import '../controllers/landing_controller.dart';
 
 class LandingView extends StatelessWidget {
   const LandingView({super.key});
-  
+
+  static final _featuresKey = GlobalKey();
+
+  void _scrollToFeatures() {
+    final context = _featuresKey.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(context, duration: const Duration(milliseconds: 600), curve: Curves.easeInOut);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,22 +52,24 @@ class LandingView extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(
-        minHeight: isMobile ? 600 : 800,
-      ),
+      height: size.height,
       child: Stack(
         children: [
-          // Background Video
+          // Background Video - full screen
           Positioned.fill(
             child: Obx(() {
               if (controller.isVideoInitialized.value && !controller.hasVideoError.value) {
-                return FittedBox(
-                  fit: BoxFit.cover,
-                  clipBehavior: Clip.hardEdge,
-                  child: SizedBox(
-                    width: controller.videoController.value.size.width,
-                    height: controller.videoController.value.size.height,
-                    child: VideoPlayer(controller.videoController),
+                return ClipRRect(
+                  child: SizedBox.expand(
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      clipBehavior: Clip.hardEdge,
+                      child: SizedBox(
+                        width: controller.videoController.value.size.width,
+                        height: controller.videoController.value.size.height,
+                        child: VideoPlayer(controller.videoController),
+                      ),
+                    ),
                   ),
                 );
               }
@@ -72,30 +81,28 @@ class LandingView extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.black.withOpacity(0.4),
-                    Colors.transparent,
+                    Colors.black.withOpacity(0.7),
+                    Colors.black.withOpacity(0.3),
+                    Colors.black.withOpacity(0.5),
                   ],
-                  stops: const [0.0, 0.6, 1.0],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
             ),
           ),
-          // Content Overlay
+          // Content Overlay - centered
           Center(
             child: SafeArea(
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 24 : size.width * 0.08,
+                  horizontal: isMobile ? 24 : size.width * 0.1,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: isMobile
-                      ? CrossAxisAlignment.center
-                      : CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -112,7 +119,7 @@ class LandingView extends StatelessWidget {
                               color: Colors.white, size: 18),
                           const SizedBox(width: 10),
                           Text(
-                            'TECNOLOGIA PARA O CAMPO',
+                            'SMART SECAGEM',
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
@@ -125,10 +132,10 @@ class LandingView extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
                     SizedBox(
-                      width: isMobile ? double.infinity : size.width * 0.5,
+                      width: isMobile ? double.infinity : size.width * 0.7,
                       child: Text(
                         'A inteligência que seu grão precisa.',
-                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
+                        textAlign: TextAlign.center,
                         style: GoogleFonts.outfit(
                           fontSize: isMobile ? (size.width < 360 ? 36 : 48) : 84,
                           fontWeight: FontWeight.w900,
@@ -140,10 +147,10 @@ class LandingView extends StatelessWidget {
                     ),
                     const SizedBox(height: 28),
                     SizedBox(
-                      width: isMobile ? double.infinity : size.width * 0.4,
+                      width: isMobile ? double.infinity : size.width * 0.55,
                       child: Text(
                         'Otimize sua aeração com algoritmos avançados. Reduza perdas, economize energia e garanta a qualidade máxima da sua safra.',
-                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
+                        textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: isMobile ? 18 : 22,
                           color: Colors.white.withOpacity(0.85),
@@ -160,7 +167,7 @@ class LandingView extends StatelessWidget {
                       children: [
                         _buildPrimaryButton(
                             'Acessar Sistema', controller.accessSystem),
-                        _buildSecondaryButton('Conhecer Soluções', () {}),
+                        _buildSecondaryButton('Conhecer Soluções', _scrollToFeatures),
                       ],
                     ),
                   ],
@@ -168,55 +175,7 @@ class LandingView extends StatelessWidget {
               ),
             ),
           ),
-          // Badges/Status at Bottom Right (Desktop only)
-          if (!isMobile)
-            Positioned(
-              bottom: 40,
-              right: size.width * 0.08,
-              child: _buildHeroBadges(),
-            ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildHeroBadges() {
-    return Row(
-      children: [
-        _buildBadgeItem(Icons.sensors_rounded, 'Monitoramento 24h'),
-        const SizedBox(width: 20),
-        _buildBadgeItem(Icons.bolt_rounded, '30% Mais Eficiente'),
-      ],
-    );
-  }
-
-  Widget _buildBadgeItem(IconData icon, String text) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: Colors.white, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                text,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -230,6 +189,7 @@ class LandingView extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
+      key: _featuresKey,
       padding: EdgeInsets.symmetric(
         vertical: isMobile ? 60 : 120,
         horizontal: isMobile ? 20 : size.width * 0.1,

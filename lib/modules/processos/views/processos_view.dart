@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/models/processo_model.dart';
+import '../../home/controllers/home_controller.dart';
 import '../controllers/processos_controller.dart';
 
 class ProcessosView extends GetView<ProcessosController> {
@@ -233,11 +234,13 @@ class ProcessosView extends GetView<ProcessosController> {
   Widget _buildQuickActions(ProcessoModel p) {
     final theme = Theme.of(Get.context!);
     if (p.status == 'Finalizada' || p.status == 'Cancelada') {
-      return _ActionButton(
-        icon: Icons.delete_outline_rounded,
-        color: Colors.red,
-        onTap: () => _confirmDelete(p),
-      );
+      return Get.find<HomeController>().isAdmin
+        ? _ActionButton(
+            icon: Icons.delete_outline_rounded,
+            color: Colors.red,
+            onTap: () => _confirmDelete(p),
+          )
+        : const SizedBox.shrink();
     }
 
     return Row(
@@ -272,7 +275,7 @@ class ProcessosView extends GetView<ProcessosController> {
           color: Colors.red, 
           onTap: () => controller.changeStatus(p, 'Cancelada')
         ),
-        if (p.status != 'Iniciada' && p.status != 'Pausada') ...[
+        if (p.status != 'Iniciada' && p.status != 'Pausada' && Get.find<HomeController>().isAdmin) ...[
           const SizedBox(width: 8),
           _ActionButton(
             icon: Icons.delete_outline_rounded,
