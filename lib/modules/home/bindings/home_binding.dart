@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
+import '../../custos_de_producao/controllers/custos_de_producao_controller.dart';
 import '../../dashboard/bindings/dashboard_binding.dart';
 import '../../farm_management/controllers/farm_management_controller.dart';
 import '../../batch_management/controllers/batch_management_controller.dart';
@@ -12,6 +13,7 @@ class HomeBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<HomeController>(() => HomeController());
+    Get.lazyPut<CustosDeProducaoController>(() => CustosDeProducaoController());
     Get.lazyPut<FarmManagementController>(() => FarmManagementController());
     Get.lazyPut<BatchManagementController>(() => BatchManagementController());
     Get.lazyPut<SiloManagementController>(() => SiloManagementController());

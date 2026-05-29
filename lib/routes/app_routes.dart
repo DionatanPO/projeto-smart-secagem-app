@@ -12,4 +12,5 @@ abstract class Routes {
   static const secagem = '/secagem';
   static const processos = '/processos';
   static const clientes = '/clientes';
+  static const custosDeProducao = '/custos-de-producao';
 }

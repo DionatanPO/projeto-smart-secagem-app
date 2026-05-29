@@ -17,6 +17,7 @@ import '../../batch_management/views/batch_management_view.dart';
 import '../../secagem/views/secagem_view.dart';
 import '../../processos/views/processos_view.dart';
 import '../../clientes/views/clientes_view.dart';
+import '../../custos_de_producao/views/custos_de_producao_view.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -162,6 +163,9 @@ class HomeView extends GetView<HomeController> {
         (14, 'Processos', Icons.history_rounded),
         (15, 'Clientes', Icons.people_alt_rounded),
       ]),
+      ('Financeiro', [
+        (16, 'Custos Produção', Icons.monetization_on_rounded),
+      ]),
       ('Sistema', [
         (4, 'Dispositivos', Icons.hub_rounded),
         (5, 'Notificações', Icons.notifications_rounded),
@@ -301,6 +305,7 @@ class HomeView extends GetView<HomeController> {
       case 13: return const SecagemView();
       case 14: return const ProcessosView();
       case 15: return const ClientesView();
+      case 16: return const CustosDeProducaoView();
       default: return const DashboardView();
     }
   }
