@@ -21,8 +21,8 @@ import '../modules/processos/bindings/processos_binding.dart';
 import '../modules/processos/views/processos_view.dart';
 import '../modules/clientes/bindings/clientes_binding.dart';
 import '../modules/clientes/views/clientes_view.dart';
-import '../modules/custos_de_producao/bindings/custos_de_producao_binding.dart';
-import '../modules/custos_de_producao/views/custos_de_producao_view.dart';
+import '../modules/custos/bindings/custos_binding.dart';
+import '../modules/custos/views/custos_view.dart';
 import 'app_routes.dart';
 import '../core/middlewares/auth_middleware.dart';
 
@@ -103,9 +103,9 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
-      name: Routes.custosDeProducao,
-      page: () => const CustosDeProducaoView(),
-      binding: CustosDeProducaoBinding(),
+      name: Routes.custos,
+      page: () => const CustosView(),
+      binding: CustosBinding(),
       middlewares: [AuthMiddleware()],
     ),
   ];

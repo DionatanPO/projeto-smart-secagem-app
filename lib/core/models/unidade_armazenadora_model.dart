@@ -1,4 +1,4 @@
-class FarmModel {
+class UnidadeArmazenadoraModel {
   final int? id;
   final String name;
   final String? location;
@@ -6,7 +6,7 @@ class FarmModel {
   final int? owner;
   final DateTime? createdAt;
 
-  FarmModel({
+  UnidadeArmazenadoraModel({
     this.id,
     required this.name,
     this.location,
@@ -15,8 +15,8 @@ class FarmModel {
     this.createdAt,
   });
 
-  factory FarmModel.fromJson(Map<String, dynamic> json) {
-    return FarmModel(
+  factory UnidadeArmazenadoraModel.fromJson(Map<String, dynamic> json) {
+    return UnidadeArmazenadoraModel(
       id: json['id'],
       name: json['name'],
       location: json['location'],

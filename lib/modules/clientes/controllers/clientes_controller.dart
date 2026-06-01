@@ -2,13 +2,13 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/cliente_model.dart';
-import '../../../core/models/farm_model.dart';
+import '../../../core/models/unidade_armazenadora_model.dart';
 
 class ClientesController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   final clientes = <ClienteModel>[].obs;
-  final farms = <FarmModel>[].obs;
+  final unidades = <UnidadeArmazenadoraModel>[].obs;
   final isLoading = false.obs;
   final searchQuery = ''.obs;
 
@@ -27,15 +27,15 @@ class ClientesController extends GetxController {
   void onInit() {
     super.onInit();
     getClientes();
-    loadFarms();
+    loadUnidades();
   }
 
-  Future<void> loadFarms() async {
+  Future<void> loadUnidades() async {
     try {
-      final response = await _apiService.dio.get('fazendas/');
+      final response = await _apiService.dio.get('unidades-armazenadoras/');
       if (response.statusCode == 200) {
-        farms.assignAll(
-          (response.data as List).map((e) => FarmModel.fromJson(e)).toList(),
+        unidades.assignAll(
+          (response.data as List).map((e) => UnidadeArmazenadoraModel.fromJson(e)).toList(),
         );
       }
     } catch (_) {}

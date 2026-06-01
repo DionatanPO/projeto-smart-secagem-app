@@ -1,8 +1,8 @@
 class BatchModel {
   int? id;
   String? numeroLote;
-  int farm;
-  String? farmName;
+  int unidadeArmazenadora;
+  String? unidadeArmazenadoraNome;
   String cultura;
   String? variedade;
   String safra;
@@ -22,8 +22,8 @@ class BatchModel {
   BatchModel({
     this.id,
     this.numeroLote,
-    required this.farm,
-    this.farmName,
+    required this.unidadeArmazenadora,
+    this.unidadeArmazenadoraNome,
     required this.cultura,
     this.variedade,
     required this.safra,
@@ -45,8 +45,8 @@ class BatchModel {
     return BatchModel(
       id: json['id'],
       numeroLote: json['numero_lote'],
-      farm: json['farm'],
-      farmName: json['farm_name'],
+      unidadeArmazenadora: json['unidade_armazenadora'],
+      unidadeArmazenadoraNome: json['unidade_armazenadora_nome'],
       cultura: json['cultura'],
       variedade: json['variedade'],
       safra: json['safra'],
@@ -69,7 +69,7 @@ class BatchModel {
     return {
       'id': id,
       'numero_lote': numeroLote,
-      'farm': farm,
+      'unidade_armazenadora': unidadeArmazenadora,
       'cultura': cultura,
       'variedade': variedade,
       'safra': safra,

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/models/batch_model.dart';
-import '../../farm_management/controllers/farm_management_controller.dart';
+import '../../unidade_armazenadora_management/controllers/unidade_armazenadora_management_controller.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/batch_management_controller.dart';
 
@@ -149,7 +149,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                             children: [
                               _infoRow(cs, Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy').format(batch.dataEntrada!.toLocal()) : '---'),
                               _infoRow(cs, Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
-                              _infoRow(cs, Icons.location_on_outlined, batch.farmName ?? 'N/A'),
+                              _infoRow(cs, Icons.location_on_outlined, batch.unidadeArmazenadoraNome ?? 'N/A'),
                               if (batch.clienteNome != null) _infoRow(cs, Icons.person_outline_rounded, batch.clienteNome!),
                               if (batch.siloName != null) _infoRow(cs, Icons.warehouse_outlined, batch.siloName!),
                             ],
@@ -335,7 +335,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
   void _showBatchForm(BuildContext context, {BatchModel? batch}) {
     final cs = Theme.of(context).colorScheme;
     final isEditing = batch != null;
-    final farmController = Get.find<FarmManagementController>();
+    final unidadeController = Get.find<UnidadeArmazenadoraManagementController>();
 
     final numeroCtl = TextEditingController(text: batch?.numeroLote ?? '');
     final safraCtl = TextEditingController(text: batch?.safra ?? '2023/2024');
@@ -346,7 +346,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
     final grainTypes = ['Milho', 'Soja', 'Arroz', 'Trigo', 'Sorgo', 'Café', 'Feijão', 'Outros'];
     final initialCultura = batch?.cultura ?? 'Milho';
     final selectedCultura = (grainTypes.contains(initialCultura) ? initialCultura : 'Outros').obs;
-    final selectedFarmId = Rx<int?>(batch?.farm ?? (farmController.farms.isNotEmpty ? farmController.farms.first.id : null));
+    final selectedFarmId = Rx<int?>(batch?.unidadeArmazenadora ?? (unidadeController.unidades.isNotEmpty ? unidadeController.unidades.first.id : null));
     final selectedClientId = Rx<int?>(batch?.cliente ?? (controller.clients.isNotEmpty ? controller.clients.first['id'] as int : null));
 
     Get.dialog(
@@ -446,12 +446,12 @@ class BatchManagementView extends GetView<BatchManagementController> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      _fieldLabel(cs, 'FAZENDA / UNIDADE'),
+                      _fieldLabel(cs, 'UNIDADE ARMAZENADORA'),
                       const SizedBox(height: 8),
                       Obx(() => DropdownButtonFormField<int>(
                         value: selectedFarmId.value,
                         decoration: _dropDeco(cs, Icons.agriculture),
-                        items: farmController.farms.map((f) => DropdownMenuItem(value: f.id, child: Text(f.name, style: GoogleFonts.inter(color: cs.onSurface)))).toList(),
+                        items: unidadeController.unidades.map((u) => DropdownMenuItem(value: u.id, child: Text(u.name, style: GoogleFonts.inter(color: cs.onSurface)))).toList(),
                         onChanged: (val) => selectedFarmId.value = val,
                         style: GoogleFonts.inter(color: cs.onSurface),
                       )),
@@ -471,7 +471,7 @@ class BatchManagementView extends GetView<BatchManagementController> {
                           Expanded(flex: 2, child: FilledButton(
                             onPressed: () {
                               final b = BatchModel(
-                                id: batch?.id, numeroLote: numeroCtl.text, farm: selectedFarmId.value!,
+                                id: batch?.id, numeroLote: numeroCtl.text, unidadeArmazenadora: selectedFarmId.value!,
                                 cultura: selectedCultura.value, safra: safraCtl.text,
                                 pesoInicial: double.tryParse(pesoCtl.text) ?? 0,
                                 umidadeInicial: double.tryParse(umidadeCtl.text) ?? 0,

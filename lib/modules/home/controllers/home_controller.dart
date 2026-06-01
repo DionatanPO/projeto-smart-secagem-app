@@ -20,7 +20,7 @@ class HomeController extends GetxController {
     try {
       final response = await _api.dio.get('me/');
       accountType.value = response.data['account_type'] ?? '';
-      currentUserFarmId.value = response.data['farm'] as int?;
+      currentUserFarmId.value = response.data['unidade_armazenadora'] as int?;
     } catch (_) {}
   }
 

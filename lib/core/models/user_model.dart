@@ -8,7 +8,7 @@ class UserModel {
   final String firstName;
   final String lastName;
   final String? telefone;
-  final int? farm;
+  final int? unidadeArmazenadora;
 
   UserModel({
     this.id,
@@ -20,7 +20,7 @@ class UserModel {
     this.firstName = '',
     this.lastName = '',
     this.telefone,
-    this.farm,
+    this.unidadeArmazenadora,
   });
 
   String get displayName {
@@ -38,7 +38,7 @@ class UserModel {
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
       telefone: json['telefone'],
-      farm: json['farm'],
+      unidadeArmazenadora: json['unidade_armazenadora'],
     );
   }
 
@@ -54,7 +54,7 @@ class UserModel {
     if (password != null && password!.isNotEmpty) {
       data['password'] = password;
     }
-    if (farm != null) data['farm'] = farm;
+    if (unidadeArmazenadora != null) data['unidade_armazenadora'] = unidadeArmazenadora;
     return data;
   }
 }

@@ -1,8 +1,9 @@
 class SiloModel {
   final int? id;
-  final int? farmId; // New: Reference to Farm
-  final String? farmName; // New: To display in the UI
+  final int? unidadeArmazenadoraId;
+  final String? unidadeArmazenadoraNome;
   final String name;
+  final String tipo;
   final double capacity;
   final double currentQuantity;
   final String status;
@@ -12,9 +13,10 @@ class SiloModel {
 
   SiloModel({
     this.id,
-    this.farmId,
-    this.farmName,
+    this.unidadeArmazenadoraId,
+    this.unidadeArmazenadoraNome,
     required this.name,
+    this.tipo = 'pulmao',
     required this.capacity,
     required this.currentQuantity,
     required this.status,
@@ -26,9 +28,10 @@ class SiloModel {
   factory SiloModel.fromJson(Map<String, dynamic> json) {
     return SiloModel(
       id: json['id'],
-      farmId: json['farm'],
-      farmName: json['farm_name'],
+      unidadeArmazenadoraId: json['unidade_armazenadora'],
+      unidadeArmazenadoraNome: json['unidade_armazenadora_nome'],
       name: json['name'],
+      tipo: json['tipo'] ?? 'pulmao',
       capacity: (json['capacity'] as num? ?? 0.0).toDouble(),
       currentQuantity: (json['current_quantity'] as num? ?? 0.0).toDouble(),
       status: json['status'],
@@ -41,8 +44,9 @@ class SiloModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'farm': farmId,
+      'unidade_armazenadora': unidadeArmazenadoraId,
       'name': name,
+      'tipo': tipo,
       'capacity': capacity,
       'current_quantity': currentQuantity,
       'status': status,

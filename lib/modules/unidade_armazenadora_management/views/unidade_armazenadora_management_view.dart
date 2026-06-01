@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../core/models/farm_model.dart';
+import '../../../core/models/unidade_armazenadora_model.dart';
 import '../../home/controllers/home_controller.dart';
-import '../controllers/farm_management_controller.dart';
+import '../controllers/unidade_armazenadora_management_controller.dart';
 
-class FarmManagementView extends GetView<FarmManagementController> {
-  const FarmManagementView({super.key});
+class UnidadeArmazenadoraManagementView extends GetView<UnidadeArmazenadoraManagementController> {
+  const UnidadeArmazenadoraManagementView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class FarmManagementView extends GetView<FarmManagementController> {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Fazendas',
+                          'Unidades Armazenadoras',
                           style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
                         ),
                       ),
@@ -54,23 +54,23 @@ class FarmManagementView extends GetView<FarmManagementController> {
             Padding(
               padding: const EdgeInsets.only(top: 24, bottom: 20),
               child: SearchBar(
-                hintText: 'Buscar fazenda...',
+                hintText: 'Buscar unidade...',
                 hintStyle: WidgetStatePropertyAll(GoogleFonts.inter(color: cs.onSurfaceVariant)),
                 leading: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
                 backgroundColor: WidgetStatePropertyAll(cs.surfaceContainerHighest.withOpacity(0.5)),
                 elevation: const WidgetStatePropertyAll(0),
                 shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                 textStyle: WidgetStatePropertyAll(GoogleFonts.inter(fontSize: 14, color: cs.onSurface)),
-                onChanged: controller.filterFarms,
+                onChanged: controller.filterUnidades,
               ),
             ),
             Expanded(
               child: Obx(() {
-                final farms = controller.filteredFarms;
-                if (controller.isLoading.value && farms.isEmpty) {
+                final unidades = controller.filteredUnidades;
+                if (controller.isLoading.value && unidades.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (farms.isEmpty) {
+                if (unidades.isEmpty) {
                   return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
                 return GridView.builder(
@@ -80,8 +80,8 @@ class FarmManagementView extends GetView<FarmManagementController> {
                     crossAxisSpacing: 20,
                     mainAxisSpacing: 20,
                   ),
-                  itemCount: farms.length,
-                  itemBuilder: (_, i) => _buildFarmCard(context, farms[i]),
+                  itemCount: unidades.length,
+                  itemBuilder: (_, i) => _buildUnidadeCard(context, unidades[i]),
                 );
               }),
             ),
@@ -89,7 +89,7 @@ class FarmManagementView extends GetView<FarmManagementController> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showFarmForm(context),
+        onPressed: () => _showUnidadeForm(context),
         backgroundColor: cs.primary,
         foregroundColor: cs.onPrimary,
         elevation: 0,
@@ -100,7 +100,7 @@ class FarmManagementView extends GetView<FarmManagementController> {
     );
   }
 
-  Widget _buildFarmCard(BuildContext context, FarmModel farm) {
+  Widget _buildUnidadeCard(BuildContext context, UnidadeArmazenadoraModel unidade) {
     final cs = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
@@ -108,7 +108,7 @@ class FarmManagementView extends GetView<FarmManagementController> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => _showFarmForm(context, farm: farm),
+        onTap: () => _showUnidadeForm(context, unidade: unidade),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -131,14 +131,14 @@ class FarmManagementView extends GetView<FarmManagementController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(farm.name, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(unidade.name, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 2),
                         Row(
                           children: [
                             Icon(Icons.location_on_rounded, size: 14, color: cs.onSurfaceVariant),
                             const SizedBox(width: 4),
                             Expanded(
-                              child: Text(farm.location ?? 'Sem localização', style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              child: Text(unidade.location ?? 'Sem localização', style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
                             ),
                           ],
                         ),
@@ -151,8 +151,8 @@ class FarmManagementView extends GetView<FarmManagementController> {
                     elevation: 2,
                     color: cs.surfaceContainerLow,
                     onSelected: (value) {
-                      if (value == 0) _showFarmForm(context, farm: farm);
-                      if (value == 1) controller.deleteFarm(farm.id!);
+                      if (value == 0) _showUnidadeForm(context, unidade: unidade);
+                      if (value == 1) controller.deleteUnidade(unidade.id!);
                     },
                     itemBuilder: (_) => [
                       PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
@@ -162,17 +162,17 @@ class FarmManagementView extends GetView<FarmManagementController> {
                   ),
                 ],
               ),
-              if (farm.description != null && farm.description!.isNotEmpty) ...[
+              if (unidade.description != null && unidade.description!.isNotEmpty) ...[
                 const Spacer(),
-                Text(farm.description!, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant.withOpacity(0.8)), maxLines: 2, overflow: TextOverflow.ellipsis),
+                Text(unidade.description!, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant.withOpacity(0.8)), maxLines: 2, overflow: TextOverflow.ellipsis),
               ],
               const Spacer(),
-              if (farm.createdAt != null)
+              if (unidade.createdAt != null)
                 Row(
                   children: [
                     Icon(Icons.schedule_rounded, size: 14, color: cs.onSurfaceVariant.withOpacity(0.6)),
                     const SizedBox(width: 4),
-                    Text(DateFormat('dd/MM/yyyy').format(farm.createdAt!), style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.6))),
+                    Text(DateFormat('dd/MM/yyyy').format(unidade.createdAt!), style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.6))),
                   ],
                 ),
             ],
@@ -199,12 +199,12 @@ class FarmManagementView extends GetView<FarmManagementController> {
           ),
           const SizedBox(height: 20),
           Text(
-            hasSearch ? 'Nenhum resultado encontrado' : 'Nenhuma fazenda cadastrada',
+            hasSearch ? 'Nenhum resultado encontrado' : 'Nenhuma unidade cadastrada',
             style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Text(
-            hasSearch ? 'Tente buscar por outro nome ou localização.' : 'Adicione uma fazenda ou armazém para organizar seus silos.',
+            hasSearch ? 'Tente buscar por outro nome ou localização.' : 'Adicione uma unidade armazenadora para organizar seus silos.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant.withOpacity(0.7)),
           ),
@@ -213,12 +213,12 @@ class FarmManagementView extends GetView<FarmManagementController> {
     );
   }
 
-  void _showFarmForm(BuildContext context, {FarmModel? farm}) {
+  void _showUnidadeForm(BuildContext context, {UnidadeArmazenadoraModel? unidade}) {
     final cs = Theme.of(context).colorScheme;
-    final isEditing = farm != null;
-    final nameCtl = TextEditingController(text: farm?.name ?? '');
-    final locationCtl = TextEditingController(text: farm?.location ?? '');
-    final descCtl = TextEditingController(text: farm?.description ?? '');
+    final isEditing = unidade != null;
+    final nameCtl = TextEditingController(text: unidade?.name ?? '');
+    final locationCtl = TextEditingController(text: unidade?.location ?? '');
+    final descCtl = TextEditingController(text: unidade?.description ?? '');
 
     Get.dialog(
       Dialog(
@@ -244,7 +244,7 @@ class FarmManagementView extends GetView<FarmManagementController> {
                         children: [
                           Text(isEditing ? 'Editar Unidade' : 'Nova Unidade', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: cs.onPrimary)),
                           const SizedBox(height: 4),
-                          Text(isEditing ? 'Atualize as informações da fazenda.' : 'Cadastre uma nova localidade.', style: GoogleFonts.inter(fontSize: 13, color: cs.onPrimary.withOpacity(0.8))),
+                          Text(isEditing ? 'Atualize as informações da unidade.' : 'Cadastre uma nova localidade.', style: GoogleFonts.inter(fontSize: 13, color: cs.onPrimary.withOpacity(0.8))),
                         ],
                       ),
                     ),
@@ -260,7 +260,7 @@ class FarmManagementView extends GetView<FarmManagementController> {
                     children: [
                       _buildFieldLabel(cs, 'NOME'),
                       const SizedBox(height: 8),
-                      _buildField(cs, nameCtl, 'Ex: Fazenda Santa Fé', Icons.business_rounded),
+                      _buildField(cs, nameCtl, 'Ex: Unidade Santa Fé', Icons.business_rounded),
                       const SizedBox(height: 20),
                       _buildFieldLabel(cs, 'LOCALIZAÇÃO'),
                       const SizedBox(height: 8),
@@ -284,8 +284,8 @@ class FarmManagementView extends GetView<FarmManagementController> {
                             flex: 2,
                             child: FilledButton(
                               onPressed: () {
-                                final f = FarmModel(id: farm?.id, name: nameCtl.text, location: locationCtl.text, description: descCtl.text);
-                                if (isEditing) { controller.updateFarm(f); } else { controller.createFarm(f); }
+                                final f = UnidadeArmazenadoraModel(id: unidade?.id, name: nameCtl.text, location: locationCtl.text, description: descCtl.text);
+                                if (isEditing) { controller.updateUnidade(f); } else { controller.createUnidade(f); }
                               },
                               style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                               child: Text(isEditing ? 'Atualizar' : 'Cadastrar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),

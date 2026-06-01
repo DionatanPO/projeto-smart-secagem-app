@@ -5,18 +5,18 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/silo_model.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../../core/models/telemetry_model.dart';
-import '../../farm_management/controllers/farm_management_controller.dart';
-import '../../../core/models/farm_model.dart';
+import '../../unidade_armazenadora_management/controllers/unidade_armazenadora_management_controller.dart';
+import '../../../core/models/unidade_armazenadora_model.dart';
 import '../../../core/models/batch_model.dart';
 import '../../batch_management/controllers/batch_management_controller.dart';
 
 class SiloManagementController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
-  final _farmController = Get.find<FarmManagementController>();
+  final _unidadeController = Get.find<UnidadeArmazenadoraManagementController>();
   final _batchController = Get.put(BatchManagementController());
 
   final silos = <SiloModel>[].obs;
-  List<FarmModel> get availableFarms => _farmController.farms;
+  List<UnidadeArmazenadoraModel> get availableUnidades => _unidadeController.unidades;
   final siloSensors = <SensorModel>[].obs;
   
   // Guardamos as últimas leituras de CADA sensor agrupadas por ID do silo

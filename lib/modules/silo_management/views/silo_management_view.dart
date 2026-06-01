@@ -268,7 +268,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
                     _buildStatusBadge(silo.status, statusColor),
                   ],
                 ),
-                if (silo.farmName != null)
+                if (silo.unidadeArmazenadoraNome != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Row(
@@ -276,15 +276,27 @@ class SiloManagementView extends GetView<SiloManagementController> {
                         Icon(Icons.location_on_outlined, size: 14, color: theme.hintColor),
                         const SizedBox(width: 4),
                         Text(
-                          silo.farmName!,
+                          silo.unidadeArmazenadoraNome!,
                           style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
                         ),
                       ],
                     ),
                   ),
-                // Capacidade abaixo da Fazenda
                 Padding(
-                  padding: const EdgeInsets.only(top: 6),
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    children: [
+                      Icon(Icons.category_outlined, size: 14, color: AppColors.primary.withOpacity(0.7)),
+                      const SizedBox(width: 4),
+                      Text(
+                        _tipoLabel(silo.tipo),
+                        style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
                   child: Row(
                     children: [
                       Icon(Icons.warehouse_outlined, size: 14, color: AppColors.primary.withOpacity(0.7)),
@@ -904,7 +916,10 @@ class SiloManagementView extends GetView<SiloManagementController> {
     final validStatuses = ['disponivel', 'em_uso', 'manutencao', 'desativado'];
     final currentStatus = silo?.status ?? 'disponivel';
     final status = (validStatuses.contains(currentStatus) ? currentStatus : 'disponivel').obs;
-    final selectedFarmId = (silo?.farmId).obs;
+    final selectedFarmId = (silo?.unidadeArmazenadoraId).obs;
+    final tipoValues = ['pulmao', 'armazenamento'];
+    final currentTipo = silo?.tipo ?? 'pulmao';
+    final selectedTipo = (tipoValues.contains(currentTipo) ? currentTipo : 'pulmao').obs;
 
     Get.dialog(
       Dialog(
@@ -944,7 +959,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _fieldLabel(cs, 'FAZENDA / LOCALIZAÇÃO'),
+                      _fieldLabel(cs, 'UNIDADE ARMAZENADORA / LOCALIZAÇÃO'),
                       const SizedBox(height: 8),
                       Obx(() => DropdownButtonFormField<int?>(
                         value: selectedFarmId.value,
@@ -952,9 +967,9 @@ class SiloManagementView extends GetView<SiloManagementController> {
                         dropdownColor: cs.surface,
                         items: [
                           const DropdownMenuItem(value: null, child: Text('Nenhuma (Unidade Independente)')),
-                          ...controller.availableFarms.map((f) => DropdownMenuItem(
-                            value: f.id,
-                            child: Text(f.name, style: GoogleFonts.inter(color: cs.onSurface)),
+                          ...controller.availableUnidades.map((u) => DropdownMenuItem(
+                            value: u.id,
+                            child: Text(u.name, style: GoogleFonts.inter(color: cs.onSurface)),
                           )),
                         ],
                         onChanged: (v) => selectedFarmId.value = v,
@@ -968,6 +983,20 @@ class SiloManagementView extends GetView<SiloManagementController> {
                         style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
                         decoration: _fieldDeco(cs, 'Ex: Silo Sul 01', Icons.warehouse_rounded),
                       ),
+                      const SizedBox(height: 20),
+                      _fieldLabel(cs, 'TIPO DO SILO'),
+                      const SizedBox(height: 8),
+                      Obx(() => DropdownButtonFormField<String>(
+                        value: selectedTipo.value,
+                        style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                        dropdownColor: cs.surface,
+                        items: const [
+                          DropdownMenuItem(value: 'pulmao', child: Text('Silo Pulmão')),
+                          DropdownMenuItem(value: 'armazenamento', child: Text('Silo de Armazenamento')),
+                        ],
+                        onChanged: (v) => selectedTipo.value = v!,
+                        decoration: _fieldDeco(cs, '', Icons.category_rounded),
+                      )),
                       const SizedBox(height: 20),
                       Row(
                         children: [
@@ -1036,8 +1065,9 @@ class SiloManagementView extends GetView<SiloManagementController> {
                               onPressed: () {
                                 final newSilo = SiloModel(
                                   id: silo?.id,
-                                  farmId: selectedFarmId.value,
+                                  unidadeArmazenadoraId: selectedFarmId.value,
                                   name: nameController.text,
+                                  tipo: selectedTipo.value,
                                   capacity: double.tryParse(capacityController.text) ?? 0.0,
                                   currentQuantity: double.tryParse(quantityController.text) ?? 0.0,
                                   status: status.value,
@@ -1081,6 +1111,14 @@ class SiloManagementView extends GetView<SiloManagementController> {
       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: cs.primary)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     );
+  }
+
+  String _tipoLabel(String tipo) {
+    const labels = {
+      'pulmao': 'Silo Pulmão',
+      'armazenamento': 'Silo de Armazenamento',
+    };
+    return labels[tipo] ?? tipo;
   }
 
   void _confirmDelete(BuildContext context, SiloModel silo) {

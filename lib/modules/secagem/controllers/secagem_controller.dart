@@ -1,15 +1,15 @@
 import 'package:get/get.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/secador_model.dart';
-import '../../farm_management/controllers/farm_management_controller.dart';
-import '../../../core/models/farm_model.dart';
+import '../../unidade_armazenadora_management/controllers/unidade_armazenadora_management_controller.dart';
+import '../../../core/models/unidade_armazenadora_model.dart';
 
 class SecagemController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
-  final _farmController = Get.find<FarmManagementController>();
+  final _unidadeController = Get.find<UnidadeArmazenadoraManagementController>();
 
   final secadores = <SecadorModel>[].obs;
-  List<FarmModel> get availableFarms => _farmController.farms;
+  List<UnidadeArmazenadoraModel> get availableUnidades => _unidadeController.unidades;
   final isLoading = false.obs;
   final searchQuery = ''.obs;
 
@@ -21,7 +21,7 @@ class SecagemController extends GetxController {
       s.tipo.toLowerCase().contains(q) ||
       s.fonteCalor.toLowerCase().contains(q) ||
       s.status.toLowerCase().contains(q) ||
-      (s.farmName?.toLowerCase().contains(q) ?? false)
+      (s.unidadeArmazenadoraNome?.toLowerCase().contains(q) ?? false)
     ).toList();
   }
 

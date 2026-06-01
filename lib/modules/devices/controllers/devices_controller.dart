@@ -7,7 +7,7 @@ import '../../../core/models/telemetry_model.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../../core/models/silo_model.dart';
 import '../../../core/models/secador_model.dart';
-import '../../../core/models/farm_model.dart';
+import '../../../core/models/unidade_armazenadora_model.dart';
 
 class DevicesController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
@@ -15,7 +15,7 @@ class DevicesController extends GetxController {
   final sensors = <SensorModel>[].obs;
   final silos = <SiloModel>[].obs;
   final secadores = <SecadorModel>[].obs;
-  final farms = <FarmModel>[].obs;
+  final unidades = <UnidadeArmazenadoraModel>[].obs;
   final telemetry = <TelemetryModel>[].obs;
   final isLoading = false.obs;
   final isLoadingTelemetry = false.obs;
@@ -33,7 +33,7 @@ class DevicesController extends GetxController {
       s.status.toLowerCase().contains(query) ||
       (s.siloName?.toLowerCase().contains(query) ?? false) ||
       (s.secadorName?.toLowerCase().contains(query) ?? false) ||
-      (s.farmName?.toLowerCase().contains(query) ?? false)
+      (s.unidadeArmazenadoraNome?.toLowerCase().contains(query) ?? false)
     ).toList();
   }
 
@@ -45,7 +45,7 @@ class DevicesController extends GetxController {
     getSensors();
     getSilos();
     getSecadores();
-    getFarms();
+    getUnidades();
   }
 
   Future<void> getSensors() async {
@@ -85,12 +85,12 @@ class DevicesController extends GetxController {
     }
   }
 
-  Future<void> getFarms() async {
+  Future<void> getUnidades() async {
     try {
-      final response = await _apiService.dio.get('fazendas/');
+      final response = await _apiService.dio.get('unidades-armazenadoras/');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        farms.assignAll(data.map((json) => FarmModel.fromJson(json)).toList());
+        unidades.assignAll(data.map((json) => UnidadeArmazenadoraModel.fromJson(json)).toList());
       }
     } catch (_) {
     }

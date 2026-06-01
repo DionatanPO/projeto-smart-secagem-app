@@ -18,7 +18,7 @@ class BatchManagementController extends GetxController {
       (b.numeroLote?.toLowerCase().contains(q) ?? false) ||
       b.cultura.toLowerCase().contains(q) ||
       b.safra.toLowerCase().contains(q) ||
-      (b.farmName?.toLowerCase().contains(q) ?? false) ||
+      (b.unidadeArmazenadoraNome?.toLowerCase().contains(q) ?? false) ||
       (b.clienteNome?.toLowerCase().contains(q) ?? false) ||
       b.status.toLowerCase().contains(q)
     ).toList();

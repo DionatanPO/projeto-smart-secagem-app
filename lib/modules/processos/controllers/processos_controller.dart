@@ -17,6 +17,7 @@ class ProcessosController extends GetxController {
 
   final processos = <ProcessoModel>[].obs;
   final isLoading = false.obs;
+  final activeStage = 0.obs;
 
   List<BatchModel> get availableBatches => _batchController.batches;
   List<SecadorModel> get availableDryers => _secagemController.secadores;
@@ -57,7 +58,7 @@ class ProcessosController extends GetxController {
           final batch = availableBatches.firstWhere(
             (b) => b.id == processo.loteId,
             orElse: () => BatchModel(
-              farm: 0, cultura: '', safra: '', pesoInicial: 0,
+              unidadeArmazenadora: 0, cultura: '', safra: '', pesoInicial: 0,
               umidadeInicial: 0, status: '',
             ),
           );

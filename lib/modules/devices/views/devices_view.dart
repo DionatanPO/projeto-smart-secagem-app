@@ -74,7 +74,7 @@ class DevicesView extends GetView<DevicesController> {
                 // Observa as listas de lookup para reconstruir quando carregarem
                 controller.silos.length;
                 controller.secadores.length;
-                controller.farms.length;
+                controller.unidades.length;
                 if (controller.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -167,9 +167,9 @@ class DevicesView extends GetView<DevicesController> {
       final secador = controller.secadores.firstWhereOrNull((s) => s.id == sensor.secadorId);
       locationName = sensor.secadorName ?? secador?.nome ?? 'Secador #${sensor.secadorId}';
       locationIcon = Icons.settings_input_component_rounded;
-    } else if (sensor.farmId != null) {
-      final farm = controller.farms.firstWhereOrNull((f) => f.id == sensor.farmId);
-      locationName = sensor.farmName ?? farm?.name ?? 'Fazenda #${sensor.farmId}';
+    } else if (sensor.unidadeArmazenadoraId != null) {
+      final unidade = controller.unidades.firstWhereOrNull((u) => u.id == sensor.unidadeArmazenadoraId);
+      locationName = sensor.unidadeArmazenadoraNome ?? unidade?.name ?? 'Unidade #${sensor.unidadeArmazenadoraId}';
       locationIcon = Icons.agriculture_rounded;
     } else {
       locationName = 'Não vinculado';
@@ -263,7 +263,7 @@ class DevicesView extends GetView<DevicesController> {
     final cs = Theme.of(context).colorScheme;
     final gatewayIdController = TextEditingController(text: sensor?.sensorId ?? '');
     final descriptionController = TextEditingController(text: sensor?.description ?? '');
-    final selectedFarmId = (sensor?.farmId).obs;
+    final selectedFarmId = (sensor?.unidadeArmazenadoraId).obs;
     final selectedSiloId = (sensor?.siloId).obs;
     final selectedSecadorId = (sensor?.secadorId).obs;
     final validStatuses = ['ativo', 'manutencao', 'falha', 'desativado'];
@@ -346,17 +346,17 @@ class DevicesView extends GetView<DevicesController> {
                         _fieldLabel(cs, 'VINCULAR A'),
                         const SizedBox(height: 8),
                         Obx(() {
-                          final hasFarm = controller.farms.any((f) => f.id == selectedFarmId.value);
+                          final hasFarm = controller.unidades.any((u) => u.id == selectedFarmId.value);
                           return DropdownButtonFormField<int>(
                             value: hasFarm ? selectedFarmId.value : null,
                             style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
                             dropdownColor: cs.surface,
-                            hint: Text('Fazenda', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                            hint: Text('Unidade Armazenadora', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
                             items: [
                               const DropdownMenuItem(value: null, child: Text('Nenhum')),
-                              ...controller.farms.map((f) => DropdownMenuItem(
-                                value: f.id,
-                                child: Text('Fazenda: ${f.name}'),
+                              ...controller.unidades.map((u) => DropdownMenuItem(
+                                value: u.id,
+                                child: Text('Unidade: ${u.name}'),
                               )),
                             ],
                             onChanged: (v) {
@@ -449,7 +449,7 @@ class DevicesView extends GetView<DevicesController> {
                                       id: sensor?.id,
                                       sensorId: gatewayIdController.text,
                                       description: descriptionController.text,
-                                      farmId: selectedFarmId.value,
+                                      unidadeArmazenadoraId: selectedFarmId.value,
                                       siloId: selectedSiloId.value,
                                       secadorId: selectedSecadorId.value,
                                       status: status.value,

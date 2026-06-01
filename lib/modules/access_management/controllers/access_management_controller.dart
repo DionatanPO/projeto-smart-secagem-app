@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/user_model.dart';
-import '../../../core/models/farm_model.dart';
+import '../../../core/models/unidade_armazenadora_model.dart';
 
 class AccessManagementController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   final users = <UserModel>[].obs;
-  final farms = <FarmModel>[].obs;
+  final unidades = <UnidadeArmazenadoraModel>[].obs;
   final isLoading = false.obs;
   final searchQuery = ''.obs;
   int? currentUserId;
@@ -30,15 +30,15 @@ class AccessManagementController extends GetxController {
     super.onInit();
     getCurrentUser();
     getUsers();
-    loadFarms();
+    loadUnidades();
   }
 
-  Future<void> loadFarms() async {
+  Future<void> loadUnidades() async {
     try {
-      final response = await _apiService.dio.get('fazendas/');
+      final response = await _apiService.dio.get('unidades-armazenadoras/');
       if (response.statusCode == 200) {
-        farms.assignAll(
-          (response.data as List).map((e) => FarmModel.fromJson(e)).toList(),
+        unidades.assignAll(
+          (response.data as List).map((e) => UnidadeArmazenadoraModel.fromJson(e)).toList(),
         );
       }
     } catch (_) {}
@@ -89,7 +89,7 @@ class AccessManagementController extends GetxController {
       if (user.firstName.isNotEmpty) data['first_name'] = user.firstName;
       if (user.lastName.isNotEmpty) data['last_name'] = user.lastName;
       if (user.telefone != null) data['telefone'] = user.telefone;
-      if (user.farm != null) data['farm'] = user.farm;
+      if (user.unidadeArmazenadora != null) data['unidade_armazenadora'] = user.unidadeArmazenadora;
       final response = await _apiService.dio.patch('usuarios/${user.id}/', data: data);
       if (response.statusCode == 200) {
         final index = users.indexWhere((u) => u.id == user.id);

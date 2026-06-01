@@ -4,12 +4,12 @@ class SensorModel {
   final String tipo;
   final int? siloId;
   final int? secadorId;
-  final int? farmId;
+  final int? unidadeArmazenadoraId;
   final String description;
   final String status;
   final String? siloName;
   final String? secadorName;
-  final String? farmName;
+  final String? unidadeArmazenadoraNome;
 
   SensorModel({
     this.id,
@@ -17,12 +17,12 @@ class SensorModel {
     this.tipo = 'sensor_temperatura',
     this.siloId,
     this.secadorId,
-    this.farmId,
+    this.unidadeArmazenadoraId,
     required this.description,
     required this.status,
     this.siloName,
     this.secadorName,
-    this.farmName,
+    this.unidadeArmazenadoraNome,
   });
 
   factory SensorModel.fromJson(Map<String, dynamic> json) {
@@ -32,12 +32,12 @@ class SensorModel {
       tipo: json['tipo'] ?? 'sensor_temperatura',
       siloId: json['silo'],
       secadorId: json['secador'],
-      farmId: json['farm'],
+      unidadeArmazenadoraId: json['unidade_armazenadora'],
       description: json['description'],
       status: json['status'],
       siloName: json['silo_name'],
       secadorName: json['secador_name'],
-      farmName: json['farm_name'],
+      unidadeArmazenadoraNome: json['unidade_armazenadora_nome'],
     );
   }
 
@@ -48,7 +48,7 @@ class SensorModel {
       'tipo': tipo,
       'silo': siloId,
       'secador': secadorId,
-      'farm': farmId,
+      'unidade_armazenadora': unidadeArmazenadoraId,
       'description': description,
       'status': status,
     };

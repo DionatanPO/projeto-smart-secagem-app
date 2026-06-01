@@ -12,12 +12,12 @@ import '../../support/views/support_view.dart';
 import '../../smart_sense_ia/views/smart_sense_ia_view.dart';
 import '../../profile/views/profile_view.dart';
 import '../../silo_viewer/views/silo_viewer_view.dart';
-import '../../farm_management/views/farm_management_view.dart';
+import '../../unidade_armazenadora_management/views/unidade_armazenadora_management_view.dart';
 import '../../batch_management/views/batch_management_view.dart';
 import '../../secagem/views/secagem_view.dart';
 import '../../processos/views/processos_view.dart';
 import '../../clientes/views/clientes_view.dart';
-import '../../custos_de_producao/views/custos_de_producao_view.dart';
+import '../../custos/views/custos_view.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -156,16 +156,17 @@ class HomeView extends GetView<HomeController> {
         (0, 'Projeto', Icons.architecture_rounded),
       ]),
       ('Monitoramento', [
-        (2, 'Fazendas', Icons.location_on_rounded),
+        (2, 'Unidades Armazenadoras', Icons.location_on_rounded),
         (3, 'Silos', Icons.warehouse_rounded),
         (12, 'Lotes', Icons.inventory_2_rounded),
-        (13, 'Secagem', Icons.waves_rounded),
+        (13, 'Secadores', Icons.waves_rounded),
         (14, 'Processos', Icons.history_rounded),
         (15, 'Clientes', Icons.people_alt_rounded),
       ]),
       ('Financeiro', [
-        (16, 'Custos Produção', Icons.monetization_on_rounded),
+        (16, 'Custos', Icons.monetization_on_rounded),
       ]),
+
       ('Sistema', [
         (4, 'Dispositivos', Icons.hub_rounded),
         (5, 'Notificações', Icons.notifications_rounded),
@@ -292,7 +293,7 @@ class HomeView extends GetView<HomeController> {
     switch (index) {
       case 0: return const SiloViewerView();
       case 1: return const DashboardView();
-      case 2: return const FarmManagementView();
+      case 2: return const UnidadeArmazenadoraManagementView();
       case 3: return const SiloManagementView();
       case 4: return const DevicesView();
       case 5: return const NotificationsView();
@@ -305,7 +306,7 @@ class HomeView extends GetView<HomeController> {
       case 13: return const SecagemView();
       case 14: return const ProcessosView();
       case 15: return const ClientesView();
-      case 16: return const CustosDeProducaoView();
+      case 16: return const CustosView();
       default: return const DashboardView();
     }
   }

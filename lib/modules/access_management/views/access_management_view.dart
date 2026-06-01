@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/models/farm_model.dart';
+import '../../../core/models/unidade_armazenadora_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/access_management_controller.dart';
@@ -225,16 +225,16 @@ class AccessManagementView extends GetView<AccessManagementController> {
     final telefoneCtl = TextEditingController(text: user?.telefone ?? '');
     final passwordCtl = TextEditingController();
     final accountType = (user?.accountType ?? 'operador').obs;
-    int? initialFarm;
+    int? initialUnidade;
     if (user != null) {
       if (user.accountType == 'admin' || user.accountType == 'super_admin') {
-        final owned = controller.farms.where((f) => f.owner == user.id).toList();
-        initialFarm = owned.isNotEmpty ? owned.first.id : null;
+        final owned = controller.unidades.where((f) => f.owner == user.id).toList();
+        initialUnidade = owned.isNotEmpty ? owned.first.id : null;
       } else {
-        initialFarm = user.farm;
+        initialUnidade = user.unidadeArmazenadora;
       }
     }
-    final selectedFarm = initialFarm.obs;
+    final selectedUnidade = initialUnidade.obs;
     final formKey = GlobalKey<FormState>();
 
     Get.dialog(
@@ -321,24 +321,24 @@ class AccessManagementView extends GetView<AccessManagementController> {
                         );
                       }),
                       const SizedBox(height: 20),
-                      _fieldLabel(cs, 'FAZENDA'),
+                      _fieldLabel(cs, 'UNIDADE ARMAZENADORA'),
                       const SizedBox(height: 8),
                       Obx(() {
-                        final farms = controller.farms;
+                        final unidades = controller.unidades;
                         return DropdownButtonFormField<int?>(
-                          value: selectedFarm.value,
+                          value: selectedUnidade.value,
                           style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
                           dropdownColor: cs.surfaceContainerLow,
                           decoration: _dropDeco(cs, Icons.agriculture_outlined),
-                          hint: Text('Selecione uma fazenda', style: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5))),
+                          hint: Text('Selecione uma unidade', style: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5))),
                           items: [
-                            const DropdownMenuItem(value: null, child: Text('Sem fazenda')),
-                            ...farms.map((FarmModel f) => DropdownMenuItem(
-                              value: f.id,
-                              child: Text(f.name),
+                            const DropdownMenuItem(value: null, child: Text('Sem unidade')),
+                            ...unidades.map((UnidadeArmazenadoraModel u) => DropdownMenuItem(
+                              value: u.id,
+                              child: Text(u.name),
                             )),
                           ],
-                          onChanged: (v) => selectedFarm.value = v,
+                          onChanged: (v) => selectedUnidade.value = v,
                         );
                       }),
                       const SizedBox(height: 32),
@@ -354,7 +354,7 @@ class AccessManagementView extends GetView<AccessManagementController> {
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
                                 final username = user?.username ?? emailCtl.text.split('@').first;
-                                final u = UserModel(id: user?.id, username: username, email: emailCtl.text, password: passwordCtl.text.isNotEmpty ? passwordCtl.text : null, accountType: accountType.value, firstName: firstNameCtl.text, lastName: lastNameCtl.text, telefone: telefoneCtl.text.isNotEmpty ? telefoneCtl.text : null, farm: selectedFarm.value);
+                                final u = UserModel(id: user?.id, username: username, email: emailCtl.text, password: passwordCtl.text.isNotEmpty ? passwordCtl.text : null, accountType: accountType.value, firstName: firstNameCtl.text, lastName: lastNameCtl.text, telefone: telefoneCtl.text.isNotEmpty ? telefoneCtl.text : null, unidadeArmazenadora: selectedUnidade.value);
                                 if (isEditing) { controller.updateUser(u); } else { controller.createUser(u); }
                               }
                             },

@@ -5,8 +5,8 @@ class ClienteModel {
   final String? telefone;
   final String? cpfCnpj;
   final String? endereco;
-  final int? farm;
-  final String? farmName;
+  final int? unidadeArmazenadora;
+  final String? unidadeArmazenadoraNome;
   final DateTime? createdAt;
 
   ClienteModel({
@@ -16,8 +16,8 @@ class ClienteModel {
     this.telefone,
     this.cpfCnpj,
     this.endereco,
-    this.farm,
-    this.farmName,
+    this.unidadeArmazenadora,
+    this.unidadeArmazenadoraNome,
     this.createdAt,
   });
 
@@ -29,8 +29,8 @@ class ClienteModel {
       telefone: json['telefone'],
       cpfCnpj: json['cpf_cnpj'],
       endereco: json['endereco'],
-      farm: json['farm'],
-      farmName: json['farm_name'],
+      unidadeArmazenadora: json['unidade_armazenadora'],
+      unidadeArmazenadoraNome: json['unidade_armazenadora_nome'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
     );
   }
@@ -43,7 +43,7 @@ class ClienteModel {
       'telefone': telefone,
       'cpf_cnpj': cpfCnpj,
       'endereco': endereco,
-      'farm': farm,
+      'unidade_armazenadora': unidadeArmazenadora,
     };
   }
 }

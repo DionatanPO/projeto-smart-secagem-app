@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/models/cliente_model.dart';
-import '../../../core/models/farm_model.dart';
+import '../../../core/models/unidade_armazenadora_model.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/clientes_controller.dart';
 
@@ -146,9 +146,9 @@ class ClientesView extends GetView<ClientesController> {
                       const SizedBox(height: 2),
                       _infoRow(cs, Icons.location_on_outlined, cliente.endereco!),
                     ],
-                    if (cliente.farmName != null) ...[
+                    if (cliente.unidadeArmazenadoraNome != null) ...[
                       const SizedBox(height: 2),
-                      _infoRow(cs, Icons.agriculture_outlined, cliente.farmName!),
+                      _infoRow(cs, Icons.agriculture_outlined, cliente.unidadeArmazenadoraNome!),
                     ],
                     if (cliente.createdAt != null) ...[
                       const SizedBox(height: 6),
@@ -272,7 +272,7 @@ class ClientesView extends GetView<ClientesController> {
     final telCtl = TextEditingController(text: cliente?.telefone);
     final docCtl = TextEditingController(text: cliente?.cpfCnpj);
     final endCtl = TextEditingController(text: cliente?.endereco);
-    final selectedFarm = (cliente?.farm).obs;
+    final selectedFarm = (cliente?.unidadeArmazenadora).obs;
 
     Get.dialog(
       Dialog(
@@ -332,10 +332,10 @@ class ClientesView extends GetView<ClientesController> {
                       const SizedBox(height: 8),
                       _field(cs, endCtl, 'Ex: Fazenda Boa Esperança - Zona Rural', Icons.location_on_outlined),
                       const SizedBox(height: 20),
-                      _fieldLabel(cs, 'FAZENDA'),
+                      _fieldLabel(cs, 'UNIDADE ARMAZENADORA'),
                       const SizedBox(height: 8),
                       Obx(() {
-                        final farms = controller.farms;
+                        final unidades = controller.unidades;
                         return DropdownButtonFormField<int?>(
                           value: selectedFarm.value,
                           style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
@@ -347,10 +347,10 @@ class ClientesView extends GetView<ClientesController> {
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                           ),
-                          hint: Text('Selecione uma fazenda', style: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5))),
-                          items: farms.map((FarmModel f) => DropdownMenuItem(
-                            value: f.id,
-                            child: Text(f.name),
+                          hint: Text('Selecione uma unidade', style: GoogleFonts.inter(color: cs.onSurfaceVariant.withOpacity(0.5))),
+                          items: unidades.map((UnidadeArmazenadoraModel u) => DropdownMenuItem(
+                            value: u.id,
+                            child: Text(u.name),
                           )).toList(),
                           onChanged: (v) => selectedFarm.value = v,
                         );
@@ -375,7 +375,7 @@ class ClientesView extends GetView<ClientesController> {
                                   return;
                                 }
                                 if (selectedFarm.value == null) {
-                                  Get.snackbar('Erro', 'Selecione uma fazenda');
+                                  Get.snackbar('Erro', 'Selecione uma unidade');
                                   return;
                                 }
                                 final c = ClienteModel(
@@ -384,7 +384,7 @@ class ClientesView extends GetView<ClientesController> {
                                   telefone: telCtl.text.isEmpty ? null : telCtl.text,
                                   cpfCnpj: docCtl.text.isEmpty ? null : docCtl.text,
                                   endereco: endCtl.text.isEmpty ? null : endCtl.text,
-                                  farm: selectedFarm.value,
+                                  unidadeArmazenadora: selectedFarm.value,
                                 );
                                 if (isEditing) { controller.updateCliente(c); } else { controller.createCliente(c); }
                               },

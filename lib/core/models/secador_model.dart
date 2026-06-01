@@ -1,7 +1,7 @@
 class SecadorModel {
   final int? id;
-  final int farmId;
-  final String? farmName;
+  final int unidadeArmazenadoraId;
+  final String? unidadeArmazenadoraNome;
   final String nome;
   final String tipo; // Coluna, Cascata, Fluxo Contínuo, etc.
   final double capacidade; // Toneladas por hora (t/h)
@@ -11,8 +11,8 @@ class SecadorModel {
 
   SecadorModel({
     this.id,
-    required this.farmId,
-    this.farmName,
+    required this.unidadeArmazenadoraId,
+    this.unidadeArmazenadoraNome,
     required this.nome,
     required this.tipo,
     required this.capacidade,
@@ -24,8 +24,8 @@ class SecadorModel {
   factory SecadorModel.fromJson(Map<String, dynamic> json) {
     return SecadorModel(
       id: json['id'],
-      farmId: json['farm'] ?? json['farm_id'],
-      farmName: json['farm_name'],
+      unidadeArmazenadoraId: json['unidade_armazenadora'],
+      unidadeArmazenadoraNome: json['unidade_armazenadora_nome'],
       nome: json['nome'] ?? json['name'],
       tipo: json['tipo'] ?? json['type'],
       capacidade: (json['capacidade'] ?? json['capacity'] ?? 0.0).toDouble(),
@@ -38,7 +38,7 @@ class SecadorModel {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
-      'farm': farmId,
+      'unidade_armazenadora': unidadeArmazenadoraId,
       'nome': nome,
       'tipo': tipo,
       'capacidade': capacidade,

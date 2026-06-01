@@ -39,7 +39,7 @@ class SecagemView extends GetView<SecagemController> {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Controle de Secagem',
+                          'Secadores',
                           style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
                         ),
                       ),
@@ -131,7 +131,7 @@ class SecagemView extends GetView<SecagemController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(secador.nome, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        Text(secador.farmName ?? 'Sem fazenda', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(secador.unidadeArmazenadoraNome ?? 'Sem unidade', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -253,7 +253,7 @@ class SecagemView extends GetView<SecagemController> {
     final capacityCtl = TextEditingController(text: secador?.capacidade.toString());
     final obsCtl = TextEditingController(text: secador?.observacoes);
 
-    final selectedFarmId = Rx<int?>(secador?.farmId ?? (controller.availableFarms.isNotEmpty ? controller.availableFarms.first.id : null));
+    final selectedFarmId = Rx<int?>(secador?.unidadeArmazenadoraId ?? (controller.availableUnidades.isNotEmpty ? controller.availableUnidades.first.id : null));
     final selectedType = (secador?.tipo ?? 'Coluna').obs;
     final selectedFuel = (secador?.fonteCalor ?? 'Lenha').obs;
     final selectedStatus = (secador?.status ?? 'Disponível').obs;
@@ -296,12 +296,12 @@ class SecagemView extends GetView<SecagemController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _fieldLabel(cs, 'FAZENDA / UNIDADE'),
+                      _fieldLabel(cs, 'UNIDADE ARMAZENADORA'),
                       const SizedBox(height: 8),
                       Obx(() => DropdownButtonFormField<int>(
                         value: selectedFarmId.value,
                         decoration: _dropDeco(cs, Icons.agriculture),
-                        items: controller.availableFarms.map((f) => DropdownMenuItem(value: f.id, child: Text(f.name, style: GoogleFonts.inter(color: cs.onSurface)))).toList(),
+                        items: controller.availableUnidades.map((u) => DropdownMenuItem(value: u.id, child: Text(u.name, style: GoogleFonts.inter(color: cs.onSurface)))).toList(),
                         onChanged: (v) => selectedFarmId.value = v,
                         style: GoogleFonts.inter(color: cs.onSurface),
                       )),
@@ -375,7 +375,7 @@ class SecagemView extends GetView<SecagemController> {
                           Expanded(flex: 2, child: FilledButton(
                             onPressed: () {
                               final s = SecadorModel(
-                                id: secador?.id, farmId: selectedFarmId.value!, nome: nameCtl.text,
+                                id: secador?.id, unidadeArmazenadoraId: selectedFarmId.value!, nome: nameCtl.text,
                                 tipo: selectedType.value, capacidade: double.tryParse(capacityCtl.text) ?? 0,
                                 fonteCalor: selectedFuel.value, status: selectedStatus.value, observacoes: obsCtl.text,
                               );
