@@ -74,11 +74,15 @@ class BatchManagementView extends GetView<BatchManagementController> {
                 if (list.isEmpty) {
                   return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-                return ListView.separated(
+                if (isDesktop) {
+                  return SingleChildScrollView(
+                    child: _buildBatchTable(context, cs, list),
+                  );
+                }
+                return ListView.builder(
                   padding: const EdgeInsets.all(4),
                   itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) => _buildBatchCard(context, list[i]),
+                  itemBuilder: (_, i) => _buildBatchCompactCard(context, list[i]),
                 );
               }),
             ),
@@ -97,171 +101,181 @@ class BatchManagementView extends GetView<BatchManagementController> {
     );
   }
 
-  Widget _buildBatchCard(BuildContext context, BatchModel batch) {
-    final cs = Theme.of(context).colorScheme;
-    final w = MediaQuery.of(context).size.width;
-    final compact = w < 700;
-    final statusColor = _getStatusColor(batch.status);
+  Widget _buildBatchTable(BuildContext context, ColorScheme cs, List<BatchModel> list) {
+    const flex = [7, 12, 12, 10, 9, 9, 9, 9, 10];
+    const gap = 6.0;
+    final df = DateFormat('dd/MM/yyyy');
 
-    return Card(
-      elevation: 0,
-      color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _showBatchForm(context, batch: batch),
-        child: Padding(
-          padding: EdgeInsets.all(compact ? 16 : 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: compact ? 44 : 52,
-                    height: compact ? 44 : 52,
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(_getStatusIcon(batch.status), color: statusColor, size: compact ? 22 : 26),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text('Lote ${batch.numeroLote ?? '---'}', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface), overflow: TextOverflow.ellipsis),
-                            ),
-                            const SizedBox(width: 8),
-                            _buildStatusChip(batch.status, statusColor),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        if (!compact)
-                          Wrap(
-                            spacing: 14, runSpacing: 4,
-                            children: [
-                              _infoRow(cs, Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy').format(batch.dataEntrada!.toLocal()) : '---'),
-                              _infoRow(cs, Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
-                              _infoRow(cs, Icons.location_on_outlined, batch.unidadeArmazenadoraNome ?? 'N/A'),
-                              if (batch.clienteNome != null) _infoRow(cs, Icons.person_outline_rounded, batch.clienteNome!),
-                              if (batch.siloName != null) _infoRow(cs, Icons.warehouse_outlined, batch.siloName!),
-                              if (batch.placaCaminhao != null && batch.placaCaminhao!.isNotEmpty) _infoRow(cs, Icons.local_shipping_rounded, batch.placaCaminhao!),
-                              if (batch.motoristaNome != null && batch.motoristaNome!.isNotEmpty) _infoRow(cs, Icons.person_outline_rounded, batch.motoristaNome!),
-                              if (batch.pesoCaminhao != null) _infoRow(cs, Icons.scale_rounded, '${batch.pesoCaminhao!.toStringAsFixed(0)} kg'),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<int>(
-                    icon: Icon(Icons.more_vert_rounded, size: 20, color: cs.onSurfaceVariant),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 2,
-                    color: cs.surfaceContainerLow,
-                    onSelected: (value) {
-                      if (value == 0) _showBatchForm(context, batch: batch);
-                      if (value == 1) _confirmDelete(context, batch);
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
-                      if (Get.find<HomeController>().isAdmin)
-                      PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
-                    ],
-                  ),
+    Widget _header(String text) => Text(text, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.5), overflow: TextOverflow.ellipsis);
+
+    Widget _cell(String text, {bool bold = false}) => Text(text, style: GoogleFonts.inter(fontSize: 12, fontWeight: bold ? FontWeight.w600 : FontWeight.w400, color: cs.onSurface), overflow: TextOverflow.ellipsis, maxLines: 1);
+
+    List<Widget> _rowCells(List<Widget> cells) {
+      final items = <Widget>[];
+      for (int i = 0; i < cells.length; i++) {
+        if (i > 0) items.add(const SizedBox(width: gap));
+        items.add(Expanded(flex: flex[i], child: cells[i]));
+      }
+      return items;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(children: _rowCells([
+            _header('#'),
+            _header('Lote'),
+            _header('Cultura / Safra'),
+            _header('Entrada'),
+            _header('Peso'),
+            _header('Umidade'),
+            _header('Unidade'),
+            _header('Status'),
+            _header('Ações'),
+          ])),
+        ),
+        ...list.map((b) {
+          final statusColor = _getStatusColor(b.status);
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: cs.outlineVariant.withOpacity(0.2))),
+            ),
+            child: Row(children: _rowCells([
+              Text('${list.indexOf(b) + 1}', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant)),
+              _cell(b.numeroLote ?? '---', bold: true),
+              _cell('${b.cultura} (${b.safra})'),
+              _cell(b.dataEntrada != null ? df.format(b.dataEntrada!.toLocal()) : '---'),
+              _cell('${b.pesoInicial.toStringAsFixed(0)} kg'),
+              _cell('${b.umidadeInicial}%'),
+              _cell(b.unidadeArmazenadoraNome ?? '---'),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(color: statusColor.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                child: Text(_getStatusText(b.status).toUpperCase(), style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: statusColor, letterSpacing: 0.3)),
+              ),
+              PopupMenuButton<int>(
+                icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 2,
+                color: cs.surfaceContainerLow,
+                onSelected: (value) {
+                  if (value == 0) _showBatchForm(context, batch: b);
+                  if (value == 1) _confirmDelete(context, b);
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                  if (Get.find<HomeController>().isAdmin)
+                  PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                 ],
               ),
-              if (compact) ...[
-                const SizedBox(height: 12),
-                  Wrap(spacing: 12, runSpacing: 6, children: [
-                    _infoRow(cs, Icons.calendar_today_outlined, batch.dataEntrada != null ? DateFormat('dd/MM/yyyy').format(batch.dataEntrada!.toLocal()) : '---'),
-                    _infoRow(cs, Icons.inventory_2_outlined, '${batch.cultura} (${batch.safra})'),
-                    if (batch.placaCaminhao != null && batch.placaCaminhao!.isNotEmpty) _infoRow(cs, Icons.local_shipping_rounded, batch.placaCaminhao!),
-                    if (batch.motoristaNome != null && batch.motoristaNome!.isNotEmpty) _infoRow(cs, Icons.person_outline_rounded, batch.motoristaNome!),
-                    if (batch.pesoCaminhao != null) _infoRow(cs, Icons.scale_rounded, '${batch.pesoCaminhao!.toStringAsFixed(0)} kg'),
-                  ]),
-              ],
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHighest.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    _metricItem(cs, 'Peso Inicial', '${batch.pesoInicial.toStringAsFixed(0)} kg'),
-                    const Spacer(),
-                    _metricItem(cs, 'Umidade', '${batch.umidadeInicial}%', alignEnd: true),
-                  ],
-                ),
-              ),
-              if (batch.observacoes != null && batch.observacoes!.isNotEmpty) ...[
-                const SizedBox(height: 10),
+            ])),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildBatchCompactCard(BuildContext context, BatchModel batch) {
+    final cs = Theme.of(context).colorScheme;
+    final statusColor = _getStatusColor(batch.status);
+    final df = DateFormat('dd/MM/yyyy');
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
                 Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cs.primary.withOpacity(0.06),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(color: statusColor.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+                  child: Icon(Icons.inventory_2_rounded, color: statusColor, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.assignment_outlined, size: 14, color: cs.primary),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(batch.observacoes!, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant, height: 1.4)),
-                      ),
+                      Text('Lote ${batch.numeroLote ?? '---'}', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface)),
+                      Text('${batch.cultura} (${batch.safra})', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant)),
                     ],
                   ),
                 ),
+                PopupMenuButton<int>(
+                  icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 2,
+                  color: cs.surfaceContainerLow,
+                  onSelected: (value) {
+                    if (value == 0) _showBatchForm(context, batch: batch);
+                    if (value == 1) _confirmDelete(context, batch);
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                    if (Get.find<HomeController>().isAdmin)
+                    PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
+                  ],
+                ),
               ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                _compactInfo(cs, Icons.calendar_today_outlined, batch.dataEntrada != null ? df.format(batch.dataEntrada!.toLocal()) : '---'),
+                const SizedBox(width: 12),
+                _compactInfo(cs, Icons.monitor_weight_rounded, '${batch.pesoInicial.toStringAsFixed(0)} kg'),
+                const SizedBox(width: 12),
+                _compactInfo(cs, Icons.water_drop_rounded, '${batch.umidadeInicial}%'),
+              ],
+            ),
+            if (batch.placaCaminhao != null || batch.motoristaNome != null) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  if (batch.placaCaminhao != null && batch.placaCaminhao!.isNotEmpty)
+                    _compactInfo(cs, Icons.local_shipping_rounded, batch.placaCaminhao!),
+                  if (batch.motoristaNome != null && batch.motoristaNome!.isNotEmpty) ...[
+                    const SizedBox(width: 12),
+                    _compactInfo(cs, Icons.person_outline_rounded, batch.motoristaNome!),
+                  ],
+                ],
+              ),
             ],
-          ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(color: statusColor.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                  child: Text(_getStatusText(batch.status).toUpperCase(), style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: statusColor, letterSpacing: 0.3)),
+                ),
+                const Spacer(),
+                Text(batch.unidadeArmazenadoraNome ?? '', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant)),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _infoRow(ColorScheme cs, IconData icon, String text) {
+  Widget _compactInfo(ColorScheme cs, IconData icon, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 13, color: cs.onSurfaceVariant),
         const SizedBox(width: 4),
-        Text(text, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
+        Text(text, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: cs.onSurface)),
       ],
-    );
-  }
-
-  Widget _metricItem(ColorScheme cs, String label, String value, {bool alignEnd = false}) {
-    return Column(
-      crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant, letterSpacing: 0.5)),
-        Text(value, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: cs.onSurface)),
-      ],
-    );
-  }
-
-  Widget _buildStatusChip(String status, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        _getStatusText(status).toUpperCase(),
-        style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: color, letterSpacing: 0.3),
-      ),
     );
   }
 
@@ -282,18 +296,6 @@ class BatchManagementView extends GetView<BatchManagementController> {
     if (status == 'finalizado') return 'Finalizado';
     if (status == 'despachado') return 'Despachado';
     return status;
-  }
-
-  IconData _getStatusIcon(String status) {
-    if (status.contains('Pausado')) return Icons.pause_circle_outline_rounded;
-    if (status.contains('Secagem')) return Icons.waves_rounded;
-    if (status.contains('Aeração')) return Icons.air_rounded;
-    if (status.contains('Transilagem')) return Icons.swap_horiz_rounded;
-    if (status.contains('Expurgo')) return Icons.biotech_rounded;
-    if (status.contains('Expedição')) return Icons.local_shipping_rounded;
-    if (status == 'finalizado') return Icons.check_circle_outline;
-    if (status == 'despachado') return Icons.done_all_rounded;
-    return Icons.timer_outlined;
   }
 
   Widget _buildEmptyState(BuildContext context, bool hasSearch) {

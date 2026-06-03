@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../../../core/models/cliente_model.dart';
 import '../../../core/models/unidade_armazenadora_model.dart';
 import '../../home/controllers/home_controller.dart';
@@ -74,10 +73,15 @@ class ClientesView extends GetView<ClientesController> {
                 if (list.isEmpty) {
                   return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-                return ListView.separated(
+                if (isDesktop) {
+                  return SingleChildScrollView(
+                    child: _buildClientesTable(context, cs, list),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.all(4),
                   itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) => _buildClienteCard(context, list[i]),
+                  itemBuilder: (_, i) => _buildClienteCompactCard(context, list[i]),
                 );
               }),
             ),
@@ -96,81 +100,59 @@ class ClientesView extends GetView<ClientesController> {
     );
   }
 
-  Widget _buildClienteCard(BuildContext context, ClienteModel cliente) {
-    final cs = Theme.of(context).colorScheme;
+  Widget _buildClientesTable(BuildContext context, ColorScheme cs, List<ClienteModel> list) {
+    const flex = [7, 16, 14, 12, 14, 12, 9];
+    const gap = 6.0;
 
-    return Card(
-      elevation: 0,
-      color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _showClienteForm(context, cliente: cliente),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(Icons.person_rounded, color: cs.onPrimary, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(cliente.nome, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface)),
-                    const SizedBox(height: 6),
-                    if (cliente.email != null || cliente.telefone != null)
-                      Wrap(
-                        spacing: 16,
-                        runSpacing: 4,
-                        children: [
-                          if (cliente.email != null)
-                            _infoRow(cs, Icons.email_outlined, cliente.email!),
-                          if (cliente.telefone != null)
-                            _infoRow(cs, Icons.phone_outlined, cliente.telefone!),
-                        ],
-                      ),
-                    if (cliente.cpfCnpj != null) ...[
-                      const SizedBox(height: 2),
-                      _infoRow(cs, Icons.badge_outlined, '${cliente.cpfCnpj}'),
-                    ],
-                    if (cliente.endereco != null) ...[
-                      const SizedBox(height: 2),
-                      _infoRow(cs, Icons.location_on_outlined, cliente.endereco!),
-                    ],
-                    if (cliente.unidadeArmazenadoraNome != null) ...[
-                      const SizedBox(height: 2),
-                      _infoRow(cs, Icons.agriculture_outlined, cliente.unidadeArmazenadoraNome!),
-                    ],
-                    if (cliente.createdAt != null) ...[
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Icon(Icons.schedule_rounded, size: 12, color: cs.onSurfaceVariant.withOpacity(0.5)),
-                          const SizedBox(width: 4),
-                          Text(DateFormat('dd/MM/yyyy').format(cliente.createdAt!), style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.5))),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+    Widget _header(String text) => Text(text, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.5), overflow: TextOverflow.ellipsis);
+
+    Widget _cell(String text, {bool bold = false}) => Text(text, style: GoogleFonts.inter(fontSize: 12, fontWeight: bold ? FontWeight.w600 : FontWeight.w400, color: cs.onSurface), overflow: TextOverflow.ellipsis, maxLines: 1);
+
+    List<Widget> _rowCells(List<Widget> cells) {
+      final items = <Widget>[];
+      for (int i = 0; i < cells.length; i++) {
+        if (i > 0) items.add(const SizedBox(width: gap));
+        items.add(Expanded(flex: flex[i], child: cells[i]));
+      }
+      return items;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(children: _rowCells([
+            _header('#'),
+            _header('Nome'),
+            _header('E-mail'),
+            _header('Telefone'),
+            _header('Documento'),
+            _header('Unidade'),
+            _header('Ações'),
+          ])),
+        ),
+        ...list.map((c) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: cs.outlineVariant.withOpacity(0.2))),
+            ),
+            child: Row(children: _rowCells([
+              Text('${list.indexOf(c) + 1}', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant)),
+              _cell(c.nome, bold: true),
+              _cell(c.email ?? '---'),
+              _cell(c.telefone ?? '---'),
+              _cell(c.cpfCnpj ?? '---'),
+              _cell(c.unidadeArmazenadoraNome ?? '---'),
               PopupMenuButton<int>(
-                icon: Icon(Icons.more_vert_rounded, size: 20, color: cs.onSurfaceVariant),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 elevation: 2,
                 color: cs.surfaceContainerLow,
                 onSelected: (value) {
-                  if (value == 0) _showClienteForm(context, cliente: cliente);
-                  if (value == 1) _confirmDelete(context, cliente);
+                  if (value == 0) _showClienteForm(context, cliente: c);
+                  if (value == 1) _confirmDelete(context, c);
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
@@ -178,20 +160,96 @@ class ClientesView extends GetView<ClientesController> {
                   PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                 ],
               ),
+            ])),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildClienteCompactCard(BuildContext context, ClienteModel cliente) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.person_rounded, color: cs.onPrimary, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(cliente.nome, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      if (cliente.email != null)
+                        Text(cliente.email!, style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+                PopupMenuButton<int>(
+                  icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 2,
+                  color: cs.surfaceContainerLow,
+                  onSelected: (value) {
+                    if (value == 0) _showClienteForm(context, cliente: cliente);
+                    if (value == 1) _confirmDelete(context, cliente);
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                    if (Get.find<HomeController>().isAdmin)
+                    PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                if (cliente.telefone != null)
+                  _compactInfo(cs, Icons.phone_outlined, cliente.telefone!),
+                if (cliente.telefone != null && cliente.cpfCnpj != null)
+                  const SizedBox(width: 12),
+                if (cliente.cpfCnpj != null)
+                  _compactInfo(cs, Icons.badge_outlined, cliente.cpfCnpj!),
+              ],
+            ),
+            if (cliente.endereco != null) ...[
+              const SizedBox(height: 4),
+              _compactInfo(cs, Icons.location_on_outlined, cliente.endereco!),
             ],
-          ),
+            if (cliente.unidadeArmazenadoraNome != null) ...[
+              const SizedBox(height: 4),
+              _compactInfo(cs, Icons.agriculture_outlined, cliente.unidadeArmazenadoraNome!),
+            ],
+          ],
         ),
       ),
     );
   }
 
-  Widget _infoRow(ColorScheme cs, IconData icon, String text) {
+  Widget _compactInfo(ColorScheme cs, IconData icon, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 13, color: cs.onSurfaceVariant),
         const SizedBox(width: 4),
-        Text(text, style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant)),
+        Text(text, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: cs.onSurface)),
       ],
     );
   }

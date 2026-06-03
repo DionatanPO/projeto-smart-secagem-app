@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../../../core/models/unidade_armazenadora_model.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/unidade_armazenadora_management_controller.dart';
@@ -73,15 +72,15 @@ class UnidadeArmazenadoraManagementView extends GetView<UnidadeArmazenadoraManag
                 if (unidades.isEmpty) {
                   return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-                return GridView.builder(
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 420,
-                    mainAxisExtent: isDesktop ? 176 : 200,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                  ),
+                if (isDesktop) {
+                  return SingleChildScrollView(
+                    child: _buildUnidadesTable(context, cs, unidades),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.all(4),
                   itemCount: unidades.length,
-                  itemBuilder: (_, i) => _buildUnidadeCard(context, unidades[i]),
+                  itemBuilder: (_, i) => _buildUnidadeCompactCard(context, unidades[i]),
                 );
               }),
             ),
@@ -100,85 +99,137 @@ class UnidadeArmazenadoraManagementView extends GetView<UnidadeArmazenadoraManag
     );
   }
 
-  Widget _buildUnidadeCard(BuildContext context, UnidadeArmazenadoraModel unidade) {
-    final cs = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _showUnidadeForm(context, unidade: unidade),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(Icons.agriculture_rounded, color: cs.onPrimary, size: 22),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(unidade.name, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, color: cs.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on_rounded, size: 14, color: cs.onSurfaceVariant),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(unidade.location ?? 'Sem localização', style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<int>(
-                    icon: Icon(Icons.more_vert_rounded, size: 20, color: cs.onSurfaceVariant),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 2,
-                    color: cs.surfaceContainerLow,
-                    onSelected: (value) {
-                      if (value == 0) _showUnidadeForm(context, unidade: unidade);
-                      if (value == 1) controller.deleteUnidade(unidade.id!);
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
-                      if (Get.find<HomeController>().isAdmin)
-                      PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
-                    ],
-                  ),
+  Widget _buildUnidadesTable(BuildContext context, ColorScheme cs, List<UnidadeArmazenadoraModel> list) {
+    const flex = [7, 18, 14, 16, 9];
+    const gap = 6.0;
+
+    Widget _header(String text) => Text(text, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.5), overflow: TextOverflow.ellipsis);
+
+    Widget _cell(String text, {bool bold = false}) => Text(text, style: GoogleFonts.inter(fontSize: 12, fontWeight: bold ? FontWeight.w600 : FontWeight.w400, color: cs.onSurface), overflow: TextOverflow.ellipsis, maxLines: 1);
+
+    List<Widget> _rowCells(List<Widget> cells) {
+      final items = <Widget>[];
+      for (int i = 0; i < cells.length; i++) {
+        if (i > 0) items.add(const SizedBox(width: gap));
+        items.add(Expanded(flex: flex[i], child: cells[i]));
+      }
+      return items;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(children: _rowCells([
+            _header('#'),
+            _header('Nome'),
+            _header('Localização'),
+            _header('Descrição'),
+            _header('Ações'),
+          ])),
+        ),
+        ...list.map((u) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: cs.outlineVariant.withOpacity(0.2))),
+            ),
+            child: Row(children: _rowCells([
+              Text('${list.indexOf(u) + 1}', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant)),
+              _cell(u.name, bold: true),
+              _cell(u.location ?? '---'),
+              _cell(u.description ?? '---'),
+              PopupMenuButton<int>(
+                icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 2,
+                color: cs.surfaceContainerLow,
+                onSelected: (value) {
+                  if (value == 0) _showUnidadeForm(context, unidade: u);
+                  if (value == 1 && Get.find<HomeController>().isAdmin) controller.deleteUnidade(u.id!);
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                  if (Get.find<HomeController>().isAdmin)
+                  PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                 ],
               ),
-              if (unidade.description != null && unidade.description!.isNotEmpty) ...[
-                const Spacer(),
-                Text(unidade.description!, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant.withOpacity(0.8)), maxLines: 2, overflow: TextOverflow.ellipsis),
-              ],
-              const Spacer(),
-              if (unidade.createdAt != null)
-                Row(
-                  children: [
-                    Icon(Icons.schedule_rounded, size: 14, color: cs.onSurfaceVariant.withOpacity(0.6)),
-                    const SizedBox(width: 4),
-                    Text(DateFormat('dd/MM/yyyy').format(unidade.createdAt!), style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant.withOpacity(0.6))),
+            ])),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildUnidadeCompactCard(BuildContext context, UnidadeArmazenadoraModel unidade) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.agriculture_rounded, color: cs.onPrimary, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(unidade.name, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
+                PopupMenuButton<int>(
+                  icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 2,
+                  color: cs.surfaceContainerLow,
+                  onSelected: (value) {
+                    if (value == 0) _showUnidadeForm(context, unidade: unidade);
+                    if (value == 1 && Get.find<HomeController>().isAdmin) controller.deleteUnidade(unidade.id!);
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                    if (Get.find<HomeController>().isAdmin)
+                    PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                   ],
                 ),
+              ],
+            ),
+            if (unidade.location != null || unidade.description != null) ...[
+              const SizedBox(height: 8),
+              if (unidade.location != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: _compactInfo(cs, Icons.location_on_rounded, unidade.location!),
+                ),
+              if (unidade.description != null)
+                _compactInfo(cs, Icons.notes_rounded, unidade.description!),
             ],
-          ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _compactInfo(ColorScheme cs, IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: cs.onSurfaceVariant),
+        const SizedBox(width: 4),
+        Expanded(child: Text(text, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: cs.onSurface))),
+      ],
     );
   }
 

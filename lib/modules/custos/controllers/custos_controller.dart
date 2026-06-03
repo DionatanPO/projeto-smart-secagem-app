@@ -1,16 +1,23 @@
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
-import '../../../core/models/processo_model.dart';
-import '../../../core/models/batch_model.dart';
-import '../../../core/models/secador_model.dart';
 import '../../../core/models/custo_processo_model.dart';
+import '../../../core/models/secador_model.dart';
 
 class CustosController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
   final processos = <CustoProcessoModel>[].obs;
+  final filtered = <CustoProcessoModel>[].obs;
   final isLoading = false.obs;
+
+  // Filters
+  final selectedSecadorId = Rx<int?>(null);
+  final dataInicio = Rx<DateTime?>(null);
+  final dataFim = Rx<DateTime?>(null);
+
+  // Secadores for filter dropdown
+  final secadores = <SecadorModel>[].obs;
 
   @override
   void onInit() {
@@ -22,37 +29,17 @@ class CustosController extends GetxController {
     isLoading.value = true;
     try {
       final results = await Future.wait([
-        _apiService.dio.get('processos/'),
-        _apiService.dio.get('lotes/'),
+        _apiService.dio.get('custos/secagem/'),
         _apiService.dio.get('secadores/'),
       ]);
 
-      final processosRaw = results[0].data as List;
-      final lotesRaw = results[1].data as List;
-      final secadoresRaw = results[2].data as List;
+      final raw = results[0].data as List;
+      processos.assignAll(raw.map((j) => CustoProcessoModel.fromJson(j)));
 
-      final lotesMap = <int, BatchModel>{};
-      for (final l in lotesRaw) {
-        final b = BatchModel.fromJson(l);
-        if (b.id != null) lotesMap[b.id!] = b;
-      }
+      final secRaw = results[1].data as List;
+      secadores.assignAll(secRaw.map((j) => SecadorModel.fromJson(j)));
 
-      final secadoresMap = <int, SecadorModel>{};
-      for (final s in secadoresRaw) {
-        final sec = SecadorModel.fromJson(s);
-        if (sec.id != null) secadoresMap[sec.id!] = sec;
-      }
-
-      processos.assignAll(
-        processosRaw.map((pJson) {
-          final p = ProcessoModel.fromJson(pJson);
-          return CustoProcessoModel(
-            processo: p,
-            lote: p.loteId != null ? lotesMap[p.loteId] : null,
-            secador: p.secadorId != null ? secadoresMap[p.secadorId] : null,
-          );
-        }),
-      );
+      aplicarFiltros();
     } on DioException catch (e) {
       Get.snackbar('Erro', 'Falha ao carregar dados: ${e.message}');
     } catch (e) {
@@ -62,4 +49,50 @@ class CustosController extends GetxController {
     }
   }
 
+  void aplicarFiltros() {
+    filtered.assignAll(processos.where((p) {
+      if (selectedSecadorId.value != null && p.secadorId != selectedSecadorId.value) {
+        return false;
+      }
+      if (dataInicio.value != null && p.dataInicio.isBefore(dataInicio.value!)) {
+        return false;
+      }
+      if (dataFim.value != null && p.dataInicio.isAfter(dataFim.value!)) {
+        return false;
+      }
+      return true;
+    }));
+  }
+
+  void setSecador(int? id) {
+    selectedSecadorId.value = id;
+    aplicarFiltros();
+  }
+
+  void setDataInicio(DateTime? d) {
+    dataInicio.value = d;
+    aplicarFiltros();
+  }
+
+  void setDataFim(DateTime? d) {
+    dataFim.value = d;
+    aplicarFiltros();
+  }
+
+  void limparFiltros() {
+    selectedSecadorId.value = null;
+    dataInicio.value = null;
+    dataFim.value = null;
+    aplicarFiltros();
+  }
+
+  // Aggregated totals
+  double get totalGeral => filtered.fold(0, (sum, p) => sum + p.custoTotal);
+  double get totalCombustivel => filtered.fold(0, (sum, p) => sum + p.custoCombustivel);
+  double get totalEnergia => filtered.fold(0, (sum, p) => sum + p.custoEnergia);
+  double get totalMaoObra => filtered.fold(0, (sum, p) => sum + p.custoMaoObra);
+  double get totalManutencao => filtered.fold(0, (sum, p) => sum + p.custoManutencao);
+  double get totalDepreciacao => filtered.fold(0, (sum, p) => sum + p.custoDepreciacao);
+  double get totalHoras => filtered.fold(0, (sum, p) => sum + p.duracaoHoras);
+  int get totalProcessos => filtered.length;
 }

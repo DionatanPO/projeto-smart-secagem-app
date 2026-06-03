@@ -53,7 +53,7 @@ class DashboardView extends GetView<DashboardController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('Resumo IA'),
         actions: [
           Obx(() => controller.isLoading
               ? const Padding(

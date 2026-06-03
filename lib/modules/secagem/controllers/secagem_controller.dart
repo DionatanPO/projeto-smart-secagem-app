@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/secador_model.dart';
+import '../../../core/models/sensor_model.dart';
+import '../../../core/models/telemetry_model.dart';
 import '../../unidade_armazenadora_management/controllers/unidade_armazenadora_management_controller.dart';
 import '../../../core/models/unidade_armazenadora_model.dart';
 
@@ -87,5 +89,27 @@ class SecagemController extends GetxController {
     } catch (e) {
       Get.snackbar('Erro', 'Falha ao remover secador');
     }
+  }
+
+  Future<List<SensorModel>> getSensores(int secadorId) async {
+    try {
+      final response = await _apiService.dio.get('sensores/', queryParameters: {'secador': secadorId});
+      if (response.statusCode == 200) {
+        return (response.data as List).map((json) => SensorModel.fromJson(json)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future<List<TelemetryModel>> getTelemetria(int sensorId, {String? data}) async {
+    try {
+      final params = <String, dynamic>{'sensor': sensorId};
+      if (data != null) params['data'] = data;
+      final response = await _apiService.dio.get('telemetria/', queryParameters: params);
+      if (response.statusCode == 200) {
+        return (response.data as List).map((json) => TelemetryModel.fromJson(json)).toList();
+      }
+    } catch (_) {}
+    return [];
   }
 }

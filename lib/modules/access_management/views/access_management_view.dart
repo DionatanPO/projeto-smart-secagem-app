@@ -77,11 +77,15 @@ class AccessManagementView extends GetView<AccessManagementController> {
                 if (list.isEmpty) {
                   return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-                return ListView.separated(
+                if (isDesktop) {
+                  return SingleChildScrollView(
+                    child: _buildUsersTable(context, cs, list),
+                  );
+                }
+                return ListView.builder(
                   padding: const EdgeInsets.all(4),
                   itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (_, i) => _buildUserCard(context, list[i]),
+                  itemBuilder: (_, i) => _buildUserCompactCard(context, list[i]),
                 );
               }),
             ),
@@ -100,66 +104,65 @@ class AccessManagementView extends GetView<AccessManagementController> {
     );
   }
 
-  Widget _buildUserCard(BuildContext context, UserModel user) {
-    final cs = Theme.of(context).colorScheme;
-    final isAdminRole = user.accountType == 'super_admin' || user.accountType == 'admin';
-    final avatarColor = isAdminRole ? cs.primary : Colors.orange;
+  Widget _buildUsersTable(BuildContext context, ColorScheme cs, List<UserModel> list) {
+    const flex = [6, 20, 22, 14, 8];
+    const gap = 6.0;
 
-    return Card(
-      elevation: 0,
-      color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _showUserForm(context, user: user),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-          child: Row(
-            children: [
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  color: avatarColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : '?',
-                    style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: avatarColor),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(child: Text(user.displayName, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface), overflow: TextOverflow.ellipsis)),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: (isAdminRole ? cs.primary : Colors.orange).withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(user.accountType.toUpperCase(), style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: avatarColor, letterSpacing: 0.3)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(user.email, style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant)),
-                  ],
-                ),
-              ),
+    Widget _header(String text) => Text(text, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.5), overflow: TextOverflow.ellipsis);
+
+    Widget _cell(String text, {bool bold = false}) => Text(text, style: GoogleFonts.inter(fontSize: 12, fontWeight: bold ? FontWeight.w600 : FontWeight.w400, color: cs.onSurface), overflow: TextOverflow.ellipsis, maxLines: 1);
+
+    List<Widget> _rowCells(List<Widget> cells) {
+      final items = <Widget>[];
+      for (int i = 0; i < cells.length; i++) {
+        if (i > 0) items.add(const SizedBox(width: gap));
+        items.add(Expanded(flex: flex[i], child: cells[i]));
+      }
+      return items;
+    }
+
+    Widget _roleBadge(String role) {
+      final isAdmin = role == 'super_admin' || role == 'admin';
+      final clr = isAdmin ? cs.primary : Colors.orange;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+        decoration: BoxDecoration(color: clr.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+        child: Text(role.toUpperCase(), style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: clr, letterSpacing: 0.3)),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(children: _rowCells([
+            _header('#'),
+            _header('Nome'),
+            _header('E-mail'),
+            _header('Acesso'),
+            _header('Ações'),
+          ])),
+        ),
+        ...list.map((u) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: cs.outlineVariant.withOpacity(0.2))),
+            ),
+            child: Row(children: _rowCells([
+              Text('${list.indexOf(u) + 1}', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant)),
+              _cell(u.displayName, bold: true),
+              _cell(u.email),
+              _roleBadge(u.accountType),
               PopupMenuButton<int>(
-                icon: Icon(Icons.more_vert_rounded, size: 20, color: cs.onSurfaceVariant),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 elevation: 2,
                 color: cs.surfaceContainerLow,
                 onSelected: (value) {
-                  if (value == 0) _showUserForm(context, user: user);
-                  if (value == 1) _confirmDelete(context, user);
+                  if (value == 0) _showUserForm(context, user: u);
+                  if (value == 1) _confirmDelete(context, u);
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
@@ -167,8 +170,79 @@ class AccessManagementView extends GetView<AccessManagementController> {
                   PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
                 ],
               ),
-            ],
-          ),
+            ])),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildUserCompactCard(BuildContext context, UserModel user) {
+    final cs = Theme.of(context).colorScheme;
+    final isAdminRole = user.accountType == 'super_admin' || user.accountType == 'admin';
+    final avatarColor = isAdminRole ? cs.primary : Colors.orange;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 0,
+      color: cs.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
+        child: Row(
+          children: [
+            Container(
+              width: 40, height: 40,
+              decoration: BoxDecoration(
+                color: avatarColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : '?',
+                  style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: avatarColor),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(child: Text(user.displayName, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface), overflow: TextOverflow.ellipsis)),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: (isAdminRole ? cs.primary : Colors.orange).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(user.accountType.toUpperCase(), style: GoogleFonts.inter(fontSize: 8, fontWeight: FontWeight.w700, color: avatarColor, letterSpacing: 0.3)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(user.email, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            PopupMenuButton<int>(
+              icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              elevation: 2,
+              color: cs.surfaceContainerLow,
+              onSelected: (value) {
+                if (value == 0) _showUserForm(context, user: user);
+                if (value == 1) _confirmDelete(context, user);
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
+                if (Get.find<HomeController>().isAdmin)
+                PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
+              ],
+            ),
+          ],
         ),
       ),
     );
