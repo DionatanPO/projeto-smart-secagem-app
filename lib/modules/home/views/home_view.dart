@@ -154,13 +154,13 @@ class HomeView extends GetView<HomeController> {
     final sections = [
       ('Principal', [
         (0, 'Projeto', Icons.architecture_rounded),
+        (14, 'Processos', Icons.history_rounded),
       ]),
       ('Monitoramento', [
         (2, 'Unidades Armazenadoras', Icons.location_on_rounded),
         (3, 'Silos', Icons.warehouse_rounded),
         (12, 'Lotes', Icons.inventory_2_rounded),
         (13, 'Secadores', Icons.waves_rounded),
-        (14, 'Processos', Icons.history_rounded),
         (15, 'Clientes', Icons.people_alt_rounded),
       ]),
       ('Financeiro', [

@@ -18,6 +18,9 @@ class BatchModel {
   String? clienteNome;
   String status;
   String? observacoes;
+  String? placaCaminhao;
+  String? motoristaNome;
+  double? pesoCaminhao;
 
   BatchModel({
     this.id,
@@ -39,6 +42,9 @@ class BatchModel {
     this.clienteNome,
     required this.status,
     this.observacoes,
+    this.placaCaminhao,
+    this.motoristaNome,
+    this.pesoCaminhao,
   });
 
   factory BatchModel.fromJson(Map<String, dynamic> json) {
@@ -62,6 +68,9 @@ class BatchModel {
       clienteNome: json['cliente_nome'],
       status: json['status'],
       observacoes: json['observacoes'],
+      placaCaminhao: json['placa_caminhao'],
+      motoristaNome: json['motorista_nome'],
+      pesoCaminhao: json['peso_caminhao'] != null ? (json['peso_caminhao'] as num).toDouble() : null,
     );
   }
 
@@ -82,6 +91,9 @@ class BatchModel {
       'cliente': cliente,
       'status': status,
       'observacoes': observacoes,
+      'placa_caminhao': placaCaminhao,
+      'motorista_nome': motoristaNome,
+      'peso_caminhao': pesoCaminhao,
     };
   }
 }

@@ -13,6 +13,7 @@ class ProcessoModel {
   final String status;
   final int? responsavelId;
   final String? responsavelNome;
+  final Map<String, dynamic>? dadosExtras;
 
   ProcessoModel({
     this.id,
@@ -29,6 +30,7 @@ class ProcessoModel {
     required this.status,
     this.responsavelId,
     this.responsavelNome,
+    this.dadosExtras,
   });
 
   factory ProcessoModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class ProcessoModel {
       status: json['status'],
       responsavelId: json['responsavel'],
       responsavelNome: json['responsavel_nome'],
+      dadosExtras: json['dados_extras'] is Map<String, dynamic> ? json['dados_extras'] : null,
     );
   }
 
@@ -60,6 +63,7 @@ class ProcessoModel {
       'data_inicio': dataInicio.toIso8601String(),
       'data_fim': dataFim?.toIso8601String(),
       'status': status,
+      if (dadosExtras != null) 'dados_extras': dadosExtras,
     };
   }
 }

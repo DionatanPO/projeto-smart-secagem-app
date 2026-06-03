@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../../core/models/batch_model.dart';
+import '../../../core/models/processo_model.dart';
 import '../../../core/services/api_service.dart';
 import '../../silo_management/controllers/silo_management_controller.dart';
 
@@ -54,10 +55,20 @@ class BatchManagementController extends GetxController {
       isLoading.value = true;
       final response = await _apiService.dio.post('lotes/', data: batch.toJson());
       if (response.statusCode == 201) {
+        final novoLote = BatchModel.fromJson(response.data);
         getBatches();
         if (Get.isRegistered<SiloManagementController>()) {
           Get.find<SiloManagementController>().getSilos();
         }
+        final processo = ProcessoModel(
+          tipoProcesso: 'Triagem',
+          loteId: novoLote.id,
+          dataInicio: DateTime.now(),
+          status: 'Iniciada',
+        );
+        try {
+          await _apiService.dio.post('processos/', data: processo.toJson());
+        } catch (_) {}
         Get.back();
         Get.snackbar('Sucesso', 'Lote cadastrado com sucesso');
       }
