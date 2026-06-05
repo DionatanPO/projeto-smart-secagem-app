@@ -39,7 +39,7 @@ class UnidadeArmazenadoraManagementView extends GetView<UnidadeArmazenadoraManag
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Unidades Armazenadoras',
+                          'Unidades de Beneficiamento de Grãos',
                           style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
                         ),
                       ),

@@ -46,8 +46,10 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  NavigationDrawer _buildDrawer(BuildContext context) {
-    return NavigationDrawer(
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      width: 420,
+      child: NavigationDrawer(
       selectedIndex: controller.selectedIndex.value,
       onDestinationSelected: (index) {
         controller.changePage(index);
@@ -59,6 +61,7 @@ class HomeView extends GetView<HomeController> {
           children: _buildAllDestinations(context: context, useDrawer: true),
         )),
       ],
+        ),
     );
   }
 
@@ -159,7 +162,7 @@ class HomeView extends GetView<HomeController> {
         (14, 'Processos', Icons.history_rounded),
       ]),
       ('Monitoramento', [
-        (2, 'Unidades Armazenadoras', Icons.location_on_rounded),
+        (2, 'Unidades de Beneficiamento de Grãos', Icons.location_on_rounded),
         (3, 'Silos', Icons.warehouse_rounded),
         (12, 'Lotes', Icons.inventory_2_rounded),
         (13, 'Secadores', Icons.waves_rounded),
@@ -245,12 +248,15 @@ class HomeView extends GetView<HomeController> {
                 children: [
                   Icon(icon, size: 22, color: color),
                   const SizedBox(width: 12),
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: color,
+                  Flexible(
+                    child: Text(
+                      title,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: color,
+                      ),
                     ),
                   ),
                 ],

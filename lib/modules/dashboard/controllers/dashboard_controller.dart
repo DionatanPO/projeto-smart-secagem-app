@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/resumo_model.dart';
 
@@ -8,6 +9,8 @@ enum DashboardStatus { idle, loading, success, error }
 
 class DashboardController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
+  final _storage = GetStorage();
+  static const _systemPromptKey = 'dashboard_system_prompt';
 
   final status = DashboardStatus.idle.obs;
   final responseTime = ''.obs;
@@ -18,6 +21,7 @@ class DashboardController extends GetxController {
   final metricsData = RxMap<String, dynamic>();
 
   StreamSubscription<Map<String, dynamic>>? _streamSubscription;
+  final systemPrompt = ''.obs;
 
   bool get isLoading => status.value == DashboardStatus.loading;
   bool get hasError => status.value == DashboardStatus.error;
@@ -26,6 +30,7 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    systemPrompt.value = _storage.read(_systemPromptKey) ?? '';
     fetchDashboardData();
   }
 
@@ -33,6 +38,12 @@ class DashboardController extends GetxController {
   void onClose() {
     _streamSubscription?.cancel();
     super.onClose();
+  }
+
+  void applyPrompt(String prompt) {
+    systemPrompt.value = prompt;
+    _storage.write(_systemPromptKey, prompt);
+    fetchDashboardData();
   }
 
   Future<void> fetchDashboardData() async {
@@ -60,6 +71,7 @@ class DashboardController extends GetxController {
 
     _streamSubscription = _apiService.postStream('chat-stream/', {
       'prompt': prompt,
+      if (systemPrompt.value.isNotEmpty) 'system_prompt': systemPrompt.value,
       'use_rag': false,
     }).listen(
       (event) {
