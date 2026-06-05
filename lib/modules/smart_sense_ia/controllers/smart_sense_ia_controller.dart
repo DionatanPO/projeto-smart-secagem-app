@@ -7,7 +7,6 @@ import '../../../core/services/api_service.dart';
 class SmartSenseIAController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
 
-  // Chat Logic
   final chatMessages = <Map<String, dynamic>>[].obs;
   final chatInputController = TextEditingController();
   final scrollController = ScrollController();
@@ -39,7 +38,6 @@ class SmartSenseIAController extends GetxController {
     final text = chatInputController.text.trim();
     if (text.isEmpty) return;
 
-    // Adiciona mensagem do usuário localmente antes da chamada
     chatMessages.add({
       'isUser': true,
       'text': text,
@@ -50,7 +48,6 @@ class SmartSenseIAController extends GetxController {
     scrollToBottom();
     isChatLoading.value = true;
 
-    // Cria placeholder para a resposta que será preenchida via stream
     final responseIndex = chatMessages.length;
     chatMessages.add({
       'isUser': false,
@@ -58,7 +55,6 @@ class SmartSenseIAController extends GetxController {
       'time': DateTime.now(),
     });
 
-    // Monta o histórico
     final history = chatMessages
         .take(responseIndex)
         .map((m) => {
@@ -67,26 +63,57 @@ class SmartSenseIAController extends GetxController {
             })
         .toList();
 
+    Map<String, dynamic>? contexto;
+    try {
+      contexto = await _apiService.fetchContext();
+    } catch (_) {}
+
+    final prompt = contexto != null
+        ? 'CONTEXTO:\n${jsonEncode(contexto)}\n\nPERGUNTA: $text'
+        : text;
+
     _streamSubscription = _apiService.postStream('chat-stream/', {
-      'prompt': text,
+      'prompt': prompt,
       'history': history,
       'use_rag': false,
     }).listen(
       (event) {
-        final type = event['type'] as String?;
-        final content = ApiService.extractContent(event);
+        final eventType = event['event'] as String?;
 
-        if (type == 'error') {
-          chatMessages[responseIndex]['text'] = event['content'] as String? ?? 'Erro ao obter resposta.';
-          chatMessages.refresh();
-          isChatLoading.value = false;
-          return;
-        }
-
-        if (content != null && content.isNotEmpty) {
-          chatMessages[responseIndex]['text'] = (chatMessages[responseIndex]['text'] as String) + content;
-          chatMessages.refresh();
-          scrollToBottom();
+        switch (eventType) {
+          case 'message':
+            final data = event['data'] as String?;
+            if (data != null && data.isNotEmpty) {
+              chatMessages[responseIndex]['text'] = (chatMessages[responseIndex]['text'] as String) + data;
+              chatMessages.refresh();
+              scrollToBottom();
+            }
+            break;
+          case 'error':
+            chatMessages[responseIndex]['text'] = event['data'] as String? ?? 'Erro ao obter resposta.';
+            chatMessages.refresh();
+            isChatLoading.value = false;
+            break;
+          case 'thought':
+          case 'metrics':
+            break;
+          case 'done':
+            break;
+          default:
+            final type = event['type'] as String?;
+            final content = ApiService.extractContent(event);
+            if (type == 'error') {
+              chatMessages[responseIndex]['text'] = event['content'] as String? ?? 'Erro ao obter resposta.';
+              chatMessages.refresh();
+              isChatLoading.value = false;
+              return;
+            }
+            if (content != null && content.isNotEmpty) {
+              chatMessages[responseIndex]['text'] = (chatMessages[responseIndex]['text'] as String) + content;
+              chatMessages.refresh();
+              scrollToBottom();
+            }
+            break;
         }
       },
       onError: (e) {
@@ -96,19 +123,7 @@ class SmartSenseIAController extends GetxController {
       },
       onDone: () {
         isChatLoading.value = false;
-        _tryExtractResposta(responseIndex);
       },
     );
-  }
-
-  void _tryExtractResposta(int index) {
-    final fullText = chatMessages[index]['text'] as String;
-    if (fullText.trim().isEmpty) return;
-
-    final extracted = ApiService.extractRespostaOuResumo(fullText);
-    if (extracted != fullText) {
-      chatMessages[index]['text'] = extracted;
-      chatMessages.refresh();
-    }
   }
 }

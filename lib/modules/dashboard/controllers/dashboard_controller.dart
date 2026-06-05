@@ -14,6 +14,8 @@ class DashboardController extends GetxController {
   final modelResponse = Rxn<ResumoModel>();
   final errorMessage = ''.obs;
   final lastUpdated = Rxn<DateTime>();
+  final thoughtContent = ''.obs;
+  final metricsData = RxMap<String, dynamic>();
 
   StreamSubscription<Map<String, dynamic>>? _streamSubscription;
 
@@ -38,27 +40,70 @@ class DashboardController extends GetxController {
 
     status.value = DashboardStatus.loading;
     errorMessage.value = '';
+    thoughtContent.value = '';
+    metricsData.clear();
+    modelResponse.value = null;
 
     final stopwatch = Stopwatch()..start();
-    final buffer = StringBuffer();
     final completer = Completer<void>();
+    var fullResponse = '';
+
+    Map<String, dynamic>? contexto;
+    try {
+      contexto = await _apiService.fetchContext();
+    } catch (_) {}
+
+    final prompt = contexto != null
+        ? '<contexto_operacional>\n${jsonEncode(contexto)}\n</contexto_operacional>\n\n'
+          'Com base no contexto operacional acima, analise os dados e faça um resumo.'
+        : 'oi';
 
     _streamSubscription = _apiService.postStream('chat-stream/', {
-      'prompt': 'Forneça um resumo operacional em texto Markdown, com tabelas onde aplicável. Ao final, detecte possíveis anomalias.',
+      'prompt': prompt,
       'use_rag': false,
     }).listen(
       (event) {
-        final content = ApiService.extractContent(event);
+        final eventType = event['event'] as String?;
 
-        if (event['type'] == 'error') {
-          errorMessage.value = event['content'] as String? ?? 'Erro ao consultar IA.';
-          status.value = DashboardStatus.error;
-          if (!completer.isCompleted) completer.complete();
-          return;
-        }
-
-        if (content != null && content.isNotEmpty) {
-          buffer.write(content);
+        switch (eventType) {
+          case 'message':
+            final data = event['data'] as String?;
+            if (data != null && data.isNotEmpty) {
+              fullResponse += data;
+              modelResponse.value = ResumoModel(resposta: fullResponse);
+            }
+            break;
+          case 'thought':
+            final data = event['data'] as String?;
+            if (data != null && data.isNotEmpty) {
+              thoughtContent.value = data;
+            }
+            break;
+          case 'metrics':
+            final data = event['data'];
+            if (data is Map) {
+              metricsData.assignAll(Map<String, dynamic>.from(data));
+            }
+            break;
+          case 'error':
+            errorMessage.value = event['data'] as String? ?? 'Erro ao consultar IA.';
+            status.value = DashboardStatus.error;
+            if (!completer.isCompleted) completer.complete();
+            break;
+          case 'done':
+            break;
+          default:
+            final content = ApiService.extractContent(event);
+            if (content != null && content.isNotEmpty) {
+              fullResponse += content;
+              modelResponse.value = ResumoModel(resposta: fullResponse);
+            }
+            if (event['type'] == 'error') {
+              errorMessage.value = event['content'] as String? ?? 'Erro ao consultar IA.';
+              status.value = DashboardStatus.error;
+              if (!completer.isCompleted) completer.complete();
+            }
+            break;
         }
       },
       onError: (e) {
@@ -69,37 +114,8 @@ class DashboardController extends GetxController {
       onDone: () {
         stopwatch.stop();
         responseTime.value = _formatResponseTime(stopwatch.elapsedMilliseconds);
-
-        String rawResult = buffer.toString().trim();
-        
-        if (rawResult.isEmpty) {
-          errorMessage.value = 'Resposta vazia da IA.';
-          status.value = DashboardStatus.error;
-          if (!completer.isCompleted) completer.complete();
-          return;
-        }
-
-        // Tenta decodificar o resultado como JSON se for um JSON string
-        dynamic decoded;
-        try {
-          if (rawResult.startsWith('{') || rawResult.startsWith('[')) {
-            decoded = jsonDecode(rawResult);
-          }
-        } catch (e) {
-          // Se falhar ao decodificar, trata como texto puro
-        }
-
-        // Constrói o modelo com tratamento seguro
-        if (decoded is Map<String, dynamic>) {
-          modelResponse.value = ResumoModelX.fromJson(decoded);
-        } else {
-          // Se não foi um JSON válido, ou era um tipo inesperado, usa rawResult
-          modelResponse.value = ResumoModel(resposta: rawResult);
-        }
-        
         lastUpdated.value = DateTime.now();
         status.value = DashboardStatus.success;
-
         if (!completer.isCompleted) completer.complete();
       },
     );

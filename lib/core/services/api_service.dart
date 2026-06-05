@@ -10,14 +10,13 @@ class ApiService extends GetxService {
   late Dio _dio;
   final _storage = const FlutterSecureStorage();
 
-  static const String baseUrlReal = 'https://apismart.secagemdigital.com/api/';
-  static const String baseUrlEmulator = 'http://localhost:8000/api/';
-  static const String baseUrlLocal = 'http://192.168.1.209:8000/api/';
+  static const String baseUrl = 'http://localhost:8000/api/';
+  static const String baseUrlAI = 'http://localhost:8001/api/';
 
   ApiService() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: baseUrlEmulator,
+        baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 60),
         receiveTimeout: const Duration(seconds: 60),
         headers: {
@@ -57,6 +56,11 @@ class ApiService extends GetxService {
 
   Dio get dio => _dio;
 
+  Future<Map<String, dynamic>> fetchContext() async {
+    final response = await _dio.get('contexto/');
+    return response.data as Map<String, dynamic>;
+  }
+
   static String extractRespostaOuResumo(String raw) {
     raw = raw.trim();
 
@@ -92,6 +96,7 @@ class ApiService extends GetxService {
   }
 
   static String? extractContent(Map<String, dynamic> event) {
+    if (event['data'] is String) return event['data'] as String;
     if (event['resposta'] is String) return event['resposta'] as String;
     if (event['content'] is String) return event['content'] as String;
     if (event['response'] is String) return event['response'] as String;
@@ -112,14 +117,12 @@ class ApiService extends GetxService {
   }
 
   Stream<Map<String, dynamic>> postStream(String endpoint, Map<String, dynamic> data) async* {
-    final url = Uri.parse(_dio.options.baseUrl + endpoint);
-    final token = await _storage.read(key: 'token');
+    final url = Uri.parse(baseUrlAI + endpoint);
     final client = http.Client();
 
     try {
       final request = http.Request('POST', url)
         ..headers['Content-Type'] = 'application/json'
-        ..headers['Authorization'] = token != null ? 'Token $token' : ''
         ..body = jsonEncode(data);
 
       final response = await client.send(request);
