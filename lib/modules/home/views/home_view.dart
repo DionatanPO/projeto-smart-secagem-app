@@ -154,6 +154,8 @@ class HomeView extends GetView<HomeController> {
     final sections = [
       ('Principal', [
         (0, 'Projeto', Icons.architecture_rounded),
+        (1, 'Resumo IA', Icons.dashboard_rounded),
+        (9, 'Smart Sense IA', Icons.psychology_rounded),
         (14, 'Processos', Icons.history_rounded),
       ]),
       ('Monitoramento', [
@@ -171,10 +173,6 @@ class HomeView extends GetView<HomeController> {
         (4, 'Dispositivos', Icons.hub_rounded),
         (5, 'Notificações', Icons.notifications_rounded),
         (7, 'Acesso', Icons.admin_panel_settings_rounded),
-      ]),
-      ('Inteligência', [
-        (1, 'Resumo IA', Icons.dashboard_rounded),
-        (9, 'Smart Sense IA', Icons.psychology_rounded),
       ]),
     ];
 

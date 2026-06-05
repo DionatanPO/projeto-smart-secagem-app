@@ -145,8 +145,7 @@ class ProcessosView extends GetView<ProcessosController> {
 
       for (final p in processos) {
         final statusColor = _getStatusColor(p.status);
-        final duration = (p.dataFim ?? DateTime.now()).difference(p.dataInicio);
-        final durationStr = '${duration.inHours}h ${duration.inMinutes % 60}m';
+        final durationStr = _formatDuracao(_calcularDuracao(p));
         sections.add(InkWell(
           onTap: () => _showProcessoDetails(context, p),
           child: Container(
@@ -204,8 +203,7 @@ class ProcessosView extends GetView<ProcessosController> {
 
       for (final p in processos) {
         final statusColor = _getStatusColor(p.status);
-        final duration = (p.dataFim ?? DateTime.now()).difference(p.dataInicio);
-        final durationStr = '${duration.inHours}h ${duration.inMinutes % 60}m';
+        final durationStr = _formatDuracao(_calcularDuracao(p));
         sections.add(Card(
           elevation: 0,
           margin: const EdgeInsets.only(bottom: 12),
@@ -320,20 +318,23 @@ class ProcessosView extends GetView<ProcessosController> {
   }
 
   Widget _actionButtons(ProcessoModel p) {
+    Widget buttons;
     if (p.status == 'Iniciada') {
-      return Row(mainAxisSize: MainAxisSize.min, children: [
+      buttons = Row(mainAxisSize: MainAxisSize.min, children: [
         _actionBtn(Get.context!, Icons.pause_rounded, 'Pausar', const Color(0xFF0288D1), () => controller.changeStatus(p, 'Pausada')),
         const SizedBox(width: 4),
         _actionBtn(Get.context!, Icons.stop_rounded, 'Parar', Colors.red, () => controller.changeStatus(p, 'Finalizada')),
       ]);
     } else if (p.status == 'Pausada') {
-      return Row(mainAxisSize: MainAxisSize.min, children: [
+      buttons = Row(mainAxisSize: MainAxisSize.min, children: [
         _actionBtn(Get.context!, Icons.play_arrow_rounded, 'Iniciar', Colors.green, () => controller.changeStatus(p, 'Iniciada')),
         const SizedBox(width: 4),
         _actionBtn(Get.context!, Icons.cancel_outlined, 'Cancelar', Colors.red, () => controller.changeStatus(p, 'Cancelada')),
       ]);
+    } else {
+      return const SizedBox.shrink();
     }
-    return const SizedBox.shrink();
+    return FittedBox(fit: BoxFit.scaleDown, child: buttons);
   }
 
   Widget _tipoCell(ColorScheme cs, String tipo) {
@@ -778,6 +779,15 @@ class ProcessosView extends GetView<ProcessosController> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     );
   }
+
+  Duration _calcularDuracao(ProcessoModel p) {
+    final total = (p.dataFim ?? DateTime.now()).difference(p.dataInicio);
+    final pausado = Duration(seconds: p.dadosExtras?['tempo_pausado_segundos'] as int? ?? 0);
+    final segundos = total.inSeconds - pausado.inSeconds;
+    return Duration(seconds: segundos < 0 ? 0 : segundos);
+  }
+
+  String _formatDuracao(Duration d) => '${d.inHours}h ${d.inMinutes % 60}m';
 }
 
 class _StageData {

@@ -1,6 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
 
 class SmartSenseIAController extends GetxController {
@@ -12,9 +13,11 @@ class SmartSenseIAController extends GetxController {
   final scrollController = ScrollController();
   final isChatLoading = false.obs;
 
+  StreamSubscription<Map<String, dynamic>>? _streamSubscription;
 
   @override
   void onClose() {
+    _streamSubscription?.cancel();
     scrollController.dispose();
     chatInputController.dispose();
     super.onClose();
@@ -47,48 +50,65 @@ class SmartSenseIAController extends GetxController {
     scrollToBottom();
     isChatLoading.value = true;
 
-    // Monta o histórico no formato esperado pela API (todas as mensagens
-    // anteriores à que acabou de ser adicionada)
+    // Cria placeholder para a resposta que será preenchida via stream
+    final responseIndex = chatMessages.length;
+    chatMessages.add({
+      'isUser': false,
+      'text': '',
+      'time': DateTime.now(),
+    });
+
+    // Monta o histórico
     final history = chatMessages
-        .take(chatMessages.length - 1)
+        .take(responseIndex)
         .map((m) => {
               'role': (m['isUser'] as bool) ? 'user' : 'assistant',
               'content': m['text'] as String,
             })
         .toList();
 
-    try {
-      final response = await _apiService.dio.post(
-        'chat/',
-        options: Options(
-          sendTimeout: const Duration(seconds: 300),
-          receiveTimeout: const Duration(seconds: 300),
-        ),
-        data: {
-          'prompt': text,
-          'history': history,
-          'use_rag': false,
-          'temperature': 0.1,
-        },
-      );
+    _streamSubscription = _apiService.postStream('chat-stream/', {
+      'prompt': text,
+      'history': history,
+      'use_rag': false,
+    }).listen(
+      (event) {
+        final type = event['type'] as String?;
+        final content = ApiService.extractContent(event);
 
-      if (response.statusCode == 200) {
-        chatMessages.add({
-          'isUser': false,
-          'text': response.data['response'] as String,
-          'time': DateTime.now(),
-        });
-        scrollToBottom();
-      }
-    } catch (e) {
-      chatMessages.add({
-        'isUser': false,
-        'text': 'Desculpe, tive um problema ao processar sua pergunta. Verifique se o servidor está online.',
-        'time': DateTime.now(),
-      });
-      scrollToBottom();
-    } finally {
-      isChatLoading.value = false;
+        if (type == 'error') {
+          chatMessages[responseIndex]['text'] = event['content'] as String? ?? 'Erro ao obter resposta.';
+          chatMessages.refresh();
+          isChatLoading.value = false;
+          return;
+        }
+
+        if (content != null && content.isNotEmpty) {
+          chatMessages[responseIndex]['text'] = (chatMessages[responseIndex]['text'] as String) + content;
+          chatMessages.refresh();
+          scrollToBottom();
+        }
+      },
+      onError: (e) {
+        chatMessages[responseIndex]['text'] = "Erro ao receber resposta.";
+        chatMessages.refresh();
+        isChatLoading.value = false;
+      },
+      onDone: () {
+        isChatLoading.value = false;
+        _tryExtractResposta(responseIndex);
+      },
+    );
+  }
+
+  void _tryExtractResposta(int index) {
+    final fullText = chatMessages[index]['text'] as String;
+    if (fullText.trim().isEmpty) return;
+
+    final extracted = ApiService.extractRespostaOuResumo(fullText);
+    if (extracted != fullText) {
+      chatMessages[index]['text'] = extracted;
+      chatMessages.refresh();
     }
   }
 }

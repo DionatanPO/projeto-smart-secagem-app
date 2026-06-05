@@ -103,7 +103,15 @@ class ProcessosController extends GetxController {
 
       if (newStatus == 'Finalizada' || newStatus == 'Cancelada') {
         data['data_fim'] = now.toIso8601String();
-        
+
+        if (processo.status == 'Pausada' && processo.dataFim != null) {
+          final tempoParadoSegundos = now.difference(processo.dataFim!).inSeconds;
+          final currentExtras = Map<String, dynamic>.from(processo.dadosExtras ?? {});
+          final accumulated = (currentExtras['tempo_pausado_segundos'] as int? ?? 0) + tempoParadoSegundos;
+          currentExtras['tempo_pausado_segundos'] = accumulated;
+          data['dados_extras'] = currentExtras;
+        }
+
         if (processo.tipoProcesso == 'Secagem' && processo.secadorId != null) {
           await _apiService.dio.patch('secadores/${processo.secadorId}/', data: {'status': 'Disponível'});
         }
@@ -114,9 +122,11 @@ class ProcessosController extends GetxController {
         data['data_fim'] = now.toIso8601String();
       } else if (newStatus == 'Iniciada') {
         if (processo.status == 'Pausada' && processo.dataFim != null) {
-          final tempoParado = now.difference(processo.dataFim!);
-          final novaDataInicio = processo.dataInicio.add(tempoParado);
-          data['data_inicio'] = novaDataInicio.toIso8601String();
+          final tempoParadoSegundos = now.difference(processo.dataFim!).inSeconds;
+          final currentExtras = Map<String, dynamic>.from(processo.dadosExtras ?? {});
+          final accumulated = (currentExtras['tempo_pausado_segundos'] as int? ?? 0) + tempoParadoSegundos;
+          currentExtras['tempo_pausado_segundos'] = accumulated;
+          data['dados_extras'] = currentExtras;
         }
         data['data_fim'] = null;
       }

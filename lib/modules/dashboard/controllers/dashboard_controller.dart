@@ -1,6 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/models/resumo_model.dart';
 
 enum DashboardStatus { idle, loading, success, error }
 
@@ -9,9 +11,11 @@ class DashboardController extends GetxController {
 
   final status = DashboardStatus.idle.obs;
   final responseTime = ''.obs;
-  final modelResponse = ''.obs;
+  final modelResponse = Rxn<ResumoModel>();
   final errorMessage = ''.obs;
   final lastUpdated = Rxn<DateTime>();
+
+  StreamSubscription<Map<String, dynamic>>? _streamSubscription;
 
   bool get isLoading => status.value == DashboardStatus.loading;
   bool get hasError => status.value == DashboardStatus.error;
@@ -23,6 +27,12 @@ class DashboardController extends GetxController {
     fetchDashboardData();
   }
 
+  @override
+  void onClose() {
+    _streamSubscription?.cancel();
+    super.onClose();
+  }
+
   Future<void> fetchDashboardData() async {
     if (isLoading) return;
 
@@ -30,44 +40,62 @@ class DashboardController extends GetxController {
     errorMessage.value = '';
 
     final stopwatch = Stopwatch()..start();
+    final buffer = StringBuffer();
+    final completer = Completer<void>();
 
-    try {
-      final response = await _apiService.dio.post('chat/',
-        options: Options(
-          sendTimeout: const Duration(seconds: 300),
-          receiveTimeout: const Duration(seconds: 300),
-        ),
-        data: {
-          'prompt': 'Forneça um resumo operacional de ${DateTime.now().toIso8601String()} em texto livre, sem formatação JSON. Ao final, detecte possíveis anomalias com base nos dados disponíveis.',
-          'use_rag': false,
-        });
+    _streamSubscription = _apiService.postStream('chat-stream/', {
+      'prompt': 'Forneça um resumo operacional em texto Markdown, com tabelas onde aplicável. Ao final, detecte possíveis anomalias.',
+      'use_rag': false,
+    }).listen(
+      (event) {
+        final content = ApiService.extractContent(event);
 
-      stopwatch.stop();
-      responseTime.value = _formatResponseTime(stopwatch.elapsedMilliseconds);
+        if (event['type'] == 'error') {
+          errorMessage.value = event['content'] as String? ?? 'Erro ao consultar IA.';
+          status.value = DashboardStatus.error;
+          if (!completer.isCompleted) completer.complete();
+          return;
+        }
 
-      if (response.statusCode == 200) {
-        final data = response.data;
+        if (content != null && content.isNotEmpty) {
+          buffer.write(content);
+        }
+      },
+      onError: (e) {
+        errorMessage.value = 'Erro na transmissão dos dados.';
+        status.value = DashboardStatus.error;
+        if (!completer.isCompleted) completer.complete();
+      },
+      onDone: () {
+        stopwatch.stop();
+        responseTime.value = _formatResponseTime(stopwatch.elapsedMilliseconds);
 
-        modelResponse.value =
-            data['response'] as String? ??
-            data['message'] as String? ??
-            data['text'] as String? ??
-            'Resposta não disponível.';
+        String rawResult = buffer.toString().trim();
+        
+        if (rawResult.isNotEmpty) {
+          try {
+            if (rawResult.startsWith('{')) {
+              final decoded = jsonDecode(rawResult);
+              // Uso da nova abordagem de extensão
+              modelResponse.value = ResumoModelX.fromJson(decoded is Map<String, dynamic> ? decoded : {'resposta': rawResult});
+            } else {
+              modelResponse.value = ResumoModel(resposta: rawResult);
+            }
+          } catch (e) {
+            modelResponse.value = ResumoModel(resposta: rawResult);
+          }
+          
+          lastUpdated.value = DateTime.now();
+          status.value = DashboardStatus.success;
+        } else {
+          errorMessage.value = 'Resposta vazia da IA.';
+          status.value = DashboardStatus.error;
+        }
+        if (!completer.isCompleted) completer.complete();
+      },
+    );
 
-        lastUpdated.value = DateTime.now();
-        status.value = DashboardStatus.success;
-      } else {
-        throw Exception('Status inesperado: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      stopwatch.stop();
-      errorMessage.value = _handleDioError(e);
-      status.value = DashboardStatus.error;
-    } catch (e) {
-      stopwatch.stop();
-      errorMessage.value = 'Erro inesperado. Tente novamente.';
-      status.value = DashboardStatus.error;
-    }
+    await completer.future;
   }
 
   String _formatResponseTime(int ms) {
@@ -75,19 +103,6 @@ class DashboardController extends GetxController {
     return '${(ms / 1000).toStringAsFixed(1)}s';
   }
 
-  String _handleDioError(DioException e) {
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.receiveTimeout:
-        return 'Tempo de conexão esgotado. Verifique sua rede.';
-      case DioExceptionType.connectionError:
-        return 'Sem conexão com o servidor.';
-      case DioExceptionType.badResponse:
-        return 'Erro no servidor (${e.response?.statusCode}).';
-      default:
-        return 'Erro de comunicação com a API.';
-    }
-  }
-
-  Future<void> refresh() => fetchDashboardData();
+  @override
+  void refresh() => fetchDashboardData();
 }

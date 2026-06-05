@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      freezed:freezed:
+        enabled: true
+      json_serializable|json_serializable:
+        enabled: true

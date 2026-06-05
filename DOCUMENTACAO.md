@@ -824,7 +824,115 @@ flutter analyze
 
 ---
 
-## 16. Glossário
+## 16. Arquitetura de IA — Integração entre os Projetos
+
+### 16.1. Visão Geral
+
+O sistema **Smart Secagem** divide sua funcionalidade de IA em **três projetos independentes** que se comunicam em camadas:
+
+```
++---------------------------+       +---------------------------+       +---------------------------+
+|  projeto_smart_secagem    |       |  Projeto-SMART-SECAGEM-API |       |  Projeto-SECAGEMDIGITAL-AI|
+|  (Flutter)                |       |  (Django - Porta 8000)    |       |  (Django - Porta 8001)    |
+|                           |       |                           |       |                           |
+|  - Interface do usuário   | --->  |  - Autenticação (Token)   | --->  |  - Carregamento do modelo |
+|  - Exibição de gráficos   |       |  - Contexto do BD (silos, |       |    LLM (.gguf)            |
+|    e relatórios           |       |    sensores, lotes...)    |       |  - Geração de texto       |
+|  - Chat IA (streaming)    |       |  - Orquestração do prompt |       |  - RAG (busca vetorial)   |
+|  - Resumo operacional     |       |  - CORS / Segurança       |       |  - Streaming NDJSON       |
+|                           |       |                           |       |                           |
++---------------------------+       +---------------------------+       +---------------------------+
+        app:8000                         api:8000                          ai:8001
+```
+
+### 16.2. Fluxo de uma Requisição de IA
+
+1. **Usuário envia mensagem** no Flutter (chat "Silo Sense IA" ou "Resumo IA")
+2. **Flutter** envia `POST /api/chat-stream/` para a **SmartSec API** (`:8000`) com:
+   - `prompt`: texto do usuário
+   - `history`: histórico da conversa (quando aplicável)
+   - `use_rag`: `false` (desativado por padrão)
+   - Autenticação via `Authorization: Token <token>`
+3. **SmartSec API** processa:
+   - Valida o token do usuário
+   - Busca contexto em tempo real do banco de dados via `get_ai_context()`:
+     - Silos, secadores, lotes, processos ativos
+     - Últimas leituras de sensores (temperatura, umidade)
+     - Alertas e anomalias
+     - Custos de secagem
+   - Monta o `system_prompt` final com:
+     - Instrução de formato (Markdown, tabelas, proibição de emojis)
+     - Contexto do banco de dados
+     - System prompt opcional vindo do Flutter
+   - Encaminha para a **SmartSec AI** (`:8001`)
+4. **SmartSec AI** processa:
+   - Recebe o prompt completo + system_prompt
+   - Executa o modelo LLM (Qwen 3.5, GGUF)
+   - Retorna stream NDJSON com eventos:
+     - `{"type": "thought", "content": "..."}` — raciocínio interno
+     - `{"type": "answer", "content": "..."}` — resposta em Markdown
+     - `{"type": "metrics", "content": {"tps": ..., "tokens": ...}}` — métricas
+     - `{"type": "error", "content": "..."}` — erro
+5. **SmartSec API** reencapsula o stream NDJSON e retorna para o Flutter
+6. **Flutter** renderiza os eventos em tempo real:
+   - Conteúdo de `type: "answer"` é exibido com formatação Markdown
+   - Tratamento de erros e timeout
+
+### 16.3. Endpoints da API
+
+| Projeto | Endpoint | Método | Finalidade |
+|---------|----------|--------|------------|
+| SmartSec API | `/api/chat/` | POST | Chat IA (streaming NDJSON) |
+| SmartSec API | `/api/chat-stream/` | POST | Chat IA (streaming NDJSON — mesmo que `/chat/`) |
+| SmartSec AI | `/api/chat-stream/` | POST | Geração de texto com modelo LLM |
+| SmartSec AI | `/api/chat/` | POST | Geração de texto não-streaming |
+| SmartSec AI | `/api/health/` | GET | Health check do modelo |
+
+### 16.4. Formato dos Eventos NDJSON
+
+**SmartSec AI → SmartSec API → Flutter:**
+
+Cada linha é um JSON independente:
+
+```json
+{"type": "thought", "content": "Analisando dados dos sensores..."}
+{"type": "answer", "content": "**Resumo Operacional**"}
+{"type": "answer", "content": "\n\n- **Silo A**: 45% ocupado"}
+{"type": "metrics", "content": {"tps": 15.2, "tokens": 320, "duration": 21.0}}
+```
+
+### 16.5. Tratamento no Flutter
+
+- **SmartSenseIAController** (`smart_sense_ia_controller.dart`):
+  - Usa `postStream()` para consumo em tempo real do NDJSON
+  - Insere o histórico da conversa a cada requisição
+  - Extrai conteúdo de múltiplos formatos: `content`, `response`, `text`, `choices[0].delta.content`
+  - Ao final da stream, tenta extrair campo `resposta` ou `resumo` do JSON gerado
+
+- **DashboardController** (`dashboard_controller.dart`):
+  - Consome o mesmo endpoint com `postStream()`
+  - Prompt fixo solicitando resumo operacional + detecção de anomalias
+  - Geração de PDF do resumo
+
+### 16.6. Variáveis de Ambiente
+
+**SmartSec AI (`.env`):**
+```
+MODEL_PATH=./models/seu_modelo_aqui.gguf
+N_THREADS=6
+N_CTX=8192
+USE_FLASH_ATTN=True
+```
+
+**SmartSec API:**
+```
+FOUNDATION_AI_CHAT_URL=http://127.0.0.1:8001/api/chat/
+FOUNDATION_AI_TIMEOUT=300
+```
+
+---
+
+## 17. Glossário
 
 | Termo                     | Definição                                                                 |
 |---------------------------|---------------------------------------------------------------------------|
