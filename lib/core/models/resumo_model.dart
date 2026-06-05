@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class ResumoModel {
   final String resposta;
 
