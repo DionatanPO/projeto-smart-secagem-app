@@ -72,25 +72,34 @@ class DashboardController extends GetxController {
 
         String rawResult = buffer.toString().trim();
         
-        if (rawResult.isNotEmpty) {
-          try {
-            if (rawResult.startsWith('{')) {
-              final decoded = jsonDecode(rawResult);
-              // Uso da nova abordagem de extensão
-              modelResponse.value = ResumoModelX.fromJson(decoded is Map<String, dynamic> ? decoded : {'resposta': rawResult});
-            } else {
-              modelResponse.value = ResumoModel(resposta: rawResult);
-            }
-          } catch (e) {
-            modelResponse.value = ResumoModel(resposta: rawResult);
-          }
-          
-          lastUpdated.value = DateTime.now();
-          status.value = DashboardStatus.success;
-        } else {
+        if (rawResult.isEmpty) {
           errorMessage.value = 'Resposta vazia da IA.';
           status.value = DashboardStatus.error;
+          if (!completer.isCompleted) completer.complete();
+          return;
         }
+
+        // Tenta decodificar o resultado como JSON se for um JSON string
+        dynamic decoded;
+        try {
+          if (rawResult.startsWith('{') || rawResult.startsWith('[')) {
+            decoded = jsonDecode(rawResult);
+          }
+        } catch (e) {
+          // Se falhar ao decodificar, trata como texto puro
+        }
+
+        // Constrói o modelo com tratamento seguro
+        if (decoded is Map<String, dynamic>) {
+          modelResponse.value = ResumoModelX.fromJson(decoded);
+        } else {
+          // Se não foi um JSON válido, ou era um tipo inesperado, usa rawResult
+          modelResponse.value = ResumoModel(resposta: rawResult);
+        }
+        
+        lastUpdated.value = DateTime.now();
+        status.value = DashboardStatus.success;
+
         if (!completer.isCompleted) completer.complete();
       },
     );
