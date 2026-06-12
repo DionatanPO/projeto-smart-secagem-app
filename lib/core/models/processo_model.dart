@@ -13,6 +13,7 @@ class ProcessoModel {
   final String status;
   final int? responsavelId;
   final String? responsavelNome;
+  final String? observacoes;
   final Map<String, dynamic>? dadosExtras;
 
   ProcessoModel({
@@ -30,6 +31,7 @@ class ProcessoModel {
     required this.status,
     this.responsavelId,
     this.responsavelNome,
+    this.observacoes,
     this.dadosExtras,
   });
 
@@ -49,6 +51,7 @@ class ProcessoModel {
       status: json['status'],
       responsavelId: json['responsavel'],
       responsavelNome: json['responsavel_nome'],
+      observacoes: json['observacoes'],
       dadosExtras: json['dados_extras'] is Map<String, dynamic> ? json['dados_extras'] : null,
     );
   }
@@ -63,6 +66,7 @@ class ProcessoModel {
       'data_inicio': dataInicio.toIso8601String(),
       'data_fim': dataFim?.toIso8601String(),
       'status': status,
+      if (observacoes != null) 'observacoes': observacoes,
       if (dadosExtras != null) 'dados_extras': dadosExtras,
     };
   }

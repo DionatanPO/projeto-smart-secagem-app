@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/processo_model.dart';
 import '../../../core/models/batch_model.dart';
@@ -67,12 +68,28 @@ class ProcessosController extends GetxController {
             'current_quantity': batch?.pesoInicial ?? 0,
           });
         }
+        if (processo.tipoProcesso == 'Armazenamento' && processo.siloId != null) {
+          final batch = availableBatches.firstWhere(
+            (b) => b.id == processo.loteId,
+            orElse: () => BatchModel(
+              unidadeArmazenadora: 0, cultura: '', safra: '', pesoInicial: 0,
+              umidadeInicial: 0, status: '',
+            ),
+          );
+          await _apiService.dio.patch('silos/${processo.siloId}/', data: {
+            'status': 'em_uso',
+            'current_quantity': batch?.pesoInicial ?? 0,
+          });
+        }
         _refreshData();
         Get.back();
         Get.snackbar('Sucesso', 'Processo iniciado com sucesso');
       }
+    } on DioException catch (dioError) {
+      final msg = dioError.response?.data is Map ? (dioError.response!.data as Map)['detail'] ?? dioError.response!.data.toString() : dioError.message;
+      Get.snackbar('Erro', 'Falha ao iniciar processo: $msg', snackPosition: SnackPosition.BOTTOM, duration: const Duration(seconds: 5));
     } catch (e) {
-      Get.snackbar('Erro', 'Falha ao iniciar processo');
+      Get.snackbar('Erro', 'Falha ao iniciar processo', snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -116,6 +133,9 @@ class ProcessosController extends GetxController {
           await _apiService.dio.patch('secadores/${processo.secadorId}/', data: {'status': 'Disponível'});
         }
         if (processo.tipoProcesso == 'Resfriamento' && processo.siloId != null) {
+          await _apiService.dio.patch('silos/${processo.siloId}/', data: {'status': 'disponivel'});
+        }
+        if (processo.tipoProcesso == 'Armazenamento' && processo.siloId != null) {
           await _apiService.dio.patch('silos/${processo.siloId}/', data: {'status': 'disponivel'});
         }
       } else if (newStatus == 'Pausada') {

@@ -343,7 +343,7 @@ class ProcessosView extends GetView<ProcessosController> {
       children: [
         _tipoIcon(tipo, 20),
         const SizedBox(width: 6),
-        Text(tipo, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurface)),
+        Flexible(child: Text(tipo, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurface), overflow: TextOverflow.ellipsis)),
       ],
     );
   }
@@ -354,8 +354,10 @@ class ProcessosView extends GetView<ProcessosController> {
     switch (tipo) {
       case 'Secagem': icon = Icons.waves_rounded; color = Colors.orange; break;
       case 'Triagem': icon = Icons.local_shipping_rounded; color = Colors.blue; break;
-      case 'Resfriamento': icon = Icons.ac_unit_rounded; color = Colors.teal; break;
+      case 'Classificação': icon = Icons.biotech_rounded; color = Colors.purple; break;
+      case 'Recebimento': icon = Icons.download_rounded; color = Colors.orange; break;
       case 'Armazenamento': icon = Icons.warehouse_rounded; color = Colors.green; break;
+      case 'Expedição': icon = Icons.local_shipping_rounded; color = Colors.blueGrey; break;
       default: icon = Icons.play_arrow_rounded; color = Colors.blue;
     }
     return Container(
@@ -426,6 +428,10 @@ class ProcessosView extends GetView<ProcessosController> {
                     activeStage: controller.activeStage.value,
                     onNewProcesso: () { Get.back(); _showProcessoForm(Get.context!, tipo: 'Secagem'); },
                     onNewBatch: () { Get.back(); showBatchFormDialog(Get.context!, controller: Get.find<BatchManagementController>(), title: 'Chegada/Triagem'); },
+                    onNewClassificacao: () { Get.back(); _showProcessoForm(Get.context!, tipo: 'Classificação'); },
+                    onNewMoega: () { Get.back(); _showProcessoForm(Get.context!, tipo: 'Recebimento'); },
+                    onNewArmazenamento: () { Get.back(); _showProcessoForm(Get.context!, tipo: 'Armazenamento'); },
+                    onNewExpedicao: () { Get.back(); _showProcessoForm(Get.context!, tipo: 'Expedição'); },
                   )),
                 ),
               ),
@@ -555,10 +561,20 @@ class ProcessosView extends GetView<ProcessosController> {
                       const SizedBox(height: 16),
                       _detailRow(cs, Icons.person_outline_rounded, 'Responsável', p.responsavelNome ?? '---'),
                       const SizedBox(height: 16),
-                      _detailRow(cs, Icons.settings_input_component_rounded, 'Secador', p.secadorNome ?? '---'),
-                      const SizedBox(height: 16),
-                      _detailRow(cs, Icons.warehouse_rounded, 'Silo', p.siloNome ?? '---'),
-                      const SizedBox(height: 16),
+                      if (p.tipoProcesso == 'Classificação' || p.tipoProcesso == 'Recebimento' || p.tipoProcesso == 'Expedição') ...[
+                        if (p.observacoes != null && p.observacoes!.isNotEmpty) ...[
+                          _detailRow(cs, Icons.description_outlined, 'Descrição', p.observacoes!),
+                          const SizedBox(height: 16),
+                        ],
+                      ] else if (p.tipoProcesso == 'Armazenamento') ...[
+                        _detailRow(cs, Icons.warehouse_rounded, 'Silo', p.siloNome ?? '---'),
+                        const SizedBox(height: 16),
+                      ] else ...[
+                        _detailRow(cs, Icons.settings_input_component_rounded, 'Secador', p.secadorNome ?? '---'),
+                        const SizedBox(height: 16),
+                        _detailRow(cs, Icons.warehouse_rounded, 'Silo', p.siloNome ?? '---'),
+                        const SizedBox(height: 16),
+                      ],
                       _detailRow(cs, Icons.info_outline_rounded, 'Status', p.status),
                       if (p.dadosExtras != null && p.dadosExtras!.isNotEmpty) ...[
                         const SizedBox(height: 20),
@@ -618,6 +634,9 @@ class ProcessosView extends GetView<ProcessosController> {
     int? selectedLoteId = processo?.loteId ?? (controller.availableBatches.isNotEmpty ? controller.availableBatches.first.id : null);
     int? selectedSecadorId = processo?.secadorId;
     int? selectedSiloId = processo?.siloId;
+    String classificacaoDescricao = '';
+    final isClassificacao = selectedTipo == 'Classificação' || selectedTipo == 'Recebimento' || selectedTipo == 'Expedição';
+    final isArmazenamento = selectedTipo == 'Armazenamento';
 
     Get.dialog(
       StatefulBuilder(
@@ -691,14 +710,31 @@ class ProcessosView extends GetView<ProcessosController> {
                             items: controller.availableBatches.map((b) => DropdownMenuItem(value: b.id, child: Text('${b.numeroLote} - ${b.cultura} (${b.status})', style: GoogleFonts.inter(color: cs.onSurface)))).toList(),
                             onChanged: (val) => setState(() => selectedLoteId = val),
                           ),
-                          const SizedBox(height: 20),
-                          _fieldLabel(cs, 'SECADOR'),
-                          const SizedBox(height: 8),
-                          DropdownButtonFormField<int>(value: selectedSecadorId, isExpanded: true, style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface), dropdownColor: cs.surface, decoration: _fieldDeco(cs, Icons.settings_input_component_rounded), items: secadorItems, onChanged: onSecadorChanged),
-                          const SizedBox(height: 20),
-                          _fieldLabel(cs, 'SILO (OPCIONAL)'),
-                          const SizedBox(height: 8),
-                          DropdownButtonFormField<int>(value: selectedSiloId, isExpanded: true, style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface), dropdownColor: cs.surface, decoration: _fieldDeco(cs, Icons.warehouse_rounded), items: siloItems, onChanged: onSiloChanged),
+                          if (isClassificacao) ...[
+                            const SizedBox(height: 20),
+                            _fieldLabel(cs, selectedTipo == 'Classificação' ? 'DESCRIÇÃO DA CLASSIFICAÇÃO' : 'OBSERVAÇÕES'),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              decoration: _fieldDeco(cs, Icons.description_outlined),
+                              maxLines: 4,
+                              style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                              onChanged: (val) => classificacaoDescricao = val,
+                            ),
+                          ] else if (isArmazenamento) ...[
+                            const SizedBox(height: 20),
+                            _fieldLabel(cs, 'SILO'),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<int>(value: selectedSiloId, isExpanded: true, style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface), dropdownColor: cs.surface, decoration: _fieldDeco(cs, Icons.warehouse_rounded), items: siloItems, onChanged: onSiloChanged),
+                          ] else ...[
+                            const SizedBox(height: 20),
+                            _fieldLabel(cs, 'SECADOR'),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<int>(value: selectedSecadorId, isExpanded: true, style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface), dropdownColor: cs.surface, decoration: _fieldDeco(cs, Icons.settings_input_component_rounded), items: secadorItems, onChanged: onSecadorChanged),
+                            const SizedBox(height: 20),
+                            _fieldLabel(cs, 'SILO (OPCIONAL)'),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<int>(value: selectedSiloId, isExpanded: true, style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface), dropdownColor: cs.surface, decoration: _fieldDeco(cs, Icons.warehouse_rounded), items: siloItems, onChanged: onSiloChanged),
+                          ],
                           const SizedBox(height: 32),
                           Row(
                             children: [
@@ -729,7 +765,8 @@ class ProcessosView extends GetView<ProcessosController> {
                                               FilledButton(
                                                 onPressed: () {
                                                   Get.back();
-                                                  final newProcesso = ProcessoModel(id: processo?.id, tipoProcesso: selectedTipo, loteId: selectedLoteId, secadorId: selectedSecadorId, siloId: selectedSiloId, dataInicio: processo?.dataInicio ?? DateTime.now(), status: processo?.status ?? 'Iniciada');
+                                                  final obs = isClassificacao ? classificacaoDescricao : null;
+                                                  final newProcesso = ProcessoModel(id: processo?.id, tipoProcesso: selectedTipo, loteId: selectedLoteId, secadorId: selectedSecadorId, siloId: selectedSiloId, dataInicio: processo?.dataInicio ?? DateTime.now(), status: processo?.status ?? 'Iniciada', observacoes: obs);
                                                   controller.createProcesso(newProcesso);
                                                 },
                                                 style: FilledButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
@@ -741,7 +778,33 @@ class ProcessosView extends GetView<ProcessosController> {
                                         return;
                                       }
                                     }
-                                    final newProcesso = ProcessoModel(id: processo?.id, tipoProcesso: selectedTipo, loteId: selectedLoteId, secadorId: selectedSecadorId, siloId: selectedSiloId, dataInicio: processo?.dataInicio ?? DateTime.now(), status: processo?.status ?? 'Iniciada');
+                                    final obs = isClassificacao ? classificacaoDescricao : null;
+                                    final newProcesso = ProcessoModel(id: processo?.id, tipoProcesso: selectedTipo, loteId: selectedLoteId, secadorId: selectedSecadorId, siloId: selectedSiloId, dataInicio: processo?.dataInicio ?? DateTime.now(), status: processo?.status ?? 'Iniciada', observacoes: obs);
+                                    if (isArmazenamento && selectedSiloId != null && selectedLoteId != null) {
+                                      final silo = controller.availableSilos.firstWhereOrNull((s) => s.id == selectedSiloId);
+                                      final batch = controller.availableBatches.firstWhereOrNull((b) => b.id == selectedLoteId);
+                                      if (silo != null && batch != null) {
+                                        final available = silo.capacity - silo.currentQuantity;
+                                        if (batch.pesoInicial > available) {
+                                          Get.dialog(AlertDialog(
+                                            backgroundColor: cs.surface,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                                            title: Row(
+                                              children: [
+                                                Container(width: 40, height: 40, decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.error_outline_rounded, color: Colors.red, size: 22)),
+                                                const SizedBox(width: 12),
+                                                Text('Capacidade insuficiente', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: cs.onSurface)),
+                                              ],
+                                            ),
+                                            content: Text('O lote ${batch.numeroLote} (${batch.pesoInicial.toStringAsFixed(0)} kg) excede a capacidade disponível do silo ${silo.name} (${available.toStringAsFixed(0)} kg).', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                                            actions: [
+                                              FilledButton(onPressed: () => Get.back(), style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Ok', style: GoogleFonts.inter(fontWeight: FontWeight.w600))),
+                                            ],
+                                          ));
+                                          return;
+                                        }
+                                      }
+                                    }
                                     if (isEditing) controller.updateProcesso(newProcesso);
                                     else controller.createProcesso(newProcesso);
                                   },
@@ -868,7 +931,11 @@ class _StageCards extends StatelessWidget {
   final int activeStage;
   final VoidCallback? onNewProcesso;
   final VoidCallback? onNewBatch;
-  const _StageCards({required this.controller, required this.activeStage, this.onNewProcesso, this.onNewBatch});
+  final VoidCallback? onNewClassificacao;
+  final VoidCallback? onNewMoega;
+  final VoidCallback? onNewArmazenamento;
+  final VoidCallback? onNewExpedicao;
+  const _StageCards({required this.controller, required this.activeStage, this.onNewProcesso, this.onNewBatch, this.onNewClassificacao, this.onNewMoega, this.onNewArmazenamento, this.onNewExpedicao});
 
   @override
   Widget build(BuildContext context) {
@@ -897,6 +964,10 @@ class _StageCards extends StatelessWidget {
     final stage = _stages[index];
     final isSecagem = index == 3;
     final isChegada = index == 0;
+    final isClassificacao = index == 1;
+    final isMoega = index == 2;
+    final isArmazenamento = index == 4;
+    final isExpedicao = index == 5;
 
     return GestureDetector(
       onTap: () {
@@ -905,6 +976,14 @@ class _StageCards extends StatelessWidget {
           onNewProcesso();
         } else if (isChegada && onNewBatch != null) {
           onNewBatch();
+        } else if (isClassificacao) {
+          onNewClassificacao?.call();
+        } else if (isMoega) {
+          onNewMoega?.call();
+        } else if (isArmazenamento) {
+          onNewArmazenamento?.call();
+        } else if (isExpedicao) {
+          onNewExpedicao?.call();
         }
       },
       child: Container(
