@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import '../../../core/values/app_colors.dart';
@@ -31,16 +30,31 @@ class LandingView extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       drawer: isMobile ? const WebDrawer() : null,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildHero(context, controller),
-            _buildFeatures(context),
-            _buildCTA(context, controller),
-            const WebFooter(),
-          ],
-        ),
-      ),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return Center(
+            child: Text(
+              'Carregando...',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                color: AppColors.primary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          );
+        }
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildHero(context, controller),
+              _buildFeatures(context),
+              _buildCTA(context, controller),
+              const WebFooter(),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -120,7 +134,8 @@ class LandingView extends StatelessWidget {
                           const SizedBox(width: 10),
                           Text(
                             'SMART SECAGEM',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
+                              fontFamily: 'Inter',
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
                               fontSize: 13,
@@ -136,7 +151,8 @@ class LandingView extends StatelessWidget {
                       child: Text(
                         'A inteligência que seu grão precisa.',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.outfit(
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
                           fontSize: isMobile ? (size.width < 360 ? 36 : 48) : 84,
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
@@ -151,7 +167,8 @@ class LandingView extends StatelessWidget {
                       child: Text(
                         'Otimize sua aeração com algoritmos avançados. Reduza perdas, economize energia e garanta a qualidade máxima da sua safra.',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
+                          fontFamily: 'Inter',
                           fontSize: isMobile ? 18 : 22,
                           color: Colors.white.withOpacity(0.85),
                           height: 1.6,
@@ -198,7 +215,8 @@ class LandingView extends StatelessWidget {
         children: [
           Text(
             'TECNOLOGIA DE PONTA',
-            style: GoogleFonts.outfit(
+            style: TextStyle(
+              fontFamily: 'Outfit',
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.primary,
@@ -209,7 +227,8 @@ class LandingView extends StatelessWidget {
           Text(
             'O controle total do seu armazém\nna palma da sua mão.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: TextStyle(
+              fontFamily: 'Outfit',
               fontSize: isMobile ? 32 : 48,
               fontWeight: FontWeight.w800,
               color: isDark ? Colors.white : AppColors.textPrimary,
@@ -316,7 +335,8 @@ class LandingView extends StatelessWidget {
           const SizedBox(height: 32),
           Text(
             title,
-            style: GoogleFonts.outfit(
+            style: TextStyle(
+              fontFamily: 'Outfit',
               fontSize: 24,
               fontWeight: FontWeight.w800,
               color: isDark ? Colors.white : AppColors.textPrimary,
@@ -326,7 +346,8 @@ class LandingView extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             description,
-            style: GoogleFonts.inter(
+            style: TextStyle(
+              fontFamily: 'Inter',
               fontSize: 16,
               color: isDark ? AppColors.textMuted : AppColors.textSecondary,
               height: 1.7,
@@ -382,7 +403,8 @@ class LandingView extends StatelessWidget {
               Text(
                 'Pronto para modernizar seu pós-colheita?',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
+                style: TextStyle(
+                  fontFamily: 'Outfit',
                   fontSize: isMobile ? 36 : 56,
                   fontWeight: FontWeight.w900,
                   color: Colors.white,
@@ -394,7 +416,8 @@ class LandingView extends StatelessWidget {
               Text(
                 'Junte-se aos produtores que já utilizam a inteligência artificial para garantir a máxima qualidade e lucratividade.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: TextStyle(
+                  fontFamily: 'Inter',
                   fontSize: isMobile ? 18 : 22,
                   color: Colors.white.withOpacity(0.8),
                   height: 1.6,
@@ -438,7 +461,8 @@ class LandingView extends StatelessWidget {
           children: [
             Text(
               text,
-              style: GoogleFonts.inter(
+              style: TextStyle(
+                fontFamily: 'Inter',
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
@@ -469,7 +493,8 @@ class LandingView extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: GoogleFonts.inter(
+          style: TextStyle(
+            fontFamily: 'Inter',
             fontSize: 18,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.5,

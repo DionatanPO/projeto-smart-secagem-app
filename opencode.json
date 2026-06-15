@@ -3,5 +3,10 @@
   "instructions": [
     "AGENTS.md",
     "lib/modules/*/AGENTS.md"
-  ]
+  ],
+  "mcp": {
+    "pencil": {
+      "enabled": false
+    }
+  }
 }

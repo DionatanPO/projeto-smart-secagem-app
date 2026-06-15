@@ -28,10 +28,7 @@ void main() async {
   // Initialize the controller at the top level
   final settingsController = Get.put(SettingsController());
 
-  // Preload Google Fonts to prevent font flash
-  GoogleFonts.outfit();
-  GoogleFonts.inter();
-
+  // Fonts are preloaded via web/index.html <link> tags
   runApp(
     Obx(() => GetMaterialApp(
           title: "Smart Secagem",
