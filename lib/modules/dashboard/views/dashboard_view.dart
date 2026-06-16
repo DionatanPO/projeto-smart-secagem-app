@@ -298,184 +298,189 @@ Gerar um resumo executivo claro e direto do estado operacional da unidade armaze
 4. Se houver dados de telemetria nos sensores, mencione leituras atípicas (temperatura elevada, umidade crítica).
 5. Encerre com 1-3 recomendações objetivas para o gestor.
 6. Use linguagem direta, bullet points e seções claras.
+7. Nao utilize emojis, emoticons ou caracteres especiais. Use apenas texto simples com marcadores (-, *, #).
 
-### FORMATO DE SAÍDA ESPERADO:
-📅 RELATÓRIO EXECUTIVO — {DATA_REFERENCIA}
+### FORMATO DE SAIDA ESPERADO:
+RELATORIO EXECUTIVO — {DATA_REFERENCIA}
 
-## 📊 RESUMO DO PERÍODO
+## RESUMO DO PERIODO
 - Processos ativos: {X} | Finalizados hoje: {Y}
-- Secadores disponíveis: {X} | Em manutenção: {Y}
-- Silos disponíveis: {X} | Ocupação média: {Y}%
-- Grão armazenado: {X.XXX} kg
+- Secadores disponiveis: {X} | Em manutencao: {Y}
+- Silos disponiveis: {X} | Ocupacao media: {Y}%
+- Grao armazenado: {X.XXX} kg
 - Sensores ativos: {X}
 
-## 🚨 ALERTAS CRÍTICOS
+## ALERTAS CRITICOS
 - {alerta mais grave}
-- {alerta secundário}
+- {alerta secundario}
 
-## 🔍 GARGALOS IDENTIFICADOS
-- {descrição do gargalo}
+## GARGALOS IDENTIFICADOS
+- {descricao do gargalo}
 
-## ✅ RECOMENDAÇÕES
-1. {recomendação 1}
-2. {recomendação 2}''';
+## RECOMENDACOES
+1. {recomendacao 1}
+2. {recomendacao 2}''';
 
-  static const _custosSecagem = r'''### TÍTULO: Relatório de Custos de Secagem — Análise Financeira Detalhada
+  static const _custosSecagem = r'''### TITULO: Relatorio de Custos de Secagem — Analise Financeira Detalhada
 
 ### OBJETIVO:
-Produzir uma análise financeira completa dos custos de secagem, cruzando dados de processos finalizados, secadores utilizados e custos operacionais.
+Produzir uma analise financeira completa dos custos de secagem, cruzando dados de processos finalizados, secadores utilizados e custos operacionais.
 
-### INSTRUÇÕES PARA O LLM:
-1. Apresente o custo total do período e o breakdown percentual (combustível, energia, mão-de-obra, manutenção, depreciação).
-2. Calcule o custo médio por hora e por tonelada processada.
-3. Compare o desempenho entre secadores disponíveis.
-4. Identifique processos com custo muito acima da média e sugira investigação.
-5. Inclua projeção do custo acumulado no mês.
+### INSTRUCOES PARA O LLM:
+1. Apresente o custo total do periodo e o breakdown percentual (combustivel, energia, mao-de-obra, manutencao, depreciacao).
+2. Calcule o custo medio por hora e por tonelada processada.
+3. Compare o desempenho entre secadores disponiveis.
+4. Identifique processos com custo muito acima da media e sugira investigacao.
+5. Inclua projecao do custo acumulado no mes.
+6. Nao utilize emojis, emoticons ou caracteres especiais. Use apenas texto simples com marcadores (-, *, #).
 
-### FORMATO DE SAÍDA ESPERADO:
-💰 RELATÓRIO DE CUSTOS DE SECAGEM
+### FORMATO DE SAIDA ESPERADO:
+RELATORIO DE CUSTOS DE SECAGEM
 
-## 💵 CUSTO TOTAL DO PERÍODO: R$ {X.XXX,XX}
-- Combustível: R$ {X} ({Y}%)
+## CUSTO TOTAL DO PERIODO: R$ {X.XXX,XX}
+- Combustivel: R$ {X} ({Y}%)
 - Energia: R$ {X} ({Y}%)
-- Mão-de-obra: R$ {X} ({Y}%)
-- Manutenção: R$ {X} ({Y}%)
-- Depreciação: R$ {X} ({Y}%)
+- Mao-de-obra: R$ {X} ({Y}%)
+- Manutencao: R$ {X} ({Y}%)
+- Depreciacao: R$ {X} ({Y}%)
 
-## 📊 CUSTOS MÉDIOS
-- Custo médio / hora: R$ {X,XX}
-- Custo médio / tonelada: R$ {X,XX}
+## CUSTOS MEDIOS
+- Custo medio / hora: R$ {X,XX}
+- Custo medio / tonelada: R$ {X,XX}
 
-## 🔥 COMPARATIVO ENTRE SECADORES
-| Secador | Tipo | Combustível | Custo/h | Horas | Custo total |
+## COMPARATIVO ENTRE SECADORES
+| Secador | Tipo | Combustivel | Custo/h | Horas | Custo total |
 
-## ⚠️ PROCESSOS FORA DA CURVA
-- {lote}: custo {X}% acima da média
+## PROCESSOS FORA DA CURVA
+- {lote}: custo {X}% acima da media
 
-## 📈 PROJEÇÃO MENSAL
-- Custo acumulado: R$ {X} | Projeção: R$ {Y} | Orçamento vs realizado: {+/-} {Z}%''';
+## PROJECAO MENSAL
+- Custo acumulado: R$ {X} | Projecao: R$ {Y} | Orcamento vs realizado: {+/-} {Z}%''';
 
-  static const _saudeLotes = r'''### TÍTULO: Relatório de Saúde dos Lotes — Risco, Qualidade e Tempo de Estoque
+  static const _saudeLotes = r'''### TITULO: Relatorio de Saude dos Lotes — Risco, Qualidade e Tempo de Estoque
 
 ### OBJETIVO:
-Analisar todos os lotes ativos na unidade armazenadora, identificando riscos de deterioração, lotes parados, umidade fora do padrão e necessidade de intervenção.
+Analisar todos os lotes ativos na unidade armazenadora, identificando riscos de deterioracao, lotes parados, umidade fora do padrao e necessidade de intervencao.
 
-### INSTRUÇÕES PARA O LLM:
-1. Classifique os lotes por nível de risco:
+### INSTRUCOES PARA O LLM:
+1. Classifique os lotes por nivel de risco:
    - RISCO ALTO: >45 dias sem finalizar OU umidade inicial >16%
-   - RISCO MÉDIO: 30-45 dias OU umidade entre 14-16%
+   - RISCO MEDIO: 30-45 dias OU umidade entre 14-16%
    - RISCO BAIXO: <30 dias E umidade <14%
-2. Liste lotes que deveriam ter passado por secagem mas não têm processo associado.
-3. Calcule a quebra técnica dos lotes que passaram por secagem.
-4. Agrupe por cultura e safra para visão consolidada.
-5. Encerre com recomendações priorizadas por risco.
+2. Liste lotes que deveriam ter passado por secagem mas nao tem processo associado.
+3. Calcule a quebra tecnica dos lotes que passaram por secagem.
+4. Agrupe por cultura e safra para visao consolidada.
+5. Encerre com recomendacoes priorizadas por risco.
+6. Nao utilize emojis, emoticons ou caracteres especiais. Use apenas texto simples com marcadores (-, *, #).
 
-### FORMATO DE SAÍDA ESPERADO:
-🧬 RELATÓRIO DE SAÚDE DOS LOTES
+### FORMATO DE SAIDA ESPERADO:
+RELATORIO DE SAUDE DOS LOTES
 
-## 🟢 LOTES SEGUROS (RISCO BAIXO) — {X} lotes
-## 🟡 ATENÇÃO (RISCO MÉDIO) — {Y} lotes
-## 🔴 CRÍTICOS (RISCO ALTO) — {Z} lotes
+## LOTES SEGUROS (RISCO BAIXO) — {X} lotes
+## ATENCAO (RISCO MEDIO) — {Y} lotes
+## CRITICOS (RISCO ALTO) — {Z} lotes
 
-## ⚖️ QUEBRA TÉCNICA NA SECAGEM
-- Média geral: {X}% | Maior quebra: {Y}% | Menor quebra: {W}%
+## QUEBRA TECNICA NA SECAGEM
+- Media geral: {X}% | Maior quebra: {Y}% | Menor quebra: {W}%
 
-## 📋 RESUMO POR CULTURA
-| Cultura | Lotes | Volume | Umidade média | Dias médio |
+## RESUMO POR CULTURA
+| Cultura | Lotes | Volume | Umidade media | Dias medio |
 
-## ✅ RECOMENDAÇÕES
-1. {prioridade máxima} 2. {prioridade média} 3. {prioridade baixa}''';
+## RECOMENDACOES
+1. {prioridade maxima} 2. {prioridade media} 3. {prioridade baixa}''';
 
-  static const _ocupacao = r'''### TÍTULO: Relatório de Ocupação e Capacidade de Armazenagem
+  static const _ocupacao = r'''### TITULO: Relatorio de Ocupacao e Capacidade de Armazenagem
 
 ### OBJETIVO:
-Fornecer visão completa da capacidade de armazenagem: ocupação atual dos silos, tendência, projeção de saturação e recomendações.
+Fornecer visao completa da capacidade de armazenagem: ocupacao atual dos silos, tendencia, projecao de saturacao e recomendacoes.
 
-### INSTRUÇÕES PARA O LLM:
+### INSTRUCOES PARA O LLM:
 1. Apresente o panorama geral: capacidade total vs ocupada.
-2. Classifique cada silo por faixa de ocupação (CRÍTICO >90%, ALERTA 75-90%, OK 50-75%, FOLGA <50%).
-3. Estime a tendência de ocupação (subindo/estável/descendo).
-4. Projete dias até saturação total com base no ritmo atual.
-5. Identifique silos disponíveis para novos lotes.
+2. Classifique cada silo por faixa de ocupacao (CRITICO >90%, ALERTA 75-90%, OK 50-75%, FOLGA <50%).
+3. Estime a tendencia de ocupacao (subindo/estavel/descendo).
+4. Projete dias até saturacao total com base no ritmo atual.
+5. Identifique silos disponiveis para novos lotes.
+6. Nao utilize emojis, emoticons ou caracteres especiais. Use apenas texto simples com marcadores (-, *, #).
 
-### FORMATO DE SAÍDA ESPERADO:
-🏗️ RELATÓRIO DE OCUPAÇÃO — CAPACIDADE DE ARMAZENAGEM
+### FORMATO DE SAIDA ESPERADO:
+RELATORIO DE OCUPACAO — CAPACIDADE DE ARMAZENAGEM
 
-## 📊 PANORAMA GERAL
-- Capacidade total: {X} | Ocupado: {Y} ({Z}%) | Disponível: {W}
+## PANORAMA GERAL
+- Capacidade total: {X} | Ocupado: {Y} ({Z}%) | Disponivel: {W}
 
-## 🔴 SILOS CRÍTICOS (>90%) | 🟡 SILOS EM ALERTA (75-90%) | 🟢 SILOS DISPONÍVEIS (<50%)
+## SILOS CRITICOS (>90%) | SILOS EM ALERTA (75-90%) | SILOS DISPONIVEIS (<50%)
 
-## 📈 TENDÊNCIA E PROJEÇÃO
-- Saldo diário: {+/- Z} kg/dia | Dias até saturação: {W} dias
+## TENDENCIA E PROJECAO
+- Saldo diario: {+/- Z} kg/dia | Dias até saturacao: {W} dias
 
-## ✅ RECOMENDAÇÕES
-1. {rotação de estoque} 2. {priorizar saída} 3. {avaliar expansão}''';
+## RECOMENDACOES
+1. {rotacao de estoque} 2. {priorizar saida} 3. {avaliar expansao}''';
 
-  static const _gargalos = r'''### TÍTULO: Relatório de Gargalos Operacionais — Diagnóstico de Fluxo
+  static const _gargalos = r'''### TITULO: Relatorio de Gargalos Operacionais — Diagnostico de Fluxo
 
 ### OBJETIVO:
 Diagnosticar gargalos no fluxo de beneficiamento, cruzando dados de processos, secadores, silos e lotes para identificar travamentos.
 
-### INSTRUÇÕES PARA O LLM:
+### INSTRUCOES PARA O LLM:
 1. Identifique onde está o gargalo principal:
    a) Processos pausados (o que está travando?)
-   b) Secadores ocupados vs disponíveis (fila de secagem?)
+   b) Secadores ocupados vs disponiveis (fila de secagem?)
    c) Silos cheios (impedindo recebimento?)
    d) Lotes parados sem processo associado
-2. Calcule o tempo médio de espera entre etapas.
-3. Mapeie o fluxo: RECEPÇÃO → SECAGEM → ARMAZENAMENTO → EXPEDIÇÃO
-4. Sugira ações específicas para destravar cada gargalo.
+2. Calcule o tempo medio de espera entre etapas.
+3. Mapeie o fluxo: RECEPCAO → SECAGEM → ARMAZENAMENTO → EXPEDICAO
+4. Sugira acoes especificas para destravar cada gargalo.
+5. Nao utilize emojis, emoticons ou caracteres especiais. Use apenas texto simples com marcadores (-, *, #).
 
-### FORMATO DE SAÍDA ESPERADO:
-🚧 RELATÓRIO DE GARGALOS OPERACIONAIS
+### FORMATO DE SAIDA ESPERADO:
+RELATORIO DE GARGALOS OPERACIONAIS
 
-## 🔍 DIAGNÓSTICO DO FLUXO
-### 1️⃣ RECEPÇÃO | 2️⃣ SECAGEM | 3️⃣ ARMAZENAMENTO | 4️⃣ EXPEDIÇÃO
+## DIAGNOSTICO DO FLUXO
+### 1. RECEPCAO | 2. SECAGEM | 3. ARMAZENAMENTO | 4. EXPEDICAO
 
-## 📊 INDICADORES DE FLUXO
-- Tempo médio entrada→secagem: {X}h | secagem→armazenamento: {Y}h
-- Throughput diário: {W} kg/dia
+## INDICADORES DE FLUXO
+- Tempo medio entrada→secagem: {X}h | secagem→armazenamento: {Y}h
+- Throughput diario: {W} kg/dia
 
-## ⚠️ GARGALO PRINCIPAL: {etapa} — {descrição}
+## GARGALO PRINCIPAL: {etapa} — {descricao}
 
-## ✅ AÇÕES CORRETIVAS
-1. {ação 1} 2. {ação 2} 3. {ação 3}''';
+## ACOES CORRETIVAS
+1. {acao 1} 2. {acao 2} 3. {acao 3}''';
 
   static const _presets = [
     _PromptPreset(
       Icons.assignment_returned_rounded,
-      'Relatório Executivo 24h',
-      'Panorama geral da unidade com alertas e recomendações',
-      '📊 RESUMO DO PERÍODO • 🚨 ALERTAS CRÍTICOS • 🔍 GARGALOS • ✅ RECOMENDAÇÕES',
+      'Relatorio Executivo 24h',
+      'Panorama geral da unidade com alertas e recomendacoes',
+      'RESUMO DO PERIODO • ALERTAS CRITICOS • GARGALOS • RECOMENDACOES',
       _executivo24h,
     ),
     _PromptPreset(
       Icons.monetization_on_rounded,
-      'Relatório de Custos de Secagem',
-      'Análise financeira detalhada por processo e secador',
-      r'💰 CUSTO TOTAL: R$ • 🔥 COMPARATIVO SECADORES • 📈 PROJEÇÃO MENSAL',
+      'Relatorio de Custos de Secagem',
+      'Analise financeira detalhada por processo e secador',
+      r'CUSTO TOTAL: R$ • COMPARATIVO SECADORES • PROJECAO MENSAL',
       _custosSecagem,
     ),
     _PromptPreset(
       Icons.biotech_rounded,
-      'Relatório de Saúde dos Lotes',
+      'Relatorio de Saude dos Lotes',
       'Risco, qualidade e tempo de estoque dos lotes',
-      '🧬 LOTES SEGUROS • 🟡 ATENÇÃO • 🔴 CRÍTICOS • ⚖️ QUEBRA TÉCNICA',
+      'LOTES SEGUROS • ATENCAO • CRITICOS • QUEBRA TECNICA',
       _saudeLotes,
     ),
     _PromptPreset(
       Icons.inventory_rounded,
-      'Relatório de Ocupação e Capacidade',
-      'Ocupação dos silos, tendência e projeção de saturação',
-      '🏗️ PANORAMA GERAL • 🔴 SILOS CRÍTICOS • 📈 PROJEÇÃO',
+      'Relatorio de Ocupacao e Capacidade',
+      'Ocupacao dos silos, tendencia e projecao de saturacao',
+      'PANORAMA GERAL • SILOS CRITICOS • PROJECAO',
       _ocupacao,
     ),
     _PromptPreset(
       Icons.bug_report_rounded,
-      'Relatório de Gargalos Operacionais',
-      'Diagnóstico completo do fluxo de beneficiamento',
-      '🚧 RECEPÇÃO → SECAGEM → ARMAZENAMENTO → EXPEDIÇÃO',
+      'Relatorio de Gargalos Operacionais',
+      'Diagnostico completo do fluxo de beneficiamento',
+      'RECEPCAO → SECAGEM → ARMAZENAMENTO → EXPEDICAO',
       _gargalos,
     ),
   ];
