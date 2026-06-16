@@ -3,6 +3,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/secador_model.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../../core/models/telemetry_model.dart';
+import '../../../core/models/motor_aeracao_model.dart';
 import '../../unidade_armazenadora_management/controllers/unidade_armazenadora_management_controller.dart';
 import '../../../core/models/unidade_armazenadora_model.dart';
 
@@ -14,6 +15,16 @@ class SecagemController extends GetxController {
   List<UnidadeArmazenadoraModel> get availableUnidades => _unidadeController.unidades;
   final isLoading = false.obs;
   final searchQuery = ''.obs;
+
+  // Motors
+  final _allMotors = <MotorAeracaoModel>[].obs;
+  final secadorMotors = <MotorAeracaoModel>[].obs;
+  final isLoadingMotors = false.obs;
+
+  // Sensors & telemetry per secador
+  final secadorSensors = <SensorModel>[].obs;
+  final secadorLatestReadings = <int, List<TelemetryModel>>{}.obs;
+  final isLoadingSecadorSensors = false.obs;
 
   List<SecadorModel> get filteredSecadores {
     if (searchQuery.value.isEmpty) return secadores;
@@ -30,7 +41,13 @@ class SecagemController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getSecadores();
+    loadDashboardData();
+  }
+
+  Future<void> loadDashboardData() async {
+    await getSecadores();
+    await getAllSensors();
+    await getAllMotors();
   }
 
   void filterSecadores(String query) => searchQuery.value = query;
@@ -49,6 +66,137 @@ class SecagemController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  // --- Sensors ---
+
+  Future<void> getAllSensors() async {
+    try {
+      final response = await _apiService.dio.get('sensores/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final allSensors = data.map((json) => SensorModel.fromJson(json)).toList();
+        await _calculateAllSecadorMetrics(allSensors);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _calculateAllSecadorMetrics(List<SensorModel> allSensors) async {
+    try {
+      for (var secador in secadores) {
+        if (secador.id == null) continue;
+        final sensorsThisSecador = allSensors.where((s) => s.secadorId == secador.id).toList();
+        if (sensorsThisSecador.isEmpty) {
+          secadorLatestReadings[secador.id!] = [];
+          continue;
+        }
+        final response = await _apiService.dio.get('telemetria/', queryParameters: {'secador': secador.id});
+        if (response.statusCode == 200) {
+          final List<dynamic> teleData = response.data;
+          final secadorTelemetries = teleData.map((json) => TelemetryModel.fromJson(json)).toList();
+          final List<TelemetryModel> currentReadings = [];
+          for (var sensor in sensorsThisSecador) {
+            final sensorTele = secadorTelemetries.where((t) => t.sensorId == sensor.id).toList();
+            if (sensorTele.isNotEmpty) {
+              sensorTele.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+              currentReadings.add(sensorTele.first);
+            } else {
+              currentReadings.add(TelemetryModel(
+                sensorId: sensor.id ?? 0,
+                sensorPhysicalId: sensor.sensorId,
+                temperature: 0.0,
+                humidity: 0.0,
+                timestamp: DateTime.now(),
+              ));
+            }
+          }
+          currentReadings.sort((a, b) => a.sensorPhysicalId.compareTo(b.sensorPhysicalId));
+          secadorLatestReadings[secador.id!] = currentReadings;
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> getSensorsBySecador(int secadorId) async {
+    isLoadingSecadorSensors.value = true;
+    secadorSensors.clear();
+    try {
+      final response = await _apiService.dio.get('sensores/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final allSensors = data.map((json) => SensorModel.fromJson(json)).toList();
+        secadorSensors.assignAll(allSensors.where((s) => s.secadorId == secadorId).toList());
+      }
+    } catch (_) {} finally {
+      isLoadingSecadorSensors.value = false;
+    }
+  }
+
+  int getSecadorSensorCount(int secadorId) {
+    return secadorLatestReadings[secadorId]?.length ?? 0;
+  }
+
+  List<TelemetryModel> getLatestReadings(int secadorId) {
+    return secadorLatestReadings[secadorId] ?? [];
+  }
+
+  Future<List<SensorModel>> getSensores(int secadorId) async {
+    try {
+      final response = await _apiService.dio.get('sensores/', queryParameters: {'secador': secadorId});
+      if (response.statusCode == 200) {
+        return (response.data as List).map((json) => SensorModel.fromJson(json)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future<List<TelemetryModel>> getTelemetria(int sensorId, {String? data}) async {
+    try {
+      final params = <String, dynamic>{'sensor': sensorId};
+      if (data != null) params['data'] = data;
+      final response = await _apiService.dio.get('telemetria/', queryParameters: params);
+      if (response.statusCode == 200) {
+        return (response.data as List).map((json) => TelemetryModel.fromJson(json)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  // --- Motors ---
+
+  Future<void> getAllMotors() async {
+    try {
+      final response = await _apiService.dio.get('motores-aeracao/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        _allMotors.assignAll(data.map((json) => MotorAeracaoModel.fromJson(json)).toList());
+      }
+    } catch (_) {}
+  }
+
+  Future<void> getMotorsBySecador(int secadorId) async {
+    isLoadingMotors.value = true;
+    secadorMotors.clear();
+    try {
+      final response = await _apiService.dio.get('motores-aeracao/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final allMotors = data.map((json) => MotorAeracaoModel.fromJson(json)).toList();
+        secadorMotors.assignAll(allMotors.where((m) => m.secadorId == secadorId).toList());
+      }
+    } catch (_) {} finally {
+      isLoadingMotors.value = false;
+    }
+  }
+
+  int getSecadorMotorCount(int secadorId) {
+    return _allMotors.where((m) => m.secadorId == secadorId).length;
+  }
+
+  List<MotorAeracaoModel> getMotorsForSecador(int secadorId) {
+    return _allMotors.where((m) => m.secadorId == secadorId).toList();
+  }
+
+  // --- CRUD ---
 
   Future<void> createSecador(SecadorModel secador) async {
     try {
@@ -91,25 +239,7 @@ class SecagemController extends GetxController {
     }
   }
 
-  Future<List<SensorModel>> getSensores(int secadorId) async {
-    try {
-      final response = await _apiService.dio.get('sensores/', queryParameters: {'secador': secadorId});
-      if (response.statusCode == 200) {
-        return (response.data as List).map((json) => SensorModel.fromJson(json)).toList();
-      }
-    } catch (_) {}
-    return [];
-  }
-
-  Future<List<TelemetryModel>> getTelemetria(int sensorId, {String? data}) async {
-    try {
-      final params = <String, dynamic>{'sensor': sensorId};
-      if (data != null) params['data'] = data;
-      final response = await _apiService.dio.get('telemetria/', queryParameters: params);
-      if (response.statusCode == 200) {
-        return (response.data as List).map((json) => TelemetryModel.fromJson(json)).toList();
-      }
-    } catch (_) {}
-    return [];
+  void refreshSecadores() {
+    getSecadores();
   }
 }

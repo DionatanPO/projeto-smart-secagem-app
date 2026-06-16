@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/secador_model.dart';
+import '../../../core/models/telemetry_model.dart';
+import '../../../core/models/motor_aeracao_model.dart';
+import '../../../core/values/app_colors.dart';
 import '../../home/controllers/home_controller.dart';
+import '../../devices/widgets/telemetry_history_dialog.dart';
 import '../controllers/secagem_controller.dart';
 import 'secador_detalhes_view.dart';
 
@@ -22,48 +26,23 @@ class SecagemView extends GetView<SecagemController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                if (!isDesktop) ...[
-                  IconButton(
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                    icon: const Icon(Icons.menu_rounded),
-                    color: cs.primary,
-                  ),
-                  const SizedBox(width: 4),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Secadores',
-                          style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
-                        ),
-                      ),
-                      if (isDesktop)
-                        Text('Gerencie sua frota de secadores industriais.', style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 24, bottom: 20),
+            _buildHeader(context, isDesktop),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
               child: SearchBar(
-                hintText: 'Buscar secador...',
-                hintStyle: WidgetStatePropertyAll(GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                hintText: 'Buscar secador por nome, tipo, status ou unidade...',
+                hintStyle: WidgetStatePropertyAll(GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant.withOpacity(0.6))),
                 leading: Icon(Icons.search_rounded, color: cs.onSurfaceVariant),
-                backgroundColor: WidgetStatePropertyAll(cs.surfaceContainerHighest.withOpacity(0.5)),
-                elevation: const WidgetStatePropertyAll(0),
-                shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                backgroundColor: WidgetStatePropertyAll(cs.surfaceContainerLow),
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
+                elevation: WidgetStatePropertyAll(0),
+                padding: WidgetStatePropertyAll(const EdgeInsets.symmetric(horizontal: 16)),
                 textStyle: WidgetStatePropertyAll(GoogleFonts.inter(fontSize: 14, color: cs.onSurface)),
                 onChanged: controller.filterSecadores,
               ),
             ),
+            const SizedBox(height: 20),
             Expanded(
               child: Obx(() {
                 final list = controller.filteredSecadores;
@@ -73,195 +52,558 @@ class SecagemView extends GetView<SecagemController> {
                 if (list.isEmpty) {
                   return _buildEmptyState(context, controller.searchQuery.value.isNotEmpty);
                 }
-                if (isDesktop) {
-                  return SingleChildScrollView(
-                    child: _buildSecadorTable(context, cs, list),
+                return LayoutBuilder(builder: (context, constraints) {
+                  final isWideGrid = constraints.maxWidth > 900;
+                  if (isWideGrid) {
+                    return GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(4, 4, 4, 80),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 24,
+                        mainAxisSpacing: 0,
+                        mainAxisExtent: 560,
+                      ),
+                      itemCount: list.length,
+                      itemBuilder: (context, index) {
+                        final secador = list[index];
+                        return Align(
+                          alignment: Alignment.topCenter,
+                          child: _buildSecadorCard(context, secador),
+                        );
+                      },
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(4, 4, 4, 80),
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      final secador = list[index];
+                      return _buildSecadorCard(context, secador);
+                    },
                   );
-                }
-                return ListView.builder(
-                  itemCount: list.length,
-                  itemBuilder: (_, i) => _buildSecadorCompactCard(context, list[i]),
-                );
+                });
               }),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => _showSecadorForm(context),
         backgroundColor: cs.primary,
         foregroundColor: cs.onPrimary,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        icon: const Icon(Icons.add_rounded),
-        label: Text('Novo Secador', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
 
-  Widget _buildSecadorTable(BuildContext context, ColorScheme cs, List<SecadorModel> list) {
-    const flex = [6, 14, 10, 10, 10, 8, 8, 8];
-    const gap = 8.0;
-
-    Widget _header(String text) => Text(text, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: cs.primary, letterSpacing: 0.5), overflow: TextOverflow.ellipsis);
-
-    Widget _cell(String text, {bool bold = false}) => Text(text, style: GoogleFonts.inter(fontSize: 12, fontWeight: bold ? FontWeight.w600 : FontWeight.w400, color: cs.onSurface), overflow: TextOverflow.ellipsis, maxLines: 1);
-
-    List<Widget> _rowCells(List<Widget> cells) {
-      final items = <Widget>[];
-      for (int i = 0; i < cells.length; i++) {
-        if (i > 0) items.add(const SizedBox(width: gap));
-        if (i < flex.length) {
-          items.add(Expanded(flex: flex[i], child: cells[i]));
-        } else {
-          items.add(cells[i]);
-        }
-      }
-      return items;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader(BuildContext context, bool isDesktop) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: Row(children: _rowCells([
-            _header('#'),
-            _header('Nome'),
-            _header('Unidade'),
-            _header('Tipo'),
-            _header('Calor'),
-            _header('Capacidade'),
-            _header('Status'),
-            _header('Ações'),
-          ])),
+        if (!isDesktop) ...[
+          IconButton(
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            icon: const Icon(Icons.menu_rounded),
+            color: cs.primary,
+          ),
+          const SizedBox(width: 4),
+        ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Secadores',
+                  style: GoogleFonts.outfit(fontSize: isDesktop ? 28 : 22, fontWeight: FontWeight.w700, color: cs.onSurface),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Gerencie sua frota de secadores industriais.',
+                style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant),
+              ),
+            ],
+          ),
         ),
-        ...list.map((s) {
-          final statusColor = _statusColor(s.status);
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: cs.outlineVariant.withOpacity(0.2))),
+        SizedBox(
+          child: OutlinedButton.icon(
+            onPressed: controller.refreshSecadores,
+            icon: const Icon(Icons.refresh_rounded, size: 20),
+            label: const Text('Sincronizar'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              side: BorderSide(color: cs.primary),
+              foregroundColor: cs.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: Row(children: _rowCells([
-              Text('${list.indexOf(s) + 1}', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant)),
-              _cell(s.nome, bold: true),
-              _cell(s.unidadeArmazenadoraNome ?? '---'),
-              _cell(s.tipo),
-              _cell(s.fonteCalor),
-              _cell('${s.capacidade} t/h'),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: statusColor.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
-                child: Text(s.status, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: statusColor, letterSpacing: 0.3)),
-              ),
-              PopupMenuButton<int>(
-                icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 2,
-                color: cs.surfaceContainerLow,
-                onSelected: (value) {
-                  if (value == 0) _showSecadorForm(context, secador: s);
-                  if (value == 1) Get.to(() => SecadorDetalhesView(secador: s));
-                  if (value == 2) _confirmDelete(context, s);
-                },
-                itemBuilder: (_) => [
-                  PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
-                  PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.sensors_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Sensores e Telemetria', style: GoogleFonts.inter(color: cs.onSurface))])),
-                  if (Get.find<HomeController>().isAdmin)
-                  PopupMenuItem(value: 2, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
-                ],
-              ),
-            ])),
-          );
-        }),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildSecadorCompactCard(BuildContext context, SecadorModel secador) {
+  Widget _buildSecadorCard(BuildContext context, SecadorModel secador) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = cs.brightness == Brightness.dark;
     final statusColor = _statusColor(secador.status);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      color: cs.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.border.withOpacity(0.5)),
+        boxShadow: [
+          if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 12)),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > 500;
+                return isWide
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: _buildInfoColumn(context, secador, statusColor, isDark),
+                        ),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildDryerGraphic(context, secador, statusColor, isDark, true),
+                              const SizedBox(height: 16),
+                              _buildBatchSideCard(context, secador, isDark),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        _buildInfoColumn(context, secador, statusColor, isDark),
+                        const SizedBox(height: 16),
+                        _buildDryerGraphic(context, secador, statusColor, isDark, false),
+                        const SizedBox(height: 16),
+                        _buildBatchSideCard(context, secador, isDark),
+                      ],
+                    );
+              },
+            ),
+          ),
+          if (secador.observacoes != null && secador.observacoes!.isNotEmpty)
+            _buildFooter(context, secador, isDark),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoColumn(BuildContext context, SecadorModel secador, Color statusColor, bool isDark) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
           children: [
-            Row(
+            Expanded(
+              child: Text(
+                secador.nome,
+                style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: cs.onSurface),
+              ),
+            ),
+            const SizedBox(width: 8),
+            _buildStatusBadge(secador.status, statusColor),
+          ],
+        ),
+        if (secador.unidadeArmazenadoraNome != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
               children: [
-                Container(
-                  width: 36, height: 36,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [cs.primary, cs.primary.withOpacity(0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(Icons.heat_pump_rounded, color: cs.onPrimary, size: 18),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(secador.nome, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      Text(secador.unidadeArmazenadoraNome ?? 'Sem unidade', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                ),
-                PopupMenuButton<int>(
-                  icon: Icon(Icons.more_vert_rounded, size: 18, color: cs.onSurfaceVariant),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 2,
-                  color: cs.surfaceContainerLow,
-                  onSelected: (value) {
-                    if (value == 0) _showSecadorForm(context, secador: secador);
-                    if (value == 1) Get.to(() => SecadorDetalhesView(secador: secador));
-                    if (value == 2) _confirmDelete(context, secador);
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(value: 0, child: Row(children: [Icon(Icons.edit_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Editar', style: GoogleFonts.inter(color: cs.onSurface))])),
-                    PopupMenuItem(value: 1, child: Row(children: [Icon(Icons.sensors_rounded, size: 18, color: cs.primary), const SizedBox(width: 10), Text('Sensores e Telemetria', style: GoogleFonts.inter(color: cs.onSurface))])),
-                    if (Get.find<HomeController>().isAdmin)
-                    PopupMenuItem(value: 2, child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: cs.error), const SizedBox(width: 10), Text('Excluir', style: GoogleFonts.inter(color: cs.error))])),
-                  ],
+                Icon(Icons.location_on_outlined, size: 14, color: cs.onSurfaceVariant),
+                const SizedBox(width: 4),
+                Text(
+                  secador.unidadeArmazenadoraNome!,
+                  style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
+          ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Row(
+            children: [
+              Icon(Icons.settings_input_component_rounded, size: 14, color: cs.primary.withOpacity(0.7)),
+              const SizedBox(width: 4),
+              Text(
+                secador.tipo,
+                style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Row(
+            children: [
+              Icon(Icons.speed_rounded, size: 14, color: cs.primary.withOpacity(0.7)),
+              const SizedBox(width: 4),
+              Text(
+                'Capacidade: ',
+                style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+              ),
+              Text(
+                '${secador.capacidade} t/h',
+                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: cs.primary),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Row(
+            children: [
+              Icon(Icons.local_fire_department_rounded, size: 14, color: Colors.orange.withOpacity(0.7)),
+              const SizedBox(width: 4),
+              Text(
+                secador.fonteCalor,
+                style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+        Obx(
+          () => Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
               children: [
-                _compactMetric(cs, Icons.settings_input_component_rounded, secador.tipo),
-                const SizedBox(width: 12),
-                _compactMetric(cs, Icons.speed_rounded, '${secador.capacidade} t/h'),
-                const SizedBox(width: 12),
-                _compactMetric(cs, Icons.local_fire_department_rounded, secador.fonteCalor),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: statusColor.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
-                  child: Text(secador.status, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: statusColor, letterSpacing: 0.3)),
-                ),
+                _buildMiniBadge(context, Icons.sensors_rounded, '${controller.getSecadorSensorCount(secador.id ?? 0)} Sensores', cs.primary),
+                const SizedBox(width: 8),
+                _buildMiniBadge(context, Icons.air_rounded, '${controller.getSecadorMotorCount(secador.id ?? 0)} Motores', Colors.orange),
               ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        PopupMenuButton(
+          icon: Icon(Icons.more_horiz_rounded, color: cs.onSurfaceVariant),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          itemBuilder: (context) => <PopupMenuEntry>[
+            PopupMenuItem(
+              onTap: () {
+                controller.getSensorsBySecador(secador.id!);
+                _showSecadorSensors(context, secador);
+              },
+              child: Row(children: [Icon(Icons.sensors_rounded, size: 20, color: cs.primary), const SizedBox(width: 12), Text('Ver Sensores', style: GoogleFonts.inter(color: cs.onSurface))]),
+            ),
+            PopupMenuItem(
+              onTap: () {
+                controller.getMotorsBySecador(secador.id!);
+                _showSecadorMotors(context, secador);
+              },
+              child: Row(children: [Icon(Icons.air_rounded, size: 20, color: Colors.orange), const SizedBox(width: 12), Text('Ver Motores', style: GoogleFonts.inter(color: cs.onSurface))]),
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              onTap: () => Future.delayed(Duration.zero, () => _showSecadorForm(context, secador: secador)),
+              child: Row(children: [Icon(Icons.edit_rounded, size: 20, color: cs.primary), const SizedBox(width: 12), Text('Editar Secador', style: GoogleFonts.inter(color: cs.onSurface))]),
+            ),
+            PopupMenuItem(
+              onTap: () => Get.to(() => SecadorDetalhesView(secador: secador)),
+              child: Row(children: [Icon(Icons.assessment_rounded, size: 20, color: cs.primary), const SizedBox(width: 12), Text('Sensores e Telemetria', style: GoogleFonts.inter(color: cs.onSurface))]),
+            ),
+            if (Get.find<HomeController>().isAdmin)
+            PopupMenuItem(
+              onTap: () => _confirmDelete(context, secador),
+              child: Row(children: [Icon(Icons.delete_outline_rounded, size: 20, color: cs.error), const SizedBox(width: 12), Text('Remover', style: GoogleFonts.inter(color: cs.error))]),
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildDryerGraphic(BuildContext context, SecadorModel secador, Color statusColor, bool isDark, bool isHorizontal) {
+    final cs = Theme.of(context).colorScheme;
+    final graphicWidth = isHorizontal ? 320.0 : 280.0;
+    final graphicHeight = isHorizontal ? 240.0 : 220.0;
+
+    return Obx(() {
+      final readings = controller.getLatestReadings(secador.id ?? 0);
+      final motors = controller.getMotorsForSecador(secador.id ?? 0);
+
+      return Center(
+        child: SizedBox(
+          width: graphicWidth,
+          height: graphicHeight,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Positioned(
+                left: (graphicWidth - 140) / 2,
+                child: CustomPaint(
+                  size: const Size(140, 200),
+                  painter: DryerPainter(
+                    statusColor: statusColor,
+                    isDark: isDark,
+                  ),
+                ),
+              ),
+              // Sensores (callouts à direita)
+              if (readings.isNotEmpty)
+                ...List.generate(readings.length, (index) {
+                  final r = readings[index];
+                  final double topOffset = (graphicHeight * 0.2) + (index * 55.0);
+                  return Positioned(
+                    left: (graphicWidth / 2) + 10,
+                    top: topOffset,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 1,
+                          color: cs.primary.withOpacity(0.3),
+                        ),
+                        const SizedBox(width: 6),
+                        _buildSensorLabel(r, isDark),
+                      ],
+                    ),
+                  );
+                }),
+              if (readings.isEmpty)
+                Positioned(
+                  right: 20,
+                  top: graphicHeight * 0.4,
+                  child: Text(
+                    'Sem sensores',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(fontSize: 11, color: Colors.grey.withOpacity(0.5), fontStyle: FontStyle.italic),
+                  ),
+                ),
+              // Motores (na parte inferior)
+              if (motors.isNotEmpty)
+                Positioned(
+                  left: (graphicWidth - (motors.length * 150.0).clamp(100, 300)) / 2,
+                  bottom: -5,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: motors.map((m) {
+                      final isLigado = m.estado == 'ligado';
+                      return Padding(
+                        padding: EdgeInsets.only(right: motors.indexOf(m) < motors.length - 1 ? 12 : 0),
+                        child: _buildMotorLabel(m, isLigado, isDark),
+                      );
+                    }).toList(),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildSensorLabel(TelemetryModel reading, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            reading.sensorPhysicalId.toUpperCase(),
+            style: GoogleFonts.inter(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 0.3),
+          ),
+          const SizedBox(height: 2),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.thermostat_rounded, size: 9, color: Colors.orange),
+              const SizedBox(width: 2),
+              Text('${reading.temperature}°C', style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.orange)),
+              const SizedBox(width: 6),
+              Icon(Icons.water_drop_rounded, size: 9, color: Colors.blue),
+              const SizedBox(width: 2),
+              Text('${reading.humidity}%', style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Widget _compactMetric(ColorScheme cs, IconData icon, String value) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: cs.onSurfaceVariant),
-        const SizedBox(width: 4),
-        Text(value, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: cs.onSurface)),
-      ],
+  Widget _buildMotorLabel(MotorAeracaoModel motor, bool isLigado, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isLigado ? Colors.green.withOpacity(0.3) : Colors.grey.withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: isLigado ? Colors.green.withOpacity(0.2) : Colors.grey.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.air_rounded, size: 10, color: isLigado ? Colors.green : Colors.grey),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            motor.motorId,
+            style: GoogleFonts.inter(fontSize: 8, fontWeight: FontWeight.w700, color: Colors.orange, letterSpacing: 0.2),
+          ),
+          const SizedBox(width: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+            decoration: BoxDecoration(
+              color: isLigado ? Colors.green.withOpacity(0.15) : Colors.grey.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Text(
+              isLigado ? 'LIGADO' : 'DESLIGADO',
+              style: GoogleFonts.inter(fontSize: 7, fontWeight: FontWeight.w900, color: isLigado ? Colors.green : Colors.grey, letterSpacing: 0.2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBatchSideCard(BuildContext context, SecadorModel secador, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(isDark ? 0.08 : 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.orange.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.local_fire_department_rounded, size: 16, color: Colors.orange),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'FONTE DE CALOR',
+                  style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.orange, letterSpacing: 1),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  secador.fonteCalor,
+                  style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.orange),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '${secador.capacidade} t/h',
+              style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.orange),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniBadge(BuildContext context, IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter(BuildContext context, SecadorModel secador, bool isDark) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.015),
+        borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.assignment_outlined, size: 14, color: cs.primary.withOpacity(0.6)),
+              const SizedBox(width: 8),
+              Text(
+                'OBSERVAÇÕES TÉCNICAS',
+                style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: cs.primary.withOpacity(0.6), letterSpacing: 0.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            secador.observacoes!,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(fontSize: 12, height: 1.5, color: isDark ? Colors.grey[400] : Colors.grey[700]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+      child: Text(
+        status.toUpperCase(),
+        style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900, color: color, letterSpacing: 1),
+      ),
     );
   }
 
@@ -270,6 +612,7 @@ class SecagemView extends GetView<SecagemController> {
       case 'Disponível': return Colors.green;
       case 'Em Uso': return Colors.blue;
       case 'Em Manutenção': return Colors.orange;
+      case 'Desativado': return Colors.grey;
       default: return Colors.grey;
     }
   }
@@ -294,24 +637,265 @@ class SecagemView extends GetView<SecagemController> {
     );
   }
 
-  void _confirmDelete(BuildContext context, SecadorModel secador) {
+  void _showSecadorSensors(BuildContext context, SecadorModel secador) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = cs.brightness == Brightness.dark;
     Get.dialog(
-      AlertDialog(
-        backgroundColor: cs.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Row(
-          children: [
-            Container(width: 40, height: 40, decoration: BoxDecoration(color: cs.error.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.delete_outline_rounded, color: cs.error, size: 22)),
-            const SizedBox(width: 12),
-            Text('Remover Secador?', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: cs.onSurface)),
-          ],
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          width: MediaQuery.of(context).size.width * 0.9,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Sensores do Secador', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: cs.onSurface)),
+                        Text(secador.nome, style: GoogleFonts.inter(color: cs.primary, fontWeight: FontWeight.w600, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close_rounded),
+                    style: IconButton.styleFrom(backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: Obx(() {
+                  if (controller.isLoadingSecadorSensors.value) {
+                    return const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator()));
+                  }
+                  if (controller.secadorSensors.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Column(
+                          children: [
+                            Icon(Icons.sensors_off_rounded, size: 48, color: Colors.grey.withOpacity(0.3)),
+                            const SizedBox(height: 16),
+                            Text('Nenhum sensor vinculado a este secador.', style: GoogleFonts.inter(color: Colors.grey)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: controller.secadorSensors.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final sensor = controller.secadorSensors[index];
+                      final sensorStatusColor = sensor.status.toLowerCase() == 'ativo' ? Colors.green : Colors.orange;
+                      return InkWell(
+                        onTap: () { Get.back(); TelemetryHistoryDialog.show(context, sensor); },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(color: cs.primary.withOpacity(0.1), shape: BoxShape.circle),
+                                child: Icon(Icons.settings_input_antenna_rounded, color: cs.primary, size: 18),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(sensor.description, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: cs.onSurface)),
+                                    Text('ID: ${sensor.sensorId}', style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(color: sensorStatusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                                child: Text(sensor.status.toUpperCase(), style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: sensorStatusColor)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Fechar', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
         ),
-        content: Text('Deseja excluir o equipamento "${secador.nome}"?', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
-        actions: [
-          TextButton(onPressed: () => Get.back(), style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Cancelar', style: GoogleFonts.inter(color: cs.onSurfaceVariant))),
-          FilledButton(onPressed: () { controller.deleteSecador(secador.id!); Get.back(); }, style: FilledButton.styleFrom(backgroundColor: cs.error, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Remover', style: GoogleFonts.inter(fontWeight: FontWeight.w600))),
-        ],
+      ),
+    );
+  }
+
+  void _showSecadorMotors(BuildContext context, SecadorModel secador) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = cs.brightness == Brightness.dark;
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          width: MediaQuery.of(context).size.width * 0.9,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Motores do Secador', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: cs.onSurface)),
+                        Text(secador.nome, style: GoogleFonts.inter(color: Colors.orange, fontWeight: FontWeight.w600, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close_rounded),
+                    style: IconButton.styleFrom(backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: Obx(() {
+                  if (controller.isLoadingMotors.value) {
+                    return const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator()));
+                  }
+                  if (controller.secadorMotors.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Column(
+                          children: [
+                            Icon(Icons.electrical_services_rounded, size: 48, color: Colors.grey.withOpacity(0.3)),
+                            const SizedBox(height: 16),
+                            Text('Nenhum motor vinculado a este secador.', style: GoogleFonts.inter(color: Colors.grey)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: controller.secadorMotors.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final motor = controller.secadorMotors[index];
+                      final isLigado = motor.estado == 'ligado';
+                      Color motorStatusColor;
+                      switch (motor.status) {
+                        case 'ativo': motorStatusColor = isLigado ? Colors.green : Colors.orange; break;
+                        case 'manutencao': motorStatusColor = Colors.orange; break;
+                        case 'falha': motorStatusColor = Colors.red; break;
+                        default: motorStatusColor = Colors.grey;
+                      }
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), shape: BoxShape.circle),
+                              child: Icon(Icons.air_rounded, color: Colors.orange.shade700, size: 18),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(motor.motorId, style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: cs.onSurface)),
+                                  if (motor.description.isNotEmpty)
+                                    Text(motor.description, style: GoogleFonts.inter(color: Colors.grey, fontSize: 12)),
+                                  const SizedBox(height: 4),
+                                  Text(isLigado ? 'LIGADO' : 'DESLIGADO', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: isLigado ? Colors.green : Colors.grey)),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(color: motorStatusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                                  child: Text(motor.status.toUpperCase(), style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: motorStatusColor)),
+                                ),
+                                if (motor.potenciaKW != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text('${motor.potenciaKW!.toStringAsFixed(1)} kW', style: GoogleFonts.inter(fontSize: 11, color: Colors.grey)),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Fechar', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -323,7 +907,6 @@ class SecagemView extends GetView<SecagemController> {
     final capacityCtl = TextEditingController(text: secador?.capacidade.toString());
     final obsCtl = TextEditingController(text: secador?.observacoes);
 
-    // Cost controllers
     final custoAquisicaoCtl = TextEditingController(text: secador?.custoAquisicao?.toStringAsFixed(2));
     final valorResidualCtl = TextEditingController(text: secador?.valorResidual?.toStringAsFixed(2));
     final vidaUtilCtl = TextEditingController(text: secador?.vidaUtilAnos?.toString());
@@ -617,5 +1200,157 @@ class SecagemView extends GetView<SecagemController> {
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     );
+  }
+
+  void _confirmDelete(BuildContext context, SecadorModel secador) {
+    final cs = Theme.of(context).colorScheme;
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: cs.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(width: 40, height: 40, decoration: BoxDecoration(color: cs.error.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.delete_outline_rounded, color: cs.error, size: 22)),
+            const SizedBox(width: 12),
+            Text('Remover Secador?', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: cs.onSurface)),
+          ],
+        ),
+        content: Text('Deseja excluir o equipamento "${secador.nome}"?', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+        actions: [
+          TextButton(onPressed: () => Get.back(), style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Cancelar', style: GoogleFonts.inter(color: cs.onSurfaceVariant))),
+          FilledButton(onPressed: () { controller.deleteSecador(secador.id!); Get.back(); }, style: FilledButton.styleFrom(backgroundColor: cs.error, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: Text('Remover', style: GoogleFonts.inter(fontWeight: FontWeight.w600))),
+        ],
+      ),
+    );
+  }
+}
+
+class DryerPainter extends CustomPainter {
+  final Color statusColor;
+  final bool isDark;
+
+  DryerPainter({required this.statusColor, required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    final width = size.width;
+    final height = size.height;
+
+    // Dimensões do secador
+    final bodyLeft = width * 0.15;
+    final bodyTop = height * 0.15;
+    final bodyWidth = width * 0.7;
+    final bodyHeight = height * 0.6;
+
+    // 1. Corpo principal (cilindro vertical)
+    final bodyRect = Rect.fromLTWH(bodyLeft, bodyTop, bodyWidth, bodyHeight);
+    final bodyGradient = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: isDark
+          ? [Colors.grey[850]!, Colors.grey[700]!, Colors.grey[900]!]
+          : [Colors.grey[400]!, Colors.grey[100]!, Colors.grey[500]!],
+      stops: const [0.0, 0.4, 1.0],
+    ).createShader(bodyRect);
+    paint.shader = bodyGradient;
+    canvas.drawRRect(RRect.fromRectAndRadius(bodyRect, const Radius.circular(8)), paint);
+
+    // 2. Topo (câmara de aquecimento - tons mais escuros)
+    final topRect = Rect.fromLTWH(bodyLeft - 5, bodyTop - 15, bodyWidth + 10, 20);
+    final topGradient = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: isDark
+          ? [Colors.grey[800]!, Colors.grey[600]!, Colors.grey[800]!]
+          : [Colors.grey[500]!, Colors.grey[300]!, Colors.grey[500]!],
+      stops: const [0.0, 0.5, 1.0],
+    ).createShader(topRect);
+    paint.shader = topGradient;
+    canvas.drawRRect(RRect.fromRectAndRadius(topRect, const Radius.circular(6)), paint);
+
+    // 3. Saída de ar (chamine no topo)
+    final chamineLeft = bodyLeft + bodyWidth / 2 - 8;
+    final chamineRect = Rect.fromLTWH(chamineLeft, bodyTop - 35, 16, 22);
+    paint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: isDark ? [Colors.grey[700]!, Colors.grey[800]!] : [Colors.grey[400]!, Colors.grey[500]!],
+    ).createShader(chamineRect);
+    canvas.drawRRect(RRect.fromRectAndRadius(chamineRect, const Radius.circular(3)), paint);
+
+    // 4. Fogo/calor na base (efeito de chama)
+    final firePath = Path();
+    final fireBaseY = bodyTop + bodyHeight;
+    firePath.moveTo(bodyLeft + 10, fireBaseY);
+    firePath.lineTo(bodyLeft + bodyWidth / 2 - 10, fireBaseY + 25);
+    firePath.lineTo(bodyLeft + bodyWidth / 2, fireBaseY + 15);
+    firePath.lineTo(bodyLeft + bodyWidth / 2 + 10, fireBaseY + 25);
+    firePath.lineTo(bodyLeft + bodyWidth - 10, fireBaseY);
+    firePath.close();
+
+    final firePaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [statusColor.withOpacity(0.6), statusColor.withOpacity(0.2)],
+      ).createShader(Rect.fromLTWH(bodyLeft, fireBaseY, bodyWidth, 25));
+    canvas.drawPath(firePath, firePaint);
+
+    // 5. Nervuras do secador
+    paint.shader = null;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 0.8;
+    paint.color = isDark ? Colors.black26 : Colors.black.withOpacity(0.05);
+    for (int i = 1; i < 6; i++) {
+      final y = bodyTop + (bodyHeight * i / 6);
+      canvas.drawLine(Offset(bodyLeft, y), Offset(bodyLeft + bodyWidth, y), paint);
+    }
+
+    // 6. Porta de inspeção
+    final doorRect = Rect.fromLTWH(
+      bodyLeft + bodyWidth / 2 - 12,
+      bodyTop + bodyHeight / 2 - 12,
+      24, 24,
+    );
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 1.5;
+    paint.color = isDark ? Colors.white24 : Colors.black.withOpacity(0.2);
+    canvas.drawRRect(RRect.fromRectAndRadius(doorRect, const Radius.circular(4)), paint);
+    canvas.drawCircle(
+      Offset(bodyLeft + bodyWidth / 2, bodyTop + bodyHeight / 2),
+      2,
+      paint,
+    );
+
+    // 7. Tubulação lateral (entrada de ar)
+    final tuboLeft = bodyLeft + bodyWidth + 3;
+    final tuboRect = Rect.fromLTWH(tuboLeft, bodyTop + bodyHeight * 0.3, 8, bodyHeight * 0.4);
+    paint.style = PaintingStyle.fill;
+    paint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: isDark ? [Colors.grey[700]!, Colors.grey[800]!] : [Colors.grey[300]!, Colors.grey[400]!],
+    ).createShader(tuboRect);
+    canvas.drawRRect(RRect.fromRectAndRadius(tuboRect, const Radius.circular(3)), paint);
+
+    // 8. Reflexo de vidro
+    paint.shader = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Colors.white.withOpacity(isDark ? 0.05 : 0.15),
+        Colors.transparent,
+        Colors.white.withOpacity(isDark ? 0.02 : 0.08),
+      ],
+      stops: const [0.0, 0.5, 1.0],
+    ).createShader(bodyRect);
+    paint.style = PaintingStyle.fill;
+    canvas.drawRRect(RRect.fromRectAndRadius(bodyRect, const Radius.circular(8)), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant DryerPainter oldDelegate) {
+    return oldDelegate.isDark != isDark;
   }
 }

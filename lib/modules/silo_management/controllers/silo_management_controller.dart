@@ -5,6 +5,7 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/silo_model.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../../core/models/telemetry_model.dart';
+import '../../../core/models/motor_aeracao_model.dart';
 import '../../unidade_armazenadora_management/controllers/unidade_armazenadora_management_controller.dart';
 import '../../../core/models/unidade_armazenadora_model.dart';
 import '../../../core/models/batch_model.dart';
@@ -18,12 +19,14 @@ class SiloManagementController extends GetxController {
   final silos = <SiloModel>[].obs;
   List<UnidadeArmazenadoraModel> get availableUnidades => _unidadeController.unidades;
   final siloSensors = <SensorModel>[].obs;
+  final siloMotors = <MotorAeracaoModel>[].obs;
   
   // Guardamos as últimas leituras de CADA sensor agrupadas por ID do silo
   final siloLatestReadings = <int, List<TelemetryModel>>{}.obs;
   
   final isLoading = false.obs;
   final isLoadingSensors = false.obs;
+  final isLoadingMotors = false.obs;
 
   @override
   void onInit() {
@@ -34,6 +37,7 @@ class SiloManagementController extends GetxController {
   Future<void> loadDashboardData() async {
     await getSilos();
     await getAllSensors();
+    await getAllMotors();
   }
 
   Future<void> getAllSensors() async {
@@ -48,6 +52,41 @@ class SiloManagementController extends GetxController {
       }
     } catch (_) {
     }
+  }
+
+  Future<void> getAllMotors() async {
+    try {
+      final response = await _apiService.dio.get('motores-aeracao/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        _allMotors.assignAll(data.map((json) => MotorAeracaoModel.fromJson(json)).toList());
+      }
+    } catch (_) {}
+  }
+
+  final _allMotors = <MotorAeracaoModel>[].obs;
+
+  Future<void> getMotorsBySilo(int siloId) async {
+    isLoadingMotors.value = true;
+    siloMotors.clear();
+    try {
+      final response = await _apiService.dio.get('motores-aeracao/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final allMotors = data.map((json) => MotorAeracaoModel.fromJson(json)).toList();
+        siloMotors.assignAll(allMotors.where((m) => m.siloId == siloId).toList());
+      }
+    } catch (_) {} finally {
+      isLoadingMotors.value = false;
+    }
+  }
+
+  int getSiloMotorCount(int siloId) {
+    return _allMotors.where((m) => m.siloId == siloId).length;
+  }
+
+  List<MotorAeracaoModel> getMotorsForSilo(int siloId) {
+    return _allMotors.where((m) => m.siloId == siloId).toList();
   }
 
   Future<void> _calculateAllSiloMetrics(List<SensorModel> allSensors) async {

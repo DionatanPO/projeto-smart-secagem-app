@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../core/models/silo_model.dart';
 import '../../../core/models/telemetry_model.dart';
+import '../../../core/models/motor_aeracao_model.dart';
 import '../../devices/widgets/telemetry_history_dialog.dart';
 import '../../home/controllers/home_controller.dart';
 import '../controllers/silo_management_controller.dart';
@@ -205,34 +206,39 @@ class SiloManagementView extends GetView<SiloManagementController> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Header Integrado com Nome, Status e Ações
-          _buildSiloHeader(context, silo, statusColor, isDark, index),
-          
-          // 2. Conteúdo Principal (Gráfico + Métricas)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            padding: const EdgeInsets.all(24),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isWide = constraints.maxWidth > 400; // Threshold reduzido para manter Row em 2 colunas grid
-                return isWide 
+                final isWide = constraints.maxWidth > 500;
+                return isWide
                   ? Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Gráfico do Silo com Telemetria Integrada
-                        Expanded(
-                          flex: 3,
-                          child: _buildSiloGraphic(context, silo, statusColor, isDark, true),
-                        ),
-                        // Card Lateral de Lote
                         Expanded(
                           flex: 2,
-                          child: _buildBatchSideCard(context, silo, isDark),
+                          child: _buildSiloInfoColumn(context, silo, statusColor, isDark, index),
+                        ),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildSiloGraphic(context, silo, statusColor, isDark, true),
+                              const SizedBox(height: 16),
+                              _buildBatchSideCard(context, silo, isDark),
+                            ],
+                          ),
                         ),
                       ],
                     )
                   : Column(
                       children: [
+                        _buildSiloInfoColumn(context, silo, statusColor, isDark, index),
+                        const SizedBox(height: 16),
                         _buildSiloGraphic(context, silo, statusColor, isDark, false),
+                        const SizedBox(height: 16),
                         _buildBatchSideCard(context, silo, isDark),
                       ],
                     );
@@ -240,7 +246,6 @@ class SiloManagementView extends GetView<SiloManagementController> {
             ),
           ),
           
-          // 3. Rodapé de Notas (Subtil e Integrado)
           if (silo.observations != null && silo.observations!.isNotEmpty)
             _buildSiloFooter(context, silo, isDark),
         ],
@@ -248,98 +253,112 @@ class SiloManagementView extends GetView<SiloManagementController> {
     );
   }
 
-  Widget _buildSiloHeader(BuildContext context, SiloModel silo, Color statusColor, bool isDark, int index) {
+  Widget _buildSiloInfoColumn(BuildContext context, SiloModel silo, Color statusColor, bool isDark, int index) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 20, 16, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                silo.name,
+                style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(width: 8),
+            _buildStatusBadge(silo.status, statusColor),
+          ],
+        ),
+        if (silo.unidadeArmazenadoraNome != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Text(
-                      silo.name,
-                      style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 12),
-                    _buildStatusBadge(silo.status, statusColor),
-                  ],
-                ),
-                if (silo.unidadeArmazenadoraNome != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      children: [
-                        Icon(Icons.location_on_outlined, size: 14, color: theme.hintColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          silo.unidadeArmazenadoraNome!,
-                          style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
-                        ),
-                      ],
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Row(
-                    children: [
-                      Icon(Icons.category_outlined, size: 14, color: AppColors.primary.withOpacity(0.7)),
-                      const SizedBox(width: 4),
-                      Text(
-                        _tipoLabel(silo.tipo),
-                        style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Row(
-                    children: [
-                      Icon(Icons.warehouse_outlined, size: 14, color: AppColors.primary.withOpacity(0.7)),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Carga: ',
-                        style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
-                      ),
-                      Text(
-                        '${silo.currentQuantity}t / ${silo.capacity}t',
-                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: theme.primaryColor),
-                      ),
-                    ],
-                  ),
+                Icon(Icons.location_on_outlined, size: 14, color: theme.hintColor),
+                const SizedBox(width: 4),
+                Text(
+                  silo.unidadeArmazenadoraNome!,
+                  style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
                 ),
               ],
             ),
           ),
-          PopupMenuButton(
-            icon: const Icon(Icons.more_horiz_rounded),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            itemBuilder: (context) => <PopupMenuEntry>[
-              PopupMenuItem(
-                onTap: () {
-                  controller.getSensorsBySilo(silo.id!);
-                  _showSiloSensors(context, silo);
-                },
-                child: const Row(children: [Icon(Icons.sensors_rounded, size: 20, color: AppColors.primary), SizedBox(width: 12), Text('Ver Sensores')]),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                onTap: () => Future.delayed(Duration.zero, () => _showSiloForm(context, silo: silo)),
-                child: const Row(children: [Icon(Icons.edit_rounded, size: 20), SizedBox(width: 12), Text('Editar Silo')]),
-              ),
-              if (Get.find<HomeController>().isAdmin)
-              PopupMenuItem(
-                onTap: () => controller.deleteSilo(silo.id!),
-                child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red), SizedBox(width: 12), Text('Remover', style: TextStyle(color: Colors.red))]),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Row(
+            children: [
+              Icon(Icons.category_outlined, size: 14, color: AppColors.primary.withOpacity(0.7)),
+              const SizedBox(width: 4),
+              Text(
+                _tipoLabel(silo.tipo),
+                style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Row(
+            children: [
+              Icon(Icons.warehouse_outlined, size: 14, color: AppColors.primary.withOpacity(0.7)),
+              const SizedBox(width: 4),
+              Text(
+                'Carga: ',
+                style: GoogleFonts.inter(fontSize: 12, color: theme.hintColor),
+              ),
+              Text(
+                '${silo.currentQuantity}t / ${silo.capacity}t',
+                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: theme.primaryColor),
+              ),
+            ],
+          ),
+        ),
+        Obx(
+          () => Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              children: [
+                _buildMiniBadge(context, Icons.sensors_rounded, '${controller.getSiloSensorCount(silo.id ?? 0)} Sensores', AppColors.primary),
+                const SizedBox(width: 8),
+                _buildMiniBadge(context, Icons.bolt_rounded, '${controller.getSiloMotorCount(silo.id ?? 0)} Motores', Colors.orange),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        PopupMenuButton(
+          icon: const Icon(Icons.more_horiz_rounded),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          itemBuilder: (context) => <PopupMenuEntry>[
+            PopupMenuItem(
+              onTap: () {
+                controller.getSensorsBySilo(silo.id!);
+                _showSiloSensors(context, silo);
+              },
+              child: const Row(children: [Icon(Icons.sensors_rounded, size: 20, color: AppColors.primary), SizedBox(width: 12), Text('Ver Sensores')]),
+            ),
+            PopupMenuItem(
+              onTap: () {
+                controller.getMotorsBySilo(silo.id!);
+                _showSiloMotors(context, silo);
+              },
+              child: const Row(children: [Icon(Icons.bolt_rounded, size: 20, color: Colors.orange), SizedBox(width: 12), Text('Ver Motores')]),
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              onTap: () => Future.delayed(Duration.zero, () => _showSiloForm(context, silo: silo)),
+              child: const Row(children: [Icon(Icons.edit_rounded, size: 20), SizedBox(width: 12), Text('Editar Silo')]),
+            ),
+            if (Get.find<HomeController>().isAdmin)
+            PopupMenuItem(
+              onTap: () => controller.deleteSilo(silo.id!),
+              child: const Row(children: [Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red), SizedBox(width: 12), Text('Remover', style: TextStyle(color: Colors.red))]),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -351,6 +370,7 @@ class SiloManagementView extends GetView<SiloManagementController> {
 
     return Obx(() {
       final readings = controller.getLatestReadings(silo.id ?? 0);
+      final motors = controller.getMotorsForSilo(silo.id ?? 0);
       
       return Center(
         child: SizedBox(
@@ -394,23 +414,20 @@ class SiloManagementView extends GetView<SiloManagementController> {
               if (readings.isNotEmpty)
                 ...List.generate(readings.length, (index) {
                   final r = readings[index];
-                  // Distribuir sensores verticalmente ao longo do corpo do silo
                   final double topOffset = (graphicHeight * 0.3) + (index * 60.0);
                   
                   return Positioned(
-                    left: 20 + (siloWidth * 0.75), // Começa na borda direita do silo
+                    left: 20 + (siloWidth * 0.75),
                     top: topOffset,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Linha de Conexão
                         Container(
                           width: 15,
                           height: 1,
                           color: theme.primaryColor.withOpacity(0.3),
                         ),
                         const SizedBox(width: 8),
-                        // Label do Sensor
                         _buildIntegratedSensorLabel(r, isDark),
                       ],
                     ),
@@ -425,6 +442,26 @@ class SiloManagementView extends GetView<SiloManagementController> {
                     'Sem sensores\nativos',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(fontSize: 11, color: Colors.grey.withOpacity(0.5), fontStyle: FontStyle.italic),
+                  ),
+                ),
+
+              // Motores Integrados (na parte inferior)
+              if (motors.isNotEmpty)
+                Positioned(
+                  left: 20,
+                  bottom: -10,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ...List.generate(motors.length, (index) {
+                        final m = motors[index];
+                        final isLigado = m.estado == 'ligado';
+                        return Padding(
+                          padding: EdgeInsets.only(right: index < motors.length - 1 ? 16 : 0),
+                          child: _buildIntegratedMotorLabel(m, isLigado, isDark),
+                        );
+                      }),
+                    ],
                   ),
                 ),
             ],
@@ -451,6 +488,58 @@ class SiloManagementView extends GetView<SiloManagementController> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildIntegratedMotorLabel(MotorAeracaoModel motor, bool isLigado, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isLigado ? Colors.green.withOpacity(0.3) : Colors.grey.withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: isLigado ? Colors.green.withOpacity(0.2) : Colors.grey.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.air_rounded,
+              size: 12,
+              color: isLigado ? Colors.green : Colors.grey,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            motor.motorId,
+            style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.orange, letterSpacing: 0.3),
+          ),
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: isLigado ? Colors.green.withOpacity(0.15) : Colors.grey.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Text(
+              isLigado ? 'LIGADO' : 'DESLIGADO',
+              style: GoogleFonts.inter(
+                fontSize: 7,
+                fontWeight: FontWeight.w900,
+                color: isLigado ? Colors.green : Colors.grey,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -906,6 +995,197 @@ class SiloManagementView extends GetView<SiloManagementController> {
     );
   }
 
+  void _showSiloMotors(BuildContext context, SiloModel silo) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          width: MediaQuery.of(context).size.width * 0.9,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Motores do Silo',
+                          style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          silo.name,
+                          style: GoogleFonts.inter(color: Colors.orange, fontWeight: FontWeight.w600, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close_rounded),
+                    style: IconButton.styleFrom(
+                      backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
+                child: Obx(() {
+                  if (controller.isLoadingMotors.value) {
+                    return const Center(child: Padding(
+                      padding: EdgeInsets.all(40.0),
+                      child: CircularProgressIndicator(),
+                    ));
+                  }
+
+                  if (controller.siloMotors.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Column(
+                          children: [
+                            Icon(Icons.electrical_services_rounded, size: 48, color: Colors.grey.withOpacity(0.3)),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Nenhum motor vinculado a este silo.',
+                              style: GoogleFonts.inter(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: controller.siloMotors.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final motor = controller.siloMotors[index];
+                      final isLigado = motor.estado == 'ligado';
+                      Color statusColor;
+                      switch (motor.status) {
+                        case 'ativo':
+                          statusColor = isLigado ? Colors.green : Colors.orange;
+                          break;
+                        case 'manutencao':
+                          statusColor = Colors.orange;
+                          break;
+                        case 'falha':
+                          statusColor = Colors.red;
+                          break;
+                        default:
+                          statusColor = Colors.grey;
+                      }
+
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.bolt_rounded, color: Colors.orange.shade700, size: 18),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    motor.motorId,
+                                    style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
+                                  ),
+                                  if (motor.description.isNotEmpty)
+                                    Text(
+                                      motor.description,
+                                      style: GoogleFonts.inter(color: Colors.grey, fontSize: 12),
+                                    ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    isLigado ? 'LIGADO' : 'DESLIGADO',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: isLigado ? Colors.green : Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    motor.status.toUpperCase(),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: statusColor,
+                                    ),
+                                  ),
+                                ),
+                                if (motor.potenciaKW != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${motor.potenciaKW!.toStringAsFixed(1)} kW',
+                                    style: GoogleFonts.inter(fontSize: 11, color: Colors.grey),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Fechar', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showSiloForm(BuildContext context, {SiloModel? silo}) {
     final cs = Theme.of(context).colorScheme;
     final isEditing = silo != null;
@@ -1188,6 +1468,27 @@ class SiloManagementView extends GetView<SiloManagementController> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMiniBadge(BuildContext context, IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+          ),
+        ],
       ),
     );
   }

@@ -13,4 +13,5 @@ abstract class Routes {
   static const processos = '/processos';
   static const clientes = '/clientes';
   static const custos = '/custos';
+  static const devicesMotors = '/devices/motors';
 }

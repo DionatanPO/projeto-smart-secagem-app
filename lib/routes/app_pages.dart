@@ -23,6 +23,7 @@ import '../modules/clientes/bindings/clientes_binding.dart';
 import '../modules/clientes/views/clientes_view.dart';
 import '../modules/custos/bindings/custos_binding.dart';
 import '../modules/custos/views/custos_view.dart';
+import '../modules/devices/views/aeration_motors_view.dart';
 import 'app_routes.dart';
 import '../core/middlewares/auth_middleware.dart';
 
@@ -106,6 +107,11 @@ class AppPages {
       name: Routes.custos,
       page: () => const CustosView(),
       binding: CustosBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: Routes.devicesMotors,
+      page: () => const AerationMotorsView(),
       middlewares: [AuthMiddleware()],
     ),
   ];
