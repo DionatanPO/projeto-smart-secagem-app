@@ -11,7 +11,7 @@ class ApiService extends GetxService {
   final _storage = const FlutterSecureStorage();
 
   static const String baseUrl = 'http://localhost:8000/api/';
-  static const String baseUrlAI = 'http://localhost:8001/api/';
+  static const String baseUrlAI = 'https://ai.secagemdigital.com/api/';
 
   ApiService() {
     _dio = Dio(
