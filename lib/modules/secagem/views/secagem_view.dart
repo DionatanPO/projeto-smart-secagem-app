@@ -162,7 +162,8 @@ class SecagemView extends GetView<SecagemController> {
           if (!isDark) BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 12)),
         ],
       ),
-      child: Column(
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -208,6 +209,7 @@ class SecagemView extends GetView<SecagemController> {
           if (secador.observacoes != null && secador.observacoes!.isNotEmpty)
             _buildFooter(context, secador, isDark),
         ],
+      ),
       ),
     );
   }
