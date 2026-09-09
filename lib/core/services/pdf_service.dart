@@ -233,7 +233,7 @@ class PdfService {
                     ),
                     pw.SizedBox(width: 10),
                     pw.Text(
-                      'SILO SENSE',
+                      'AGROMIND AI',
                       style: pw.TextStyle(
                         fontSize: 18,
                         fontWeight: pw.FontWeight.bold,
@@ -291,7 +291,7 @@ class PdfService {
             children: [
               pw.Expanded(
                 child: pw.Text(
-                  'Gerado por Silo Sense IA em ${DateTime.now().toIso8601String().substring(0, 19).replaceAll('T', ' às ')} · '
+                  'Gerado por AgroMind AI em ${DateTime.now().toIso8601String().substring(0, 19).replaceAll('T', ' às ')} · '
                   'Documento autenticado pelo usuário',
                   style: pw.TextStyle(fontSize: 6.5, color: _subtle),
                 ),

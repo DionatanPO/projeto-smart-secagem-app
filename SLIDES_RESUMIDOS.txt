@@ -1,0 +1,279 @@
+================================================================================
+          CONTEUDO RESUMIDO DOS SLIDES - APRESENTACAO SMART SECAGEM
+================================================================================
+
+
+================================================================================
+SLIDE 1 - CAPA
+================================================================================
+
+Smart Secagem
+Plataforma de Inteligencia Agricola Pos-Colheita
+Monitoramento, Automacao e IA Preditiva para Graos
+
+
+================================================================================
+SLIDE 2 - AGENDA
+================================================================================
+
+1. Visao Geral do Projeto
+2. Problema e Solucao
+3. Arquitetura Tecnica
+4. Modulos do Sistema
+5. Funcionalidades de IA
+6. Demonstracao ao Vivo
+7. Arquitetura de Integracao
+8. Roadmap e Proximos Passos
+9. Encerramento e Perguntas
+
+
+================================================================================
+SLIDE 3 - VISAO GERAL DO PROJETO
+================================================================================
+
+Smart Secagem e uma plataforma completa de monitoramento e automacao
+para operacoes pos-colheita de graos.
+
+Destaques:
+- Flutter (Web, Mobile, Desktop)
+- Monitoramento IoT em tempo real
+- IA integrada para analise preditiva
+- 19 modulos especializados
+- Backend Django + AI Microservice
+
+
+================================================================================
+SLIDE 4 - PROBLEMA E SOLUCAO
+================================================================================
+
+PROBLEMA:
+- Perdas pos-colheita de 10-30% da producao
+- Falta de monitoramento em tempo real
+- Decisoes manuais baseadas em intuicao
+- Risco de incendio em secadores
+
+SOLUCAO:
+- Monitoramento IoT em tempo real
+- IA para analise preditiva
+- Automacao de processos
+- Alertas inteligentes
+- Relatorios automaticos
+
+
+================================================================================
+SLIDE 5 - STACK TECNOLOGICA
+================================================================================
+
+FRONTEND: Flutter (Dart 3.x) + GetX
+BACKEND: Django REST API (porta 8000)
+IA: AI Microservice (porta 8001)
+IOT: Sensores (temp, mancal, CO) + Motores
+GRAFICOS: fl_chart
+ARMazenAMENTO: GetStorage + FlutterSecureStorage
+
+
+================================================================================
+SLIDE 6 - ARQUITETURA TECNICA
+================================================================================
+
+FLUTTER CLIENT
+      │
+      ├──→ Django REST API (8000) → Dados, CRUD, Auth
+      │
+      └──→ AI Microservice (8001) → LLM, Streaming, IA
+
+Comunicacao via SSE (Server-Sent Events) para streaming de IA
+
+
+================================================================================
+SLIDE 7 - MODULOS DO SISTEMA
+================================================================================
+
+PUBLICOS (2): Landing, Login
+CENTRAIS (3): Home, Dashboard IA, Smart Sense IA
+OPERACIONAIS (7): Secagem, Silo Management, Silo Viewer, Devices,
+                   Unidade Armazenadora, Batch, Processos
+FINANCEIROS (2): Clientes, Custos
+ADMINISTRATIVOS (5): Notifications, Access, Profile, Settings, Support
+
+
+================================================================================
+SLIDE 8 - DASHBOARD IA
+================================================================================
+
+Resumo operacional gerado por IA em tempo real.
+
+5 RELATORIOS:
+1. Executivo 24h
+2. Custos de Secagem
+3. Saude dos Lotes
+4. Ocupacao e Capacidade
+5. Gargalos Operacionais
+
+Recursos: Streaming, prompts customizados, exportacao PDF
+
+
+================================================================================
+SLIDE 9 - SMART SENSE IA
+================================================================================
+
+Chat conversacional para consultas em linguagem natural.
+
+Como funciona:
+1. Usuario faz pergunta
+2. Sistema busca contexto operacional
+3. Contexto + pergunta enviados a IA
+4. Resposta streaming em tempo real
+
+Capacidades: Sensores, lotes, silos, processos
+
+
+================================================================================
+SLIDE 10 - RISCO DE FOGO
+================================================================================
+
+Sistema client-side de prevencao de incendio em secadores.
+
+SENSORES: Mancal (temp), Abafamento (CO), Vibracao
+
+5 NIVEIS DE RISCO:
+- Seguro (verde)
+- Atenucao (azul)
+- Aviso (amarelo)
+- Critico (laranja)
+- Emergencia (vermelho)
+
+Scoring: 0 a 12+ pontos
+
+
+================================================================================
+SLIDE 11 - EQUILIBRIO HIGROSCOPICO
+================================================================================
+
+Decisao inteligente de aeracao baseada em:
+
+- Temperatura Interna: detecta pontos quentes
+- Umidade Relativa: ponto de equilibrio
+- Ponto de Orvalho: previne condensacao
+- Delta T: resfriamento efetivo
+
+Aeracao ativa APENAS quando Delta T favoravel
+
+
+================================================================================
+SLIDE 12 - MONITORAMENTO IoT
+================================================================================
+
+SENSORES: Temperatura, Mancal, Abafamento (CO)
+MOTORES: Controle ON/OFF remoto
+TELEMETRIA: Temp, umidade, gas, vibracao
+GRAFICOS: Filtragem por data em tempo real
+
+
+================================================================================
+SLIDE 13 - VISUALIZACAO 3D/AR
+================================================================================
+
+- Modelo 3D interativo de silos
+- Realidade Aumentada (sobreposicao de dados)
+- Timeline de estagios do projeto
+- Diagrama de rede IoT (Modbus TCP/RTU)
+
+
+================================================================================
+SLIDE 14 - ARQUITETURA DE INTEGRACAO
+================================================================================
+
+USUARIO → Flutter App
+    │
+    ├──→ GET /contexto/ → Django API → dados operacionais
+    │
+    └──→ POST /chat-stream/ → AI Microservice → SSE Stream
+
+EVENTOS SSE: message, thought, metrics, error, done
+
+
+================================================================================
+SLIDE 15 - MODELOS DE DADOS
+================================================================================
+
+14 MODELOS:
+- Gestao: Silo, Secador, Motor, Lote, Processo, U.A.
+- Operacional: Sensor, Telemetry, FireRisk, Resumo
+- Negocio: Cliente, Custo
+- Sistema: User, Notification
+
+
+================================================================================
+SLIDE 16 - FUNCIONALIDADES PLANEJADAS
+================================================================================
+
+PENDENTE:
+- Machine Learning com dados historicos
+- RAG (Retrieval-Augmented Generation)
+- Previsao de Hotspot 48h
+- Modelos de equilibrio higroscopico
+- Integracao LoRaWAN
+- App mobile nativo
+- Multi-tenant
+
+
+================================================================================
+SLIDE 17 - DEMONSTRACAO AO VIVO
+================================================================================
+
+1. Login e Dashboard (relatorio IA)
+2. Chat Smart Sense IA (pergunta e resposta)
+3. Monitoramento de Sensores (telemetria)
+4. Controle de Motores (ON/OFF)
+5. Relatorio IA (geracao e PDF)
+
+
+================================================================================
+SLIDE 18 - NUMEROS E RESULTADOS
+================================================================================
+
+19 Modulos | 14 Modelos | 5 Relatorios IA | 3 Sensores
+5 Niveis Risco | 2 APIs | 3 Plataformas
+
+VALOR:
+- Reducao de perdas
+- Decisoes baseadas em dados
+- Prevencao de incendios
+- Otimizacao de energia
+- Qualidade preservada
+
+
+================================================================================
+SLIDE 19 - ENCERRAMENTO
+================================================================================
+
+Smart Secagem: solucao completa para pos-colheita
+- IA integrada para analise preditiva
+- Monitoramento IoT em tempo real
+- Tomada de decisao inteligente
+
+Contato: secagem-digital.com
+Perguntas?
+
+
+================================================================================
+SLIDE BONUS - PERGUNTAS FREQUENTES
+================================================================================
+
+Q: Funciona offline? A: Basicas sim, IA nao.
+Q: Sensores compativeis? A: Temp, mancal, CO.
+Q: E seguro? A: Token, 2FA, middleware de rotas.
+Q: Multiplos usuarios? A: Sim, com controle de acesso.
+Q: Relatorios customizaveis? A: Sim, prompts livres.
+Q: Exporta PDF? A: Sim, via PdfService.
+Q: Plataformas? A: Web, Mobile, Desktop.
+
+
+================================================================================
+                        FIM DO CONTEUDO RESUMIDO
+================================================================================
+
+Total: 20 slides | Tempo: 20-30 minutos | Formato: 16:9
+
+================================================================================

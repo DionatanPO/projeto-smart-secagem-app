@@ -1,0 +1,48 @@
+================================================================================
+SLIDE - GESTAO DE CUSTOS
+================================================================================
+
+TITULO:
+  Quanto Esta Custando Sua Operacao?
+
+PROBLEMA QUE RESOLVE:
+  Muitos produtores nao sabem exatamente quanto gastam
+  em cada etapa da pos-colheita. O custo se esconde
+  em varias frentes e so aparece no final do mes
+  quando o prejuizo ja esta feito.
+
+O QUE O SISTEMA FAZ:
+  O modulo de custos acompanha todo o dinheiro que entra
+  e sai da operacao de pos-colheita, separado por
+  processo, secador e periodo.
+
+ONDE O DINHEIRO E RASTREADO:
+  Secagem - Quanto custa secar cada tonelada de grao
+  Energia - Quanto os motores e secadores gastam
+  Manutencao - Pecas, servicos e correcoes
+  Armazenamento - Custo por dia em cada silo
+  Mao de obra - Pessoal envolvido na operacao
+  Transporte - Frete e deslocamento
+
+COMO AJUDA NA PRATICA:
+  - Voce sabe quanto custa secar cada lote
+  - Compara custo entre secadores
+  - Identifica onde esta gastando mais
+  - Descobre onde pode economizar
+  - Tem numeros pra negociar melhor
+
+TIPO DE RELATORIO DISPONIVEL:
+  Relatorio de Custos de Secagem (via IA):
+  A inteligencia artificial gera uma analise completa
+  dos custos por processo e secador, mostrando custo
+  por tonelada e projecoes para os proximos meses.
+
+  Basta pedir no Dashboard:
+  "Gere o relatorio de custos de secagem"
+  E pronto. Numeros na tela, sem fazer conta.
+
+BENEFICIO:
+  Com o custo na palma da mao, voce decide melhor,
+  negocia melhor e lucra mais.
+
+================================================================================

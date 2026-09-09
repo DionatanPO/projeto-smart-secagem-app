@@ -1,99 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/services/api_service.dart';
 
 class NotificationsController extends GetxController {
-  // Mock data for notifications/logs
-  final notifications = <Map<String, dynamic>>[
-    {
-      'id': '1',
-      'title': 'Hotspot Detectado',
-      'description':
-          'O Silo 04 apresentou uma diferença de temperatura de 5.8°C entre o meio e a base.',
-      'time': '5 min atrás',
-      'type': 'Critical', // Critical, Warning, Info, System
-      'icon': Icons.report_problem_rounded,
-      'color': Colors.red,
-      'isRead': false,
-      'target': 'Silo 04',
-    },
-    {
-      'id': '2',
-      'title': 'Aeração Iniciada',
-      'description':
-          'O sistema de ventilação do Silo 01 foi acionado manualmente.',
-      'time': '12 min atrás',
-      'type': 'Info',
-      'icon': Icons.air_rounded,
-      'color': Colors.blue,
-      'isRead': true,
-      'target': 'Silo 01',
-    },
-    {
-      'id': '3',
-      'title': 'Bateria Baixa',
-      'description': 'O sensor SN-LVL-01 (Silo 01) está com 15% de bateria.',
-      'time': '1 hora atrás',
-      'type': 'Warning',
-      'icon': Icons.battery_alert_rounded,
-      'color': Colors.orange,
-      'isRead': false,
-      'target': 'Dispositivos',
-    },
-    {
-      'id': '4',
-      'title': 'Hub Offline',
-      'description': 'A Central de Secagem B perdeu a conexão com o servidor.',
-      'time': '2 horas atrás',
-      'type': 'Critical',
-      'icon': Icons.router_rounded,
-      'color': Colors.red,
-      'isRead': false,
-      'target': 'HUBS',
-    },
-    {
-      'id': '5',
-      'title': 'Aeração Automática',
-      'description':
-          'O sistema desligou a aeração do Silo 02 após atingir o setpoint de umidade.',
-      'time': '4 horas atrás',
-      'type': 'System',
-      'icon': Icons.settings_suggest_rounded,
-      'color': Colors.green,
-      'isRead': true,
-      'target': 'Silo 02',
-    },
-  ].obs;
+  final ApiService _apiService = Get.find<ApiService>();
 
+  final notifications = <Map<String, dynamic>>[].obs;
   final selectedFilter = 'Todos'.obs;
   final filters = ['Todos', 'Críticos', 'Alertas', 'Sistema'];
+  final isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+  }
 
   void changeFilter(String filter) {
     selectedFilter.value = filter;
   }
 
   List<Map<String, dynamic>> get filteredNotifications {
-    if (selectedFilter.value == 'Todos') return notifications;
+    final all = notifications;
+    if (selectedFilter.value == 'Todos') return all;
     if (selectedFilter.value == 'Críticos')
-      return notifications.where((n) => n['type'] == 'Critical').toList();
+      return all.where((n) => n['type'] == 'Critical').toList();
     if (selectedFilter.value == 'Alertas')
-      return notifications.where((n) => n['type'] == 'Warning').toList();
+      return all.where((n) => n['type'] == 'Warning').toList();
     if (selectedFilter.value == 'Sistema')
-      return notifications
+      return all
           .where((n) => n['type'] == 'System' || n['type'] == 'Info')
           .toList();
-    return notifications;
+    return all;
   }
 
-  void markAsRead(String id) {
+  int get unreadCount => notifications.where((n) => !(n['isRead'] as bool)).length;
+
+  Future<void> loadNotifications() async {
+    isLoading.value = true;
+    try {
+      final response = await _apiService.dio.get('notificacoes/');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data as List;
+        notifications.assignAll(data.map((json) => {
+          'id': json['id'].toString(),
+          'title': json['titulo'],
+          'description': json['descricao'],
+          'time': _formatTime(json['created_at']),
+          'type': json['tipo'],
+          'icon': _iconFromName(json['icone']),
+          'color': _colorFromName(json['cor']),
+          'isRead': json['is_read'] ?? false,
+          'target': json['target'] ?? '',
+        }).toList());
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar notificacoes: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> markAsRead(String id) async {
     final index = notifications.indexWhere((n) => n['id'] == id);
     if (index != -1) {
       final updated = Map<String, dynamic>.from(notifications[index]);
       updated['isRead'] = true;
       notifications[index] = updated;
     }
+    try {
+      await _apiService.dio.post('notificacoes/marcar_lida/', data: {'id': int.parse(id)});
+    } catch (_) {}
   }
 
-  void markAllAsRead() {
+  Future<void> markAllAsRead() async {
     for (var i = 0; i < notifications.length; i++) {
       if (!(notifications[i]['isRead'] as bool)) {
         final updated = Map<String, dynamic>.from(notifications[i]);
@@ -101,9 +80,54 @@ class NotificationsController extends GetxController {
         notifications[i] = updated;
       }
     }
+    try {
+      await _apiService.dio.post('notificacoes/marcar_todas_lidas/');
+    } catch (_) {}
   }
 
-  void clearAll() {
+  Future<void> clearAll() async {
     notifications.clear();
+    try {
+      await _apiService.dio.post('notificacoes/limpar/');
+    } catch (_) {}
+  }
+
+  String _formatTime(String? iso) {
+    if (iso == null) return '';
+    try {
+      final dt = DateTime.parse(iso);
+      final diff = DateTime.now().difference(dt);
+      if (diff.inMinutes < 1) return 'Agora';
+      if (diff.inMinutes < 60) return '${diff.inMinutes} min atrás';
+      if (diff.inHours < 24) return '${diff.inHours}h atrás';
+      return '${diff.inDays}d atrás';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  IconData _iconFromName(String? name) {
+    switch (name) {
+      case 'local_fire_department_rounded': return Icons.local_fire_department_rounded;
+      case 'warning_rounded': return Icons.warning_rounded;
+      case 'timer_off_rounded': return Icons.timer_off_rounded;
+      case 'play_circle_outline_rounded': return Icons.play_circle_outline_rounded;
+      case 'pause_circle_outline_rounded': return Icons.pause_circle_outline_rounded;
+      case 'assignment_rounded': return Icons.assignment_rounded;
+      case 'bedtime_rounded': return Icons.bedtime_rounded;
+      case 'notifications_rounded': return Icons.notifications_rounded;
+      default: return Icons.notifications_rounded;
+    }
+  }
+
+  Color _colorFromName(String? name) {
+    switch (name) {
+      case 'red': return Colors.red;
+      case 'orange': return Colors.orange;
+      case 'blue': return Colors.blue;
+      case 'green': return Colors.green;
+      case 'grey': return Colors.grey;
+      default: return Colors.blue;
+    }
   }
 }

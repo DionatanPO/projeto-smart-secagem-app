@@ -1,0 +1,682 @@
+================================================================================
+                    SMART SECAGEM - APRESENTACAO DO SISTEMA
+================================================================================
+
+  Plataforma de Monitoramento e Automacao Agricola Pos-Colheita
+  Gestao de Silos, Secagem, Dispositivos IoT e IA Preditiva
+
+  Versao: 1.0
+  Data: Setembro 2026
+  Stack: Flutter (Dart 3.x) | Django REST API | AI Microservice
+
+================================================================================
+                          1. VISAO GERAL DO PROJETO
+================================================================================
+
+O Smart Secagem e uma plataforma completa de monitoramento e automacao para
+a operacao pos-colheita de graos. O sistema integra gestao de silos, controle
+de secagem, monitoramento de dispositivos IoT e analises preditivas via
+Inteligencia Artificial para otimizar o armazenamento e a qualidade dos graos.
+
+ARQUITETURA TECNICA:
+--------------------
+  Frontend:      Flutter (Web, Mobile, Desktop)
+  Backend:       Django REST API (porta 8000)
+  AI Service:    Microservice de IA (porta 8001)
+  Estado:        GetX (State Management + Routing)
+  Storage:       GetStorage (cache) + FlutterSecureStorage (tokens)
+  HTTP Client:   Dio (API principal) + http (SSE streaming IA)
+  Graficos:      fl_chart
+  Code Gen:      freezed + json_serializable + build_runner
+
+ARQUITETURA DUAL-API:
+---------------------
+  ┌─────────────────────┐     ┌─────────────────────────┐
+  │   Django REST API   │     │    AI Microservice       │
+  │   localhost:8000    │     │    localhost:8001        │
+  │                     │     │                          │
+  │  /contexto/         │     │  /chat-stream/           │
+  │  /sensores/         │     │  (SSE Streaming)         │
+  │  /telemetria/       │     │                          │
+  │  /silos/            │     │  Prompt + Contexto       │
+  │  /secadores/        │     │  -> Resposta Stream IA   │
+  │  /motores-aeracao/  │     │                          │
+  │  /lotes/            │     │  LLM (Large Language     │
+  │  /processos/        │     │       Model)             │
+  │  /clientes/         │     │                          │
+  │  /custos/           │     │  RAG (planejado)         │
+  │  /login/            │     │                          │
+  │  /notifications/    │     │                          │
+  └─────────────────────┘     └─────────────────────────┘
+
+================================================================================
+                          2. MODULOS DO SISTEMA (19)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        MODULOS PUBLICOS (2)                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. LANDING (Pagina Inicial Publica)                                       │
+│     Rota: /landing                                                          │
+│     Descricao: Pagina publica com portfolio de features, precos, sobre,     │
+│     contato e informacoes institucionais. Ponto de entrada para usuarios    │
+│     nao autenticados.                                                       │
+│     Arquivos:                                                               │
+│       - views/landing_view.dart        (Pagina principal)                  │
+│       - views/pricing_view.dart        (Planos e precos)                   │
+│       - views/features_view.dart       ( showcase de features)              │
+│       - views/contact_view.dart        (Formulario de contato)             │
+│       - views/about_view.dart          (Pagina sobre)                      │
+│       - controllers/landing_controller.dart                                │
+│       - widgets/web_nav_bar.dart       (Navegacao web)                     │
+│       - widgets/web_drawer.dart        (Menu lateral)                      │
+│       - widgets/web_footer.dart        (Rodape)                            │
+│                                                                             │
+│  2. LOGIN (Autenticacao)                                                    │
+│     Rota: /login                                                            │
+│     Descricao: Tela de autenticacao com validacoes premium de UI/UX.       │
+│     Ponto de entrada para a area autenticada.                               │
+│     Arquivos:                                                               │
+│       - views/login_view.dart                                             │
+│       - controllers/login_controller.dart                                  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MODULOS CENTRAIS AUTENTICADOS (3)                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  3. HOME (Shell Principal)                                                  │
+│     Rota: /home                                                             │
+│     Descricao: Container principal com sidebar/drawer e roteamento          │
+│     interno para todos os sub-modulos. Layout central autenticado.          │
+│     Arquivos:                                                               │
+│       - views/home_view.dart                                                │
+│       - controllers/home_controller.dart                                    │
+│                                                                             │
+│  4. DASHBOARD (Painel IA)                                                   │
+│     Descricao: Dashboard operacional com resumo IA em tempo real.           │
+│     Faz streaming de analise IA do backend LLM com system prompts           │
+│     configuraveis para diferentes tipos de relatorio.                       │
+│     Funcionalidades IA:                                                     │
+│       - Streaming de resposta IA token por token                           │
+│       - 5 presets de system prompt:                                         │
+│         * Relatorio Executivo 24h                                           │
+│         * Relatorio de Custos de Secagem                                    │
+│         * Relatorio de Saude dos Lotes                                      │
+│         * Relatorio de Ocupacao e Capacidade                               │
+│         * Relatorio de Gargalos Operacionais                               │
+│       - Prompts customizados pelo usuario                                   │
+│       - Exportacao PDF via PdfService                                       │
+│       - Persistencia de prompt via GetStorage                               │
+│     Arquivos:                                                               │
+│       - views/dashboard_view.dart                                          │
+│       - controllers/dashboard_controller.dart                              │
+│       - bindings/dashboard_binding.dart                                    │
+│                                                                             │
+│  5. SMART SENSE IA (Chat IA Interativo)                                     │
+│     Rota: /smart-sense-ia                                                   │
+│     Descricao: Interface de chat conversacional para consultas em           │
+│     linguagem natural sobre sensores, lotes e dados operacionais.           │
+│     Funcionalidades IA:                                                     │
+│       - Chat interativo com IA                                              │
+│       - Injecao de contexto operacional automatica                         │
+│       - Historico de conversas mantido para continuidade                    │
+│       - Renderizacao Markdown completa                                      │
+│       - Badge "SENSE AI ACTIVE" e indicador de status                      │
+│     Fluxo de dados:                                                         │
+│       Input -> fetchContext() -> postStream('chat-stream/') -> SSE -> MD    │
+│     Arquivos:                                                               │
+│       - views/smart_sense_ia_view.dart                                     │
+│       - controllers/smart_sense_ia_controller.dart                         │
+│       - bindings/smart_sense_ia_binding.dart                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   MODULOS OPERACIONAIS (7)                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  6. SECAGEM (Drying)                                                        │
+│     Rota: /secagem                                                          │
+│     Descricao: Controle e monitoramento do processo de secagem. Gerencia    │
+│     parametros de secadores, metricas termicas, controle de motores,        │
+│     painel de prevencao de risco de fogo e otimizacao de processos.        │
+│     Funcionalidades IA:                                                     │
+│       - Sistema de Previsao de Risco de Fogo (client-side)                 │
+│       - Algoritmo de scoring multi-fator (0-12+ pontos)                    │
+│       - 5 niveis de risco: seguro/atencao/aviso/critico/emergencia         │
+│       - Analise de taxa de elevacao termica (C/min)                        │
+│     Arquivos:                                                               │
+│       - views/secagem_view.dart                                            │
+│       - views/secador_detalhes_view.dart                                   │
+│       - controllers/secagem_controller.dart                                │
+│       - widgets/fire_risk_panel.dart                                       │
+│                                                                             │
+│  7. SILO MANAGEMENT (Gestao de Silos)                                       │
+│     Rota: /silo-management                                                  │
+│     Descricao: Parametrizacao e gestao de silos agricolas. Inclui           │
+│     telemetria de sensores por silo, gestao de motores e paineis           │
+│     de monitoramento em tempo real.                                         │
+│     Arquivos:                                                               │
+│       - views/silo_management_view.dart                                    │
+│       - controllers/silo_management_controller.dart                        │
+│                                                                             │
+│  8. SILO VIEWER (Visualizacao 3D)                                           │
+│     Descricao: Visualizacao 3D de silos com suporte a AR (Realidade        │
+│     Aumentada), timeline de estagios do projeto e diagrama de              │
+│     arquitetura de rede IoT.                                                │
+│     Funcionalidades:                                                        │
+│       - Visualizacao 3D interativa                                          │
+│       - Suporte a Realidade Aumentada                                       │
+│       - Timeline de estagios do projeto                                     │
+│       - Diagrama de arquitetura de rede IoT                                │
+│     Arquivos:                                                               │
+│       - views/silo_viewer_view.dart                                        │
+│       - views/widgets/network_architecture_diagram.dart                    │
+│                                                                             │
+│  9. DEVICES (Dispositivos IoT)                                              │
+│     Descricao: Gestao de dispositivos IoT: sensores (temperatura,          │
+│     mancal, abafamento) e motores de aeracao com toggle ON/OFF.            │
+│     Funcionalidades:                                                        │
+│       - Gestao de sensores (3 tipos)                                        │
+│       - Controle de motores de aeracao (ON/OFF remoto)                     │
+│       - Historico de telemetria com graficos                                │
+│       - Dialog de historico de telemetria                                   │
+│     Endpoints API:                                                          │
+│       - GET/POST motores-aeracao/                                           │
+│       - PUT/DELETE motores-aeracao/<id>/                                    │
+│       - POST motores-aeracao/<id>/comando/                                  │
+│     Arquivos:                                                               │
+│       - views/devices_view.dart           (TabBar: Sensores | Motores)     │
+│       - views/aeration_motors_view.dart   (View standalone de motores)     │
+│       - controllers/devices_controller.dart                                │
+│       - controllers/aeration_motor_controller.dart                         │
+│       - widgets/telemetry_history_dialog.dart                              │
+│       - widgets/motor_control_card.dart                                    │
+│                                                                             │
+│ 10. UNIDADE ARMAZENADORA MANAGEMENT (Gestao de U.A.)                        │
+│     Rota: /unidade-armazenadora-management                                  │
+│     Descricao: Gestao de unidades armazenadoras, incluindo cadastro        │
+│     e configuracao de instalacoes de armazenamento.                         │
+│     Arquivos:                                                               │
+│       - views/unidade_armazenadora_management_view.dart                    │
+│       - controllers/unidade_armazenadora_management_controller.dart        │
+│                                                                             │
+│ 11. BATCH MANAGEMENT (Gestao de Lotes)                                      │
+│     Rota: /batch-management                                                 │
+│     Descricao: Rastreamento de lotes de graos em silos, com detalhes       │
+│     do lote, historico e vinculacao a processos.                            │
+│     Arquivos:                                                               │
+│       - views/batch_management_view.dart                                   │
+│       - controllers/batch_management_controller.dart                       │
+│                                                                             │
+│ 12. PROCESSOS (Gestao de Processos de Secagem)                              │
+│     Rota: /processos                                                        │
+│     Descricao: Gestao e rastreamento de processos de secagem, incluindo    │
+│     monitoramento de processos ativos e historico.                          │
+│     Arquivos:                                                               │
+│       - views/processos_view.dart                                          │
+│       - controllers/processos_controller.dart                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MODULOS FINANCEIROS (2)                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ 13. CLIENTES (Gestao de Clientes)                                           │
+│     Rota: /clientes                                                         │
+│     Descricao: Cadastro e gestao de clientes/produtores agricolas.         │
+│     Arquivos:                                                               │
+│       - views/clientes_view.dart                                           │
+│       - controllers/clientes_controller.dart                               │
+│                                                                             │
+│ 14. CUSTOS (Gestao de Custos)                                               │
+│     Rota: /custos                                                           │
+│     Descricao: Rastreamento de custos e gestao financeira para             │
+│     operacoes de secagem e armazenamento.                                   │
+│     Arquivos:                                                               │
+│       - views/custos_view.dart                                             │
+│       - controllers/custos_controller.dart                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                  MODULOS ADMINISTRATIVOS (5)                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ 15. NOTIFICATIONS (Centro de Alertas)                                       │
+│     Descricao: Centro de alertas e metricas de notificacoes para           │
+│     eventos do sistema, alertas de sensores e atualizacoes de processos.   │
+│     Arquivos:                                                               │
+│       - views/notifications_view.dart                                      │
+│       - controllers/notifications_controller.dart                          │
+│                                                                             │
+│ 16. ACCESS MANAGEMENT (Gestao de Acessos)                                   │
+│     Descricao: Controle de acesso e gestao de permissoes de usuarios      │
+│     dentro do app.                                                          │
+│     Arquivos:                                                               │
+│       - views/access_management_view.dart                                  │
+│       - controllers/access_management_controller.dart                      │
+│                                                                             │
+│ 17. PROFILE (Perfil do Usuario)                                             │
+│     Descricao: Gestao do perfil do usuario: dados pessoais, configuracoes  │
+│     de 2FA, nivel de acesso e preferencias de alertas.                     │
+│     Arquivos:                                                               │
+│       - views/profile_view.dart                                            │
+│       - controllers/profile_controller.dart                                │
+│                                                                             │
+│ 18. SETTINGS (Configuracoes)                                                │
+│     Descricao: Configuracoes do sistema: alternancia de esquema de         │
+│     cores, toggle Dark/Light mode e configuracao global do app.            │
+│     Arquivos:                                                               │
+│       - views/settings_view.dart                                           │
+│       - controllers/settings_controller.dart                               │
+│                                                                             │
+│ 19. SUPPORT (Suporte Educativo)                                             │
+│     Descricao: Centro de suporte educativo explicando os pilares           │
+│     biologicos e tecnicos do sistema de inteligencia de aeracao.           │
+│     Funcionalidades documentadas:                                           │
+│       - Analise de Equilibrio Higroscopico                                 │
+│       - Calculo de Delta T                                                  │
+│       - Ponto de Orvalho                                                    │
+│       - Decisao Inteligente de Aeracao                                      │
+│     Arquivos:                                                               │
+│       - views/support_view.dart                                            │
+│       - controllers/support_controller.dart                                │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                      3. FUNCIONALIDADES DE INTELIGENCIA ARTIFICIAL
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              3.1 DASHBOARD IA - RESUMO OPERACIONAL                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+
+  Localizacao: lib/modules/dashboard/
+
+  O Dashboard IA e o coracao analitico do sistema. Ele recebe dados
+  operacionais em tempo real e gera resumos inteligentes via LLM.
+
+  FLUXO OPERACIONAL:
+  -------------------
+  1. fetchContext() busca dados operacionais via GET /contexto/
+  2. Contexto e envolto em tags XML <contexto_operacional>
+  3. Prompt e enviado via POST /chat-stream/ (SSE streaming)
+  4. Resposta e exibida incrementalmente como Markdown
+
+  5 TIPOS DE RELATORIO PRE-DEFINIDOS:
+  ------------------------------------
+  a) Relatorio Executivo 24h
+     - Panorama operacional das ultimas 24 horas
+     - Alertas ativos e recomendacoes prioritarias
+
+  b) Relatorio de Custos de Secagem
+     - Analise financeira por processo e secador
+     - Custo por tonelada e projecoes
+
+  c) Relatorio de Saude dos Lotes
+     - Analise de risco e qualidade dos lotes
+     - Tempo de armazenamento e condicoes
+
+  d) Relatorio de Ocupacao e Capacidade
+     - Taxa de ocupacao dos silos
+     - Tendencias e projecao de saturacao
+
+  e) Relatorio de Gargalos Operacionais
+     - Diagnostico de gargalos na cadeia:
+       RECEPCAO -> SECAGEM -> ARMAZENAMENTO -> EXPEDICAO
+
+  RECURSOS TECNICOS:
+  -------------------
+  - Streaming de resposta token por token
+  - Tratamento de eventos "thought" (chain-of-thought)
+  - Tratamento de eventos "metrics"
+  - Tracking de tempo de resposta
+  - Exportacao para PDF via PdfService
+  - Persistencia de prompt via GetStorage
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              3.2 SMART SENSE IA - CHAT CONVERSACIONAL                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+
+  Localizacao: lib/modules/smart_sense_ia/
+
+  Interface de chat interativo para consultas em linguagem natural
+  sobre todo o ecossistema de dados da operacao.
+
+  FLUXO DE DADOS:
+  ----------------
+  Input do Usuario
+       │
+       ▼
+  fetchContext() ──→ GET /contexto/ (Django API:8000)
+       │
+       ▼
+  Montagem do Prompt com Contexto
+       │
+       ▼
+  postStream('chat-stream/', {prompt, history, use_rag: false})
+       │
+       ▼
+  AI Microservice (porta:8001) ──→ SSE Stream
+       │
+       ▼
+  Renderizacao Markdown em tempo real
+
+  CAPACIDADES:
+  -------------
+  - Perguntas sobre sensores especificos
+  - Consultas sobre lotes armazenados
+  - Analise de condicoes operacionais
+  - Historico de conversas para continuidade
+  - Badge "SENSE AI ACTIVE" com indicador de status
+
+  PARAMETROS DA API:
+  -------------------
+  {
+    "prompt": "pergunta do usuario",
+    "system_prompt": "contexto operacional",
+    "history": [...],
+    "use_rag": false
+  }
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              3.3 SISTEMA DE PREVISAO DE RISCO DE FOGO                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+
+  Localizacao: lib/core/models/fire_risk_model.dart
+               lib/modules/secagem/widgets/fire_risk_panel.dart
+
+  Sistema client-side baseado em regras para avaliacao de risco
+  de incendio em secadores. NAO usa ML - e baseado em thresholds
+  e scoring multi-fator.
+
+  ALGORITMO DE SCORING:
+  ----------------------
+  Fatores avaliados:
+    - Temperatura do sensor
+    - Nivel de gas (CO)
+    - Vibracao
+    - Taxa de elevacao termica (C/min)
+
+  Niveis de Risco por Tipo de Sensor:
+  ------------------------------------
+  SENSOR MANCAL (Rolamento):
+    - Aviso:     >= 75C
+    - Critico:   >= 90C
+    - Emergencia:>= 110C
+
+  SENSOR ABAFAMENTO (CO):
+    - Aviso:     >= 50ppm
+    - Critico:   >= 150ppm
+    - Emergencia:>= 400ppm
+
+  ESCORE FINAL (0-12+):
+  -----------------------
+  Score >= 7  →  EMERGENCIA (vermelho)
+  Score >= 5  →  CRITICO (laranja)
+  Score >= 3  →  AVISO (amarelo)
+  Score >= 1  →  ATENCAO (azul)
+  Score = 0   →  SEGURO (verde)
+
+  RECURSOS:
+  ----------
+  - Monitoramento em tempo real de todos os sensores
+  - Agregacao de nivel de fogo geral por secador
+  - Dialogo de emergencia com feedback haptico
+  - Cards de risco detalhados com dados de telemetria
+  - Dialogo educativo explicando tipos de sensor e niveis
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              3.4 EQUILIBRIO HIGROSCOPICO E DELTA T                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+
+  Localizacao: lib/modules/support/controllers/support_controller.dart
+
+  Sistema de decisao inteligente para aeracao de graos baseado em
+  analise de equilibrio higroscopico.
+
+  FLUXO DE DECISAO:
+  ------------------
+  1. Monitoramento Constante
+     - Leitura de sensores a cada 60 segundos
+     - Coleta de temperatura e umidade interna/externa
+
+  2. Analise de Equilibrio Higroscopico
+     - Calculo se o ar externo pode remover umidade do grao
+     - Verificacao de nao sobre-secagem
+
+  3. Decisao Inteligente
+     - Aeracao ativa APENAS se Delta T e favoravel
+     - Umidade relativa externa na janela ideal
+
+  4. Protecao de Qualidade
+     - Auto-desligamento se detecta tendencia de aquecimento
+     - Protecao contra aumento de umidade na massa de graos
+
+  METRICAS MONITORADAS:
+  ----------------------
+  Atributo              | Criticidade | Descricao
+  ----------------------|-------------|----------------------------------
+  Temperatura Interna   | Alta        | Detecta pontos quentes e
+                        |             | atividade biologica
+  Umidade Relativa      | Alta        | Define ponto de equilibrio
+                        |             | para evitar ganho de peso
+  Ponto de Orvalho      | Media       | Previne condensacao nas
+                        |             | paredes frias do silo
+  Delta T               | Operacional | Diferenca entre ar externo e
+                        |             | massa de grao para resfriamento
+
+================================================================================
+                      4. MODELOS DE DADOS (14)
+================================================================================
+
+  Modelo                          | Descricao
+  --------------------------------|------------------------------------------
+  ResumoModel                     | Resposta/summary da IA (campo 'resposta')
+  FireRiskModel                   | Risco de fogo com 5 niveis de severidade
+  SensorModel                     | Sensor IoT (3 tipos: temp, mancal, abafamento)
+  TelemetryModel                  | Dados de telemetria (temp, umidade, gas, vib)
+  SiloModel                       | Configuracao e dados do silo
+  SecadorModel                    | Configuracao e status do secador
+  MotorAeracaoModel               | Motor de aeracao (status, potencia, RPM, etc)
+  BatchModel                      | Dados do lote de graos
+  ProcessoModel                   | Rastreamento do processo de secagem
+  ClienteModel                    | Dados do cliente/produtor
+  CustoProcessoModel              | Custos do processo
+  UnidadeArmazenadoraModel        | Unidade de armazenamento
+  NotificationModel               | Dados de notificacao/alerta
+  UserModel                       | Conta do usuario
+
+================================================================================
+                      5. INFRAESTRUTURA CORE (lib/core/)
+================================================================================
+
+  SERVICOS:
+  ---------
+  api_service.dart     - Cliente HTTP central (Dio) com dual base URL
+                        - fetchContext(): busca contexto operacional
+                        - postStream(): streaming SSE para IA
+                        - extractContent(): parser de resposta OpenAI
+                        - extractRespostaOuResumo(): parser alternativo
+
+  auth_service.dart    - Autenticacao com token via FlutterSecureStorage
+
+  pdf_service.dart     - Geracao de PDF para exportacao de relatorios IA
+
+  MIDDLEWARES:
+  ------------
+  auth_middleware.dart - Protecao de rotas autenticadas
+
+  TEMA:
+  ------
+  app_theme.dart       - Definicoes de tema Dark/Light
+  app_colors.dart      - Constantes de cores e gradientes
+
+================================================================================
+                      6. RECURSOS SMART ADICIONAIS
+================================================================================
+
+  6.1 TELEMETRIA EM TEMPO REAL
+  -----------------------------
+  - Monitoramento por sensor: temperatura, umidade, gas, vibracao
+  - Graficos com filtragem por data
+  - Dialog de historico de telemetria
+
+  6.2 CONTROLE IoT
+  -----------------
+  - Comandos ON/OFF remotos para motores de aeracao
+  - Endpoints: POST motores-aeracao/<id>/comando/
+  - Status em tempo real dos dispositivos
+
+  6.3 SISTEMA DE NOTIFICACOES
+  ----------------------------
+  - Centro de alertas centralizado
+  - Badge de nao-lidos
+  - Alertas de sensores, processos e eventos do sistema
+
+  6.4 EXPORTACAO PDF
+  -------------------
+  - Geracao de PDF a partir de relatorios IA
+  - Servico dedicado (PdfService)
+
+  6.5 VISUALIZACAO 3D E AR
+  --------------------------
+  - Modelo 3D interativo de silos
+  - Suporte a Realidade Aumentada
+  - Timeline de estagios do projeto
+
+  6.6 DIAGRAMA DE REDE IoT
+  --------------------------
+  - Visualizacao da arquitetura de conectividade
+  - CONTROLADOR X7: Modbus TCP Client
+  - GATEWAY FIELDLOGGER: Master Modbus RTU / TCP Server
+  - Comunicacao via Ethernet CAT6e e RS485 twisted pair
+
+  6.7 GESTAO DE ACESSO
+  ----------------------
+  - Controle de permissoes por nivel de acesso
+  - Autenticacao 2FA (configuravel)
+  - Middleware de protecao de rotas
+
+  6.8 TEMA E PERSONALIZACAO
+  ---------------------------
+  - Alternancia Dark/Light mode
+  - Esquema de cores configuravel
+  - Persistencia de preferencias
+
+================================================================================
+                      7. FUNCIONALIDADES PLANEJADAS
+================================================================================
+
+  7.1 MACHINE LEARNING (Fase 03 - Status: Pendente)
+  ---------------------------------------------------
+  - Treinamento de modelos ML com dados historicos
+  - Calibracao de algoritmos de IA para deteccao de anomalias
+  - Integracao Smart Sense IA com modelos preditivos
+
+  7.2 RAG (Retrieval-Augmented Generation)
+  -----------------------------------------
+  - Parametro use_rag ja existe nas chamadas API (atualmente: false)
+  - Planejado para enriquecimento de respostas com base de conhecimento
+
+  7.3 PREVISAO DE HOTSPOT 48H
+  -----------------------------
+  - Predicao de pontos quentes com 48 horas de antecedencia
+  - Referenciado no modulo Smart Sense IA
+
+  7.4 MODELOS PREDITIVOS DE EQUILIBRIO HIGROSCOPICO
+  ----------------------------------------------------
+  - Modelos de ML para prever equilibrio higroscopico em tempo real
+  - Integracao com sensores LoRaWAN inteligentes
+
+================================================================================
+                      8. ENDPOINTS DA API
+================================================================================
+
+  DJANGO REST API (porta 8000):
+  ------------------------------
+  GET/POST  /contexto/              - Contexto operacional
+  GET/POST  /sensores/              - Sensores IoT
+  GET/POST  /telemetria/            - Dados de telemetria
+  GET/POST  /silos/                 - Silos
+  GET/POST  /secadores/             - Secadores
+  GET/POST  /motores-aeracao/       - Motores de aeracao
+  PUT/DELETE /motores-aeracao/<id>/ - Gestao de motor
+  POST      /motores-aeracao/<id>/comando/ - Comando ON/OFF
+  GET/POST  /lotes/                 - Lotes de graos
+  GET/POST  /processos/             - Processos de secagem
+  GET/POST  /clientes/              - Clientes
+  GET/POST  /custos/                - Custos
+  POST      /login/                 - Autenticacao
+  GET/POST  /notifications/         - Notificacoes
+
+  AI MICROSERVICE (porta 8001):
+  ------------------------------
+  POST      /chat-stream/           - Streaming IA (SSE)
+                                    - Aceita: prompt, system_prompt,
+                                              history, use_rag
+                                    - Retorna: eventos streaming
+                                              (message, thought,
+                                               metrics, error, done)
+
+================================================================================
+                      9. ROTAS DO APLICATIVO
+================================================================================
+
+  PUBLICAS:
+  ---------
+  /landing        → Pagina inicial publica
+  /features       → Showcase de features
+  /about          → Sobre
+  /contact        → Contato
+  /pricing        → Planos
+  /login          → Autenticacao
+
+  PROTEGIDAS (AuthMiddleware):
+  ----------------------------
+  /home                              → Shell principal
+  /smart-sense-ia                    → Chat IA
+  /secagem                           → Secagem
+  /silo-management                   → Gestao de silos
+  /batch-management                  → Gestao de lotes
+  /processos                         → Processos
+  /clientes                          → Clientes
+  /custos                            → Custos
+  /devices/motors                    → Motores (fallback)
+
+================================================================================
+                      10. COMANDOS DO DESENVOLVEDOR
+================================================================================
+
+  Instalar dependencias:
+    flutter pub get
+
+  Executar no navegador:
+    flutter run -d chrome
+
+  Executar em dispositivo conectado:
+    flutter run
+
+  Gerar codigo (freezed, json_serializable):
+    dart run build_runner build --delete-conflicting-outputs
+
+  Analise estatica:
+    flutter analyze
+
+  Executar testes:
+    flutter test
+
+================================================================================
+                         FIM DA APRESENTACAO
+================================================================================
+
+  Smart Secagem - Plataforma de Inteligencia Agricola
+  Desenvolvido com Flutter + Django + IA
+
+================================================================================

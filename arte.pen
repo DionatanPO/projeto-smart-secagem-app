@@ -1,0 +1,3193 @@
+{
+  "version": "2.11",
+  "children": [
+    {
+      "type": "frame",
+      "id": "fKmSU",
+      "x": 0,
+      "y": 0,
+      "name": "Pagina 1 - Visao Geral",
+      "clip": true,
+      "width": 900,
+      "height": 600,
+      "fill": "#F8F9FA",
+      "cornerRadius": 8,
+      "stroke": {
+        "thickness": 2,
+        "fill": "#1976D2"
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "b1UTfC",
+          "x": 20,
+          "y": 15,
+          "fill": "#1976D2",
+          "content": "Pagina 1: Visao Geral do Sistema",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "frame",
+          "id": "oBR6t",
+          "x": 20,
+          "y": 50,
+          "width": 860,
+          "height": 40,
+          "fill": "#fff",
+          "cornerRadius": 6,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#E0E0E0"
+          },
+          "gap": 16,
+          "padding": [
+            8,
+            12
+          ],
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "qm4uN",
+              "fill": "#4CAF50",
+              "width": 16,
+              "height": 16
+            },
+            {
+              "type": "text",
+              "id": "Kx4R2",
+              "fill": "#333",
+              "content": "Publico",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "ToOlA",
+              "fill": "#FF9800",
+              "width": 16,
+              "height": 16
+            },
+            {
+              "type": "text",
+              "id": "XQK9U",
+              "fill": "#333",
+              "content": "Autenticacao",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "QF61e",
+              "fill": "#2196F3",
+              "width": 16,
+              "height": 16
+            },
+            {
+              "type": "text",
+              "id": "p3mdO6",
+              "fill": "#333",
+              "content": "Protegido",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "y6VoD",
+              "fill": "#9C27B0",
+              "width": 16,
+              "height": 16
+            },
+            {
+              "type": "text",
+              "id": "a4Nbr",
+              "fill": "#333",
+              "content": "Container",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "path",
+              "id": "vqiX2",
+              "geometry": "M0 1l30 0",
+              "viewBox": [
+                0,
+                0,
+                30,
+                2
+              ],
+              "width": 30,
+              "height": 2,
+              "stroke": {
+                "thickness": 2,
+                "fill": "#666"
+              }
+            },
+            {
+              "type": "text",
+              "id": "Qryu5",
+              "fill": "#333",
+              "content": "Fluxo",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "i9cIbg",
+          "x": 60,
+          "y": 140,
+          "fill": "#4CAF50",
+          "width": 160,
+          "height": 70
+        },
+        {
+          "type": "text",
+          "id": "y07xI",
+          "x": 95,
+          "y": 158,
+          "fill": "#fff",
+          "content": "Landing View",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "b4YHEE",
+          "x": 110,
+          "y": 178,
+          "fill": "#E8F5E9",
+          "content": "/landing",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "DcItX",
+          "x": 60,
+          "y": 280,
+          "fill": "#FF9800",
+          "width": 160,
+          "height": 70
+        },
+        {
+          "type": "text",
+          "id": "C6wwx",
+          "x": 100,
+          "y": 298,
+          "fill": "#fff",
+          "content": "Login View",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "aD0cN",
+          "x": 110,
+          "y": 318,
+          "fill": "#FFE0B2",
+          "content": "/login",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "ZobMo",
+          "x": 360,
+          "y": 280,
+          "fill": "#FF9800",
+          "width": 160,
+          "height": 70
+        },
+        {
+          "type": "text",
+          "id": "FKCct",
+          "x": 367,
+          "y": 298,
+          "fill": "#fff",
+          "content": "AuthMiddleware",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "Tt7kR",
+          "x": 390,
+          "y": 318,
+          "fill": "#FFE0B2",
+          "content": "Route Guard",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "E9G9C",
+          "x": 640,
+          "y": 280,
+          "fill": "#9C27B0",
+          "width": 200,
+          "height": 70
+        },
+        {
+          "type": "text",
+          "id": "gPnJD",
+          "x": 670,
+          "y": 298,
+          "fill": "#fff",
+          "content": "HomeView Container",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "d0SmD",
+          "x": 720,
+          "y": 318,
+          "fill": "#E1BEE7",
+          "content": "/home",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "BYhtX",
+          "x": 300,
+          "y": 140,
+          "fill": "#81C784",
+          "width": 140,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "kTMsM",
+          "x": 325,
+          "y": 155,
+          "fill": "#fff",
+          "content": "Features",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "L0p0qi",
+          "x": 327,
+          "y": 172,
+          "fill": "#E8F5E9",
+          "content": "/features",
+          "fontFamily": "Inter",
+          "fontSize": 9,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "D6FSp",
+          "x": 460,
+          "y": 140,
+          "fill": "#81C784",
+          "width": 140,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "GqUSL",
+          "x": 490,
+          "y": 155,
+          "fill": "#fff",
+          "content": "About",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "UgDQY",
+          "x": 492,
+          "y": 172,
+          "fill": "#E8F5E9",
+          "content": "/about",
+          "fontFamily": "Inter",
+          "fontSize": 9,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "Hnq0o",
+          "x": 620,
+          "y": 140,
+          "fill": "#81C784",
+          "width": 140,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "F4uK1",
+          "x": 648,
+          "y": 155,
+          "fill": "#fff",
+          "content": "Contact",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "aXyq7",
+          "x": 650,
+          "y": 172,
+          "fill": "#E8F5E9",
+          "content": "/contact",
+          "fontFamily": "Inter",
+          "fontSize": 9,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "mcxAF",
+          "x": 780,
+          "y": 140,
+          "fill": "#81C784",
+          "width": 100,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "lSMIW",
+          "x": 800,
+          "y": 155,
+          "fill": "#fff",
+          "content": "Pricing",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "t3k6EB",
+          "x": 802,
+          "y": 172,
+          "fill": "#E8F5E9",
+          "content": "/pricing",
+          "fontFamily": "Inter",
+          "fontSize": 9,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "path",
+          "id": "hJS5H",
+          "x": 220,
+          "y": 167,
+          "geometry": "M0 1l75 0",
+          "viewBox": [
+            0,
+            0,
+            80,
+            2
+          ],
+          "width": 80,
+          "height": 2,
+          "stroke": {
+            "thickness": 1.5,
+            "fill": "#666"
+          }
+        },
+        {
+          "type": "path",
+          "id": "lsB2y",
+          "x": 140,
+          "y": 210,
+          "geometry": "M1 0l0 65",
+          "viewBox": [
+            0,
+            0,
+            2,
+            70
+          ],
+          "width": 2,
+          "height": 70,
+          "stroke": {
+            "thickness": 1.5,
+            "fill": "#FF9800"
+          }
+        },
+        {
+          "type": "path",
+          "id": "MfwXX",
+          "x": 220,
+          "y": 315,
+          "geometry": "M0 1l135 0",
+          "viewBox": [
+            0,
+            0,
+            140,
+            2
+          ],
+          "width": 140,
+          "height": 2,
+          "stroke": {
+            "thickness": 1.5,
+            "fill": "#FF9800"
+          }
+        },
+        {
+          "type": "path",
+          "id": "J0QQE9",
+          "x": 520,
+          "y": 315,
+          "geometry": "M0 1l115 0",
+          "viewBox": [
+            0,
+            0,
+            120,
+            2
+          ],
+          "width": 120,
+          "height": 2,
+          "stroke": {
+            "thickness": 1.5,
+            "fill": "#9C27B0"
+          }
+        },
+        {
+          "type": "text",
+          "id": "N0Pry",
+          "x": 60,
+          "y": 110,
+          "fill": "#555",
+          "content": "Fluxo de navegacao principal:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "f8LOdB",
+          "x": 300,
+          "y": 370,
+          "fill": "#E65100",
+          "content": "Login OK -> Get.offAllNamed(Routes.home)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "xRSGW",
+          "x": 300,
+          "y": 385,
+          "fill": "#E65100",
+          "content": "401 -> AuthService.logout() -> redirect /login",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "vsbOR",
+          "x": 60,
+          "y": 430,
+          "fill": "#666",
+          "content": "Total: 5 paginas publicas + Login + 17 modulos protegidos",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "ScGrB",
+          "x": 60,
+          "y": 450,
+          "fill": "#666",
+          "content": "Framework: Flutter + GetX + Dio + Django REST API",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "Xldfg",
+          "x": 60,
+          "y": 490,
+          "fill": "#E3F2FD",
+          "width": 400,
+          "height": 80,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#1976D2"
+          }
+        },
+        {
+          "type": "text",
+          "id": "MasJY",
+          "x": 80,
+          "y": 505,
+          "fill": "#1565C0",
+          "content": "App inicializa em /landing (GetMaterialApp initialRoute)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "SDDQA",
+          "x": 80,
+          "y": 522,
+          "fill": "#1565C0",
+          "content": "Rotas protegidas usam AuthMiddleware que verifica AuthService.isAuthenticated",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "YyYv5",
+          "x": 80,
+          "y": 539,
+          "fill": "#1565C0",
+          "content": "Token armazenado em FlutterSecureStorage, anexado via Dio interceptor",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "W2RQn",
+          "x": 490,
+          "y": 490,
+          "fill": "#FFF3E0",
+          "width": 380,
+          "height": 80,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#FF9800"
+          }
+        },
+        {
+          "type": "text",
+          "id": "H1Vr3",
+          "x": 510,
+          "y": 505,
+          "fill": "#E65100",
+          "content": "main.dart init order:",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "OvQIT",
+          "x": 510,
+          "y": 522,
+          "fill": "#BF360C",
+          "content": "1. GetStorage.init() 2. ApiService() 3. AuthService().init()",
+          "fontFamily": "Inter",
+          "fontSize": 9,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "U7U0E",
+          "x": 510,
+          "y": 539,
+          "fill": "#BF360C",
+          "content": "4. SettingsController() 5. GetMaterialApp(theme, routes)",
+          "fontFamily": "Inter",
+          "fontSize": 9,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "a4j0c",
+      "x": 920,
+      "y": 0,
+      "name": "Pagina 2 - Fluxo Publico",
+      "clip": true,
+      "width": 900,
+      "height": 600,
+      "fill": "#F8F9FA",
+      "cornerRadius": 8,
+      "stroke": {
+        "thickness": 2,
+        "fill": "#4CAF50"
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "WXf0f",
+          "x": 20,
+          "y": 15,
+          "fill": "#4CAF50",
+          "content": "Pagina 2: Area Publica e Login",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "Ljt39",
+          "x": 20,
+          "y": 45,
+          "fill": "#333",
+          "content": "Rotas publicas (sem middleware):",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "D3cQp",
+          "x": 40,
+          "y": 75,
+          "fill": "#4CAF50",
+          "width": 250,
+          "height": 80
+        },
+        {
+          "type": "text",
+          "id": "G06x6h",
+          "x": 80,
+          "y": 95,
+          "fill": "#fff",
+          "content": "LandingView",
+          "fontFamily": "Inter",
+          "fontSize": 15,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "mBiu9",
+          "x": 100,
+          "y": 120,
+          "fill": "#E8F5E9",
+          "content": "/landing (initial)",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "oaGGJ",
+          "x": 40,
+          "y": 180,
+          "fill": "#81C784",
+          "width": 250,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "P1A2ER",
+          "x": 95,
+          "y": 198,
+          "fill": "#fff",
+          "content": "FeaturesView",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "v3oXK",
+          "x": 105,
+          "y": 215,
+          "fill": "#E8F5E9",
+          "content": "/features",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "QK1pa",
+          "x": 40,
+          "y": 255,
+          "fill": "#81C784",
+          "width": 250,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "eJdSx",
+          "x": 105,
+          "y": 273,
+          "fill": "#fff",
+          "content": "AboutView",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "lgyHR",
+          "x": 115,
+          "y": 290,
+          "fill": "#E8F5E9",
+          "content": "/about",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "H5Dewx",
+          "x": 40,
+          "y": 330,
+          "fill": "#81C784",
+          "width": 250,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "kdsBb",
+          "x": 100,
+          "y": 348,
+          "fill": "#fff",
+          "content": "ContactView",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "jIwlE",
+          "x": 110,
+          "y": 365,
+          "fill": "#E8F5E9",
+          "content": "/contact",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "JgqK7",
+          "x": 40,
+          "y": 405,
+          "fill": "#81C784",
+          "width": 250,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "j1U8v",
+          "x": 100,
+          "y": 423,
+          "fill": "#fff",
+          "content": "PricingView",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "t3wst",
+          "x": 110,
+          "y": 440,
+          "fill": "#E8F5E9",
+          "content": "/pricing",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "GJ0Or",
+          "x": 380,
+          "y": 75,
+          "fill": "#E65100",
+          "content": "Rota de autenticacao:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "v6sbEP",
+          "x": 380,
+          "y": 100,
+          "fill": "#FF9800",
+          "width": 280,
+          "height": 80
+        },
+        {
+          "type": "text",
+          "id": "PVrhO",
+          "x": 430,
+          "y": 120,
+          "fill": "#fff",
+          "content": "LoginView",
+          "fontFamily": "Inter",
+          "fontSize": 15,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "PFH02",
+          "x": 450,
+          "y": 145,
+          "fill": "#FFE0B2",
+          "content": "/login (public)",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "xBuWQ",
+          "x": 380,
+          "y": 200,
+          "fill": "#E65100",
+          "content": "Fluxo de Login:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "tc6QR",
+          "x": 380,
+          "y": 220,
+          "fill": "#FFF3E0",
+          "width": 440,
+          "height": 120,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#FF9800"
+          }
+        },
+        {
+          "type": "text",
+          "id": "xT24J",
+          "x": 400,
+          "y": 240,
+          "fill": "#BF360C",
+          "content": "1. Usuario preenche email + senha",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "VborD",
+          "x": 400,
+          "y": 257,
+          "fill": "#BF360C",
+          "content": "2. LoginController.login() chama AuthService.login()",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "Aw6rH",
+          "x": 400,
+          "y": 274,
+          "fill": "#BF360C",
+          "content": "3. POST /api/login/ com username/password",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "qdp95",
+          "x": 400,
+          "y": 291,
+          "fill": "#BF360C",
+          "content": "4. AuthService armazena token em FlutterSecureStorage",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "K1CKxK",
+          "x": 400,
+          "y": 308,
+          "fill": "#BF360C",
+          "content": "5. isAuthenticated = true -> Get.offAllNamed(/home)",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "c3u0i",
+          "x": 380,
+          "y": 365,
+          "fill": "#2E7D32",
+          "content": "Landing page sections:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "P1FhYo",
+          "x": 380,
+          "y": 385,
+          "fill": "#E8F5E9",
+          "width": 440,
+          "height": 100,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#4CAF50"
+          }
+        },
+        {
+          "type": "text",
+          "id": "eGchI",
+          "x": 400,
+          "y": 405,
+          "fill": "#1B5E20",
+          "content": "Hero Section - video background + CTAs",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "A4MyU",
+          "x": 400,
+          "y": 422,
+          "fill": "#1B5E20",
+          "content": "Features Section - 6 cards: Algoritmo, Alertas, Controle,",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "ReT30",
+          "x": 400,
+          "y": 439,
+          "fill": "#1B5E20",
+          "content": "Eficiencia, Visao, Historico",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "vfxA1",
+          "x": 400,
+          "y": 456,
+          "fill": "#1B5E20",
+          "content": "CTA Section - banner gradiente + botao Acessar Painel",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "t8hHC",
+          "x": 400,
+          "y": 473,
+          "fill": "#1B5E20",
+          "content": "Footer - WebFooter widget",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "nSbol",
+      "x": 0,
+      "y": 620,
+      "name": "Pagina 3 - Autenticacao",
+      "clip": true,
+      "width": 900,
+      "height": 600,
+      "fill": "#F8F9FA",
+      "cornerRadius": 8,
+      "stroke": {
+        "thickness": 2,
+        "fill": "#FF9800"
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "ZaIEx",
+          "x": 20,
+          "y": 15,
+          "fill": "#FF9800",
+          "content": "Pagina 3: Autenticacao e Seguranca",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "uAYy5",
+          "x": 20,
+          "y": 45,
+          "fill": "#333",
+          "content": "Arquitetura de autenticacao:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "YW3YI",
+          "x": 40,
+          "y": 80,
+          "fill": "#FF9800",
+          "width": 260,
+          "height": 80
+        },
+        {
+          "type": "text",
+          "id": "Nl2Jq",
+          "x": 80,
+          "y": 100,
+          "fill": "#fff",
+          "content": "AuthMiddleware",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "pzwSU",
+          "x": 120,
+          "y": 125,
+          "fill": "#FFE0B2",
+          "content": "Route Guard",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "s3hxE",
+          "x": 360,
+          "y": 80,
+          "fill": "#FFB74D",
+          "width": 260,
+          "height": 80
+        },
+        {
+          "type": "text",
+          "id": "kd2MP",
+          "x": 395,
+          "y": 100,
+          "fill": "#fff",
+          "content": "AuthService",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "EH7tV",
+          "x": 420,
+          "y": 125,
+          "fill": "#fff",
+          "content": "GetxService",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "nALtq",
+          "x": 680,
+          "y": 80,
+          "fill": "#EF6C00",
+          "width": 180,
+          "height": 80
+        },
+        {
+          "type": "text",
+          "id": "lQ2Gl",
+          "x": 695,
+          "y": 100,
+          "fill": "#fff",
+          "content": "FlutterSecure",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "S0rd9H",
+          "x": 708,
+          "y": 120,
+          "fill": "#fff",
+          "content": "Storage",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "lqXZq",
+          "x": 680,
+          "y": 200,
+          "fill": "#E65100",
+          "width": 180,
+          "height": 55
+        },
+        {
+          "type": "text",
+          "id": "Xz9c6",
+          "x": 688,
+          "y": 218,
+          "fill": "#fff",
+          "content": "POST /api/login/",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "path",
+          "id": "KYe2k",
+          "x": 300,
+          "y": 120,
+          "geometry": "M0 1l55 0",
+          "viewBox": [
+            0,
+            0,
+            60,
+            2
+          ],
+          "width": 60,
+          "height": 2,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#FF9800"
+          }
+        },
+        {
+          "type": "path",
+          "id": "iGWVb",
+          "x": 620,
+          "y": 120,
+          "geometry": "M0 1l55 0",
+          "viewBox": [
+            0,
+            0,
+            60,
+            2
+          ],
+          "width": 60,
+          "height": 2,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#EF6C00"
+          }
+        },
+        {
+          "type": "path",
+          "id": "Ek5Qd",
+          "x": 770,
+          "y": 160,
+          "geometry": "M1 0l0 35",
+          "viewBox": [
+            0,
+            0,
+            2,
+            40
+          ],
+          "width": 2,
+          "height": 40,
+          "stroke": {
+            "thickness": 1.5,
+            "fill": "#E65100"
+          }
+        },
+        {
+          "type": "text",
+          "id": "b5q5Yu",
+          "x": 20,
+          "y": 190,
+          "fill": "#333",
+          "content": "Fluxo detalhado:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "AHUe3",
+          "x": 40,
+          "y": 210,
+          "fill": "#FFF3E0",
+          "width": 580,
+          "height": 200,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#FF9800"
+          }
+        },
+        {
+          "type": "text",
+          "id": "d6mpi9",
+          "x": 60,
+          "y": 230,
+          "fill": "#BF360C",
+          "content": "1. Toda rota protegida dispara AuthMiddleware.redirect()",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "s4S2r",
+          "x": 60,
+          "y": 248,
+          "fill": "#BF360C",
+          "content": "2. Verifica Get.find<AuthService>().isAuthenticated.value",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "iCCvQ",
+          "x": 60,
+          "y": 266,
+          "fill": "#BF360C",
+          "content": "3. Se FALSE -> redirect para /login",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "VWWbM",
+          "x": 60,
+          "y": 284,
+          "fill": "#BF360C",
+          "content": "4. Se TRUE -> retorna null (prossegue)",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "MnWUy",
+          "x": 60,
+          "y": 310,
+          "fill": "#E65100",
+          "content": "Session expiry (ApiService Dio interceptor):",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "OHWFO",
+          "x": 60,
+          "y": 328,
+          "fill": "#BF360C",
+          "content": "OnError 401 -> AuthService.logout() -> redirect /login + snackbar",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "rm3Rx",
+          "x": 60,
+          "y": 346,
+          "fill": "#BF360C",
+          "content": "Token anexado em OnRequest via Authorization header",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "pbdQv",
+          "x": 60,
+          "y": 364,
+          "fill": "#BF360C",
+          "content": "Dio config: timeout 60s, Content-Type application/json",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "msb7D",
+          "x": 20,
+          "y": 440,
+          "fill": "#E65100",
+          "content": "Fluxo de Logout:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "qHHkR",
+          "x": 40,
+          "y": 460,
+          "fill": "#FBE9E7",
+          "width": 580,
+          "height": 100,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#E65100"
+          }
+        },
+        {
+          "type": "text",
+          "id": "C97rG",
+          "x": 60,
+          "y": 480,
+          "fill": "#BF360C",
+          "content": "1. HomeController.logout() chama AuthService.logout()",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "AbHzj",
+          "x": 60,
+          "y": 498,
+          "fill": "#BF360C",
+          "content": "2. POST /api/logout/ (best-effort)",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "knHG8",
+          "x": 60,
+          "y": 516,
+          "fill": "#BF360C",
+          "content": "3. Deleta token do FlutterSecureStorage",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "Z6rUt",
+          "x": 60,
+          "y": 534,
+          "fill": "#BF360C",
+          "content": "4. isAuthenticated = false -> Get.offAllNamed(/login)",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Bgpmp",
+      "x": 920,
+      "y": 620,
+      "name": "Pagina 4 - Area Protegida",
+      "clip": true,
+      "width": 900,
+      "height": 600,
+      "fill": "#F8F9FA",
+      "cornerRadius": 8,
+      "stroke": {
+        "thickness": 2,
+        "fill": "#2196F3"
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "txDL3",
+          "x": 20,
+          "y": 15,
+          "fill": "#2196F3",
+          "content": "Pagina 4: Area Protegida (Sidebar Home)",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "lgcHm",
+          "x": 20,
+          "y": 45,
+          "fill": "#1565C0",
+          "content": "HomeView - Container Master com Sidebar:",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "w2CL6x",
+          "x": 40,
+          "y": 70,
+          "fill": "#9C27B0",
+          "width": 200,
+          "height": 60
+        },
+        {
+          "type": "text",
+          "id": "ScObs",
+          "x": 65,
+          "y": 88,
+          "fill": "#fff",
+          "content": "HomeView",
+          "fontFamily": "Inter",
+          "fontSize": 15,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "DFxE0",
+          "x": 90,
+          "y": 108,
+          "fill": "#E1BEE7",
+          "content": "/home",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "d0ztw",
+          "x": 40,
+          "y": 145,
+          "fill": "#333",
+          "content": "Sidebar possui 4 secoes e 17 indices (0-16):",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "IkQxm",
+          "x": 40,
+          "y": 165,
+          "fill": "#1565C0",
+          "width": 780,
+          "height": 26
+        },
+        {
+          "type": "text",
+          "id": "BLPXg",
+          "x": 55,
+          "y": 171,
+          "fill": "#fff",
+          "content": "PRINCIPAL",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "ebtAe",
+          "x": 55,
+          "y": 197,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "r82vq",
+          "x": 65,
+          "y": 203,
+          "fill": "#333",
+          "content": "Projeto (SiloViewer) [0]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "T44Qd3",
+          "x": 55,
+          "y": 227,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "Pe1zq",
+          "x": 65,
+          "y": 233,
+          "fill": "#333",
+          "content": "Resumo IA (Dashboard) [1]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "XWq5B",
+          "x": 55,
+          "y": 257,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "pPcR8",
+          "x": 65,
+          "y": 263,
+          "fill": "#333",
+          "content": "Smart Sense IA [9]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "buEef",
+          "x": 55,
+          "y": 287,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "BR0kT",
+          "x": 65,
+          "y": 293,
+          "fill": "#333",
+          "content": "Processos [14]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "n8YZu",
+          "x": 40,
+          "y": 310,
+          "fill": "#00695C",
+          "width": 780,
+          "height": 26
+        },
+        {
+          "type": "text",
+          "id": "EvOzt",
+          "x": 55,
+          "y": 316,
+          "fill": "#fff",
+          "content": "MONITORAMENTO",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "lDJt9",
+          "x": 55,
+          "y": 342,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "n2evX",
+          "x": 65,
+          "y": 348,
+          "fill": "#333",
+          "content": "U. Armazenadora [2]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "HdisD",
+          "x": 55,
+          "y": 372,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "Uc27g",
+          "x": 65,
+          "y": 378,
+          "fill": "#333",
+          "content": "Silos [3]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "f7vEYl",
+          "x": 55,
+          "y": 402,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "b3ElDk",
+          "x": 65,
+          "y": 408,
+          "fill": "#333",
+          "content": "Lotes [12]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "b1XU9",
+          "x": 55,
+          "y": 432,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "Vy31H",
+          "x": 65,
+          "y": 438,
+          "fill": "#333",
+          "content": "Secadores [13]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "YL8Oj",
+          "x": 55,
+          "y": 462,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "FXd4u",
+          "x": 65,
+          "y": 468,
+          "fill": "#333",
+          "content": "Clientes [15]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "x98o05",
+          "x": 40,
+          "y": 435,
+          "fill": "#F57F17",
+          "width": 780,
+          "height": 26
+        },
+        {
+          "type": "text",
+          "id": "I9uaU",
+          "x": 55,
+          "y": 441,
+          "fill": "#fff",
+          "content": "FINANCEIRO",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "S37Vc",
+          "x": 55,
+          "y": 467,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "jcRpp",
+          "x": 65,
+          "y": 473,
+          "fill": "#333",
+          "content": "Custos [16]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "D99tU",
+          "x": 40,
+          "y": 505,
+          "fill": "#6A1B9A",
+          "width": 780,
+          "height": 26
+        },
+        {
+          "type": "text",
+          "id": "dLd3M",
+          "x": 55,
+          "y": 511,
+          "fill": "#fff",
+          "content": "SISTEMA",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "QlS4Y",
+          "x": 55,
+          "y": 537,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "PsvGe",
+          "x": 65,
+          "y": 543,
+          "fill": "#333",
+          "content": "Dispositivos [4]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "S0ZQ0",
+          "x": 55,
+          "y": 567,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "JfDbw",
+          "x": 65,
+          "y": 573,
+          "fill": "#333",
+          "content": "Notificacoes [5]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "H4Ifk3",
+          "x": 55,
+          "y": 597,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "W6F2UM",
+          "x": 65,
+          "y": 603,
+          "fill": "#333",
+          "content": "Gestao de Acesso [7]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "wMc1x",
+          "x": 55,
+          "y": 627,
+          "fill": "#fff",
+          "width": 340,
+          "height": 26,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#BBDEFB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "NaTKn",
+          "x": 65,
+          "y": 633,
+          "fill": "#333",
+          "content": "Meu Perfil [11]",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "path",
+          "id": "w9nwG",
+          "x": 240,
+          "y": 100,
+          "geometry": "M0 1l55 0",
+          "viewBox": [
+            0,
+            0,
+            60,
+            2
+          ],
+          "width": 60,
+          "height": 2,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#9C27B0"
+          }
+        },
+        {
+          "type": "text",
+          "id": "FoEsF",
+          "x": 480,
+          "y": 70,
+          "fill": "#1565C0",
+          "content": "Rotas protegidas com AuthMiddleware:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "mdzWO",
+          "x": 480,
+          "y": 90,
+          "fill": "#E3F2FD",
+          "width": 380,
+          "height": 120,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#2196F3"
+          }
+        },
+        {
+          "type": "text",
+          "id": "FcWxN",
+          "x": 495,
+          "y": 110,
+          "fill": "#1565C0",
+          "content": "/home (HomeView - container master)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "ZmkHw",
+          "x": 495,
+          "y": 127,
+          "fill": "#1565C0",
+          "content": "/support (SupportView)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "GDwqf",
+          "x": 495,
+          "y": 144,
+          "fill": "#1565C0",
+          "content": "/smart-sense-ia (SmartSenseIAView)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "cAEbD",
+          "x": 495,
+          "y": 161,
+          "fill": "#1565C0",
+          "content": "/batch-management (BatchManagementView)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "KBUoo",
+          "x": 495,
+          "y": 178,
+          "fill": "#1565C0",
+          "content": "/secagem, /processos, /clientes, /custos",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "s5L65W",
+          "x": 495,
+          "y": 195,
+          "fill": "#1565C0",
+          "content": "/devices/motors (fallback standalone)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "PmfVu",
+          "x": 480,
+          "y": 230,
+          "fill": "#C62828",
+          "content": "Controle de Acesso:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "f6j7j",
+          "x": 480,
+          "y": 250,
+          "fill": "#FFEBEE",
+          "width": 380,
+          "height": 60,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#E53935"
+          }
+        },
+        {
+          "type": "text",
+          "id": "ARYB6",
+          "x": 495,
+          "y": 268,
+          "fill": "#C62828",
+          "content": "Index 7 (AccessManagement) escondido para",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "TfVYy",
+          "x": 495,
+          "y": 285,
+          "fill": "#C62828",
+          "content": "nao-admins via controller.canManageUsers",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "L3nOgH",
+          "x": 480,
+          "y": 340,
+          "fill": "#6A1B9A",
+          "content": "HomeBinding injeta dependencias:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "sN4z8",
+          "x": 480,
+          "y": 360,
+          "fill": "#F3E5F5",
+          "width": 380,
+          "height": 100,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#AB47BC"
+          }
+        },
+        {
+          "type": "text",
+          "id": "YNggh",
+          "x": 495,
+          "y": 378,
+          "fill": "#6A1B9A",
+          "content": "- HomeController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "f7M6S",
+          "x": 495,
+          "y": 392,
+          "fill": "#6A1B9A",
+          "content": "- U.ArmazenadoraController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "mJHgr",
+          "x": 495,
+          "y": 406,
+          "fill": "#6A1B9A",
+          "content": "- BatchManagementController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "kxvyk",
+          "x": 495,
+          "y": 420,
+          "fill": "#6A1B9A",
+          "content": "- SiloManagementController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "yYCUn",
+          "x": 495,
+          "y": 434,
+          "fill": "#6A1B9A",
+          "content": "- SecagemController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "mo2Wn",
+          "x": 495,
+          "y": 448,
+          "fill": "#6A1B9A",
+          "content": "- ProcessosController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "l1vArk",
+          "x": 495,
+          "y": 462,
+          "fill": "#6A1B9A",
+          "content": "- ClientesController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "DXSHK",
+          "x": 495,
+          "y": 476,
+          "fill": "#6A1B9A",
+          "content": "- CustosController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "vrI4D",
+          "x": 495,
+          "y": 490,
+          "fill": "#6A1B9A",
+          "content": "- DashboardController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "M1lp5K",
+      "x": 0,
+      "y": 1240,
+      "name": "Pagina 5 - Arquitetura Dados",
+      "clip": true,
+      "width": 900,
+      "height": 600,
+      "fill": "#F8F9FA",
+      "cornerRadius": 8,
+      "stroke": {
+        "thickness": 2,
+        "fill": "#3F51B5"
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "Vk71w",
+          "x": 20,
+          "y": 15,
+          "fill": "#3F51B5",
+          "content": "Pagina 5: Arquitetura de Dados e API",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "ltavB",
+          "x": 20,
+          "y": 45,
+          "fill": "#283593",
+          "content": "Camada de servicos e comunicacao com API:",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "OQifp",
+          "x": 40,
+          "y": 80,
+          "fill": "#3F51B5",
+          "width": 220,
+          "height": 65
+        },
+        {
+          "type": "text",
+          "id": "Y4TKx",
+          "x": 65,
+          "y": 100,
+          "fill": "#fff",
+          "content": "ApiService",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "ya1Hz",
+          "x": 80,
+          "y": 122,
+          "fill": "#C5CAE9",
+          "content": "Dio HTTP Client",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "yT5ab",
+          "x": 320,
+          "y": 80,
+          "fill": "#5C6BC0",
+          "width": 250,
+          "height": 65
+        },
+        {
+          "type": "text",
+          "id": "MMwsO",
+          "x": 340,
+          "y": 100,
+          "fill": "#fff",
+          "content": "Configuracao Dio",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "BWl8X",
+          "x": 345,
+          "y": 122,
+          "fill": "#C5CAE9",
+          "content": "Timeout 60s | JSON headers",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "OrOEv",
+          "x": 640,
+          "y": 80,
+          "fill": "#283593",
+          "width": 220,
+          "height": 65
+        },
+        {
+          "type": "text",
+          "id": "Eg7Ni",
+          "x": 660,
+          "y": 98,
+          "fill": "#fff",
+          "content": "Base URLs:",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "x862z",
+          "x": 660,
+          "y": 116,
+          "fill": "#9FA8DA",
+          "content": "localhost:8000/api/",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "PfLx9",
+          "x": 660,
+          "y": 132,
+          "fill": "#9FA8DA",
+          "content": "ai.secagemdigital.com/api/",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "o30To2",
+          "x": 40,
+          "y": 175,
+          "fill": "#283593",
+          "content": "Interceptors (Dio):",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "ojq9c",
+          "x": 40,
+          "y": 195,
+          "fill": "#E8EAF6",
+          "width": 380,
+          "height": 80,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#3F51B5"
+          }
+        },
+        {
+          "type": "text",
+          "id": "FV9TF",
+          "x": 55,
+          "y": 213,
+          "fill": "#283593",
+          "content": "OnRequest: anexa Authorization: Token <token> header",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "L5M9DJ",
+          "x": 55,
+          "y": 233,
+          "fill": "#C62828",
+          "content": "OnError 401: AuthService.logout() + redirect /login",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "v4mIE",
+          "x": 40,
+          "y": 310,
+          "fill": "#283593",
+          "content": "Fluxo de Dados:",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "wNTkQ",
+          "x": 40,
+          "y": 330,
+          "fill": "#E8EAF6",
+          "width": 380,
+          "height": 100,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#3F51B5"
+          }
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 5,
+          "id": "G4KIi",
+          "x": 55,
+          "y": 350,
+          "fill": "#26A69A",
+          "width": 80,
+          "height": 30
+        },
+        {
+          "type": "text",
+          "id": "hIeMX",
+          "x": 62,
+          "y": 357,
+          "fill": "#fff",
+          "content": "View",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "path",
+          "id": "rYWyO",
+          "x": 135,
+          "y": 365,
+          "geometry": "M0 1l25 0",
+          "viewBox": [
+            0,
+            0,
+            30,
+            2
+          ],
+          "width": 30,
+          "height": 2,
+          "stroke": {
+            "thickness": 1.5,
+            "fill": "#3F51B5"
+          }
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 5,
+          "id": "OpM1e",
+          "x": 165,
+          "y": 350,
+          "fill": "#00897B",
+          "width": 80,
+          "height": 30
+        },
+        {
+          "type": "text",
+          "id": "Et2SF",
+          "x": 168,
+          "y": 357,
+          "fill": "#fff",
+          "content": "Controller",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "path",
+          "id": "X02p9",
+          "x": 245,
+          "y": 365,
+          "geometry": "M0 1l25 0",
+          "viewBox": [
+            0,
+            0,
+            30,
+            2
+          ],
+          "width": 30,
+          "height": 2,
+          "stroke": {
+            "thickness": 1.5,
+            "fill": "#3F51B5"
+          }
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 5,
+          "id": "GgfLx",
+          "x": 275,
+          "y": 350,
+          "fill": "#00695C",
+          "width": 80,
+          "height": 30
+        },
+        {
+          "type": "text",
+          "id": "CAyLV",
+          "x": 281,
+          "y": 357,
+          "fill": "#fff",
+          "content": "ApiService",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "path",
+          "id": "Zv4TG",
+          "x": 355,
+          "y": 365,
+          "geometry": "M0 1l25 0",
+          "viewBox": [
+            0,
+            0,
+            30,
+            2
+          ],
+          "width": 30,
+          "height": 2,
+          "stroke": {
+            "thickness": 1.5,
+            "fill": "#3F51B5"
+          }
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 4,
+          "id": "K2GUn2",
+          "x": 385,
+          "y": 345,
+          "fill": "#1A237E",
+          "width": 30,
+          "height": 40
+        },
+        {
+          "type": "text",
+          "id": "o912v",
+          "x": 387,
+          "y": 355,
+          "fill": "#fff",
+          "content": "API",
+          "fontFamily": "Inter",
+          "fontSize": 9,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "ehm6I",
+          "x": 55,
+          "y": 400,
+          "fill": "#555",
+          "content": "View usa Obx() para reatividade com as variaveis .obs do Controller",
+          "fontFamily": "Inter",
+          "fontSize": 9,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "UJR9x",
+          "x": 480,
+          "y": 175,
+          "fill": "#283593",
+          "content": "Key Methods (ApiService):",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "SN6vy",
+          "x": 480,
+          "y": 195,
+          "fill": "#E8EAF6",
+          "width": 380,
+          "height": 110,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#3F51B5"
+          }
+        },
+        {
+          "type": "text",
+          "id": "qxeVH",
+          "x": 495,
+          "y": 213,
+          "fill": "#283593",
+          "content": "fetchContext() -> GET /api/contexto/",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "t8ubrp",
+          "x": 495,
+          "y": 233,
+          "fill": "#283593",
+          "content": "postStream(endpoint, data) -> SSE stream",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "stt4b",
+          "x": 495,
+          "y": 253,
+          "fill": "#283593",
+          "content": "extractRespostaOuResumo() -> parse JSON",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "zgYiQ",
+          "x": 495,
+          "y": 273,
+          "fill": "#283593",
+          "content": "dio.get/post/put/delete -> CRUD operations",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "hUQk9",
+          "x": 480,
+          "y": 340,
+          "fill": "#283593",
+          "content": "Servicos Core (GetxService):",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "DcUNl",
+          "x": 480,
+          "y": 360,
+          "fill": "#E8EAF6",
+          "width": 380,
+          "height": 70,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#3F51B5"
+          }
+        },
+        {
+          "type": "text",
+          "id": "SOebC",
+          "x": 495,
+          "y": 378,
+          "fill": "#283593",
+          "content": "ApiService - Dio singleton, injetado em main.dart",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "spx9E",
+          "x": 495,
+          "y": 395,
+          "fill": "#283593",
+          "content": "AuthService - Token + isAuthenticated state",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "ReEoa",
+          "x": 495,
+          "y": 412,
+          "fill": "#283593",
+          "content": "SettingsController - Theme + primary color",
+          "fontFamily": "Inter",
+          "fontSize": 11,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "V9GFZF",
+      "x": 920,
+      "y": 1240,
+      "name": "Pagina 6 - GetX Pattern",
+      "clip": true,
+      "width": 900,
+      "height": 600,
+      "fill": "#F8F9FA",
+      "cornerRadius": 8,
+      "stroke": {
+        "thickness": 2,
+        "fill": "#00695C"
+      },
+      "layout": "none",
+      "children": [
+        {
+          "type": "text",
+          "id": "QD7VQ",
+          "x": 20,
+          "y": 15,
+          "fill": "#00695C",
+          "content": "Pagina 6: GetX MVC + Notas da Arquitetura",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "yC0Yr",
+          "x": 20,
+          "y": 45,
+          "fill": "#00695C",
+          "content": "Padrao GetX MVC (Arquitetura do Projeto):",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "A2YRS",
+          "x": 40,
+          "y": 80,
+          "fill": "#26A69A",
+          "width": 160,
+          "height": 70
+        },
+        {
+          "type": "text",
+          "id": "m8yYG",
+          "x": 70,
+          "y": 105,
+          "fill": "#fff",
+          "content": "Route",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "J0Lj6f",
+          "x": 65,
+          "y": 125,
+          "fill": "#E0F2F1",
+          "content": "GetPage(name)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "path",
+          "id": "S3X2X",
+          "x": 200,
+          "y": 115,
+          "geometry": "M0 1l35 0",
+          "viewBox": [
+            0,
+            0,
+            40,
+            2
+          ],
+          "width": 40,
+          "height": 2,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#00695C"
+          }
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "Z5YoPR",
+          "x": 240,
+          "y": 80,
+          "fill": "#4DB6AC",
+          "width": 160,
+          "height": 70
+        },
+        {
+          "type": "text",
+          "id": "MxUOe",
+          "x": 270,
+          "y": 105,
+          "fill": "#fff",
+          "content": "Binding",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "O86gFA",
+          "x": 265,
+          "y": 125,
+          "fill": "#E0F2F1",
+          "content": "Get.lazyPut()",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "path",
+          "id": "QnAaw",
+          "x": 400,
+          "y": 115,
+          "geometry": "M0 1l35 0",
+          "viewBox": [
+            0,
+            0,
+            40,
+            2
+          ],
+          "width": 40,
+          "height": 2,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#00695C"
+          }
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "ofU8t",
+          "x": 440,
+          "y": 80,
+          "fill": "#00897B",
+          "width": 160,
+          "height": 70
+        },
+        {
+          "type": "text",
+          "id": "aCv0e",
+          "x": 470,
+          "y": 105,
+          "fill": "#fff",
+          "content": "Controller",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "brq2G",
+          "x": 465,
+          "y": 125,
+          "fill": "#E0F2F1",
+          "content": "GetxController",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "path",
+          "id": "oQdW1",
+          "x": 600,
+          "y": 115,
+          "geometry": "M0 1l35 0",
+          "viewBox": [
+            0,
+            0,
+            40,
+            2
+          ],
+          "width": 40,
+          "height": 2,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#00695C"
+          }
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "P9ZocI",
+          "x": 640,
+          "y": 80,
+          "fill": "#00695C",
+          "width": 160,
+          "height": 70
+        },
+        {
+          "type": "text",
+          "id": "ehiea",
+          "x": 673,
+          "y": 105,
+          "fill": "#fff",
+          "content": "View",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "qZNeW",
+          "x": 665,
+          "y": 125,
+          "fill": "#E0F2F1",
+          "content": "GetView<C>",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "dmacK",
+          "x": 60,
+          "y": 170,
+          "fill": "#555",
+          "content": "Bindings injetam Controllers; Controllers expoem Rx (.obs); Views usam Obx()",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "b4AIN",
+          "x": 20,
+          "y": 210,
+          "fill": "#00695C",
+          "content": "Notas da Arquitetura:",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 8,
+          "id": "oqTZX",
+          "x": 40,
+          "y": 230,
+          "fill": "#E0F2F1",
+          "width": 820,
+          "height": 300,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#00695C"
+          }
+        },
+        {
+          "type": "text",
+          "id": "v5JZq",
+          "x": 55,
+          "y": 248,
+          "fill": "#004D40",
+          "content": "1. Feature-first modular architecture: cada modulo tem bindings/, controllers/, views/",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "Q6ruK3",
+          "x": 55,
+          "y": 268,
+          "fill": "#004D40",
+          "content": "2. 19 modulos: 5 landing + Login + 17 sidebar (dashboards, silos, secagem, custos, etc)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "k7tur",
+          "x": 55,
+          "y": 288,
+          "fill": "#004D40",
+          "content": "3. Rotas protegidas via AuthMiddleware; publicas sem middleware",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "j6fAFt",
+          "x": 55,
+          "y": 308,
+          "fill": "#004D40",
+          "content": "4. Auth token em FlutterSecureStorage; isAuthenticated controla acesso",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "gAf9C",
+          "x": 55,
+          "y": 328,
+          "fill": "#004D40",
+          "content": "5. Dio interceptor: 401 = auto-logout + redirect para /login",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "K6qMK",
+          "x": 55,
+          "y": 348,
+          "fill": "#004D40",
+          "content": "6. GetStorage persiste preferencias (tema, cor primaria) localmente",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "Ij1lF",
+          "x": 55,
+          "y": 368,
+          "fill": "#004D40",
+          "content": "7. Dois endpoints de API: localhost:8000 (Django) + ai.secagemdigital.com (AI/SSE)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "gDxzU",
+          "x": 55,
+          "y": 388,
+          "fill": "#004D40",
+          "content": "8. Code generation: freezed + json_serializable + build_runner",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "LxMjL",
+          "x": 55,
+          "y": 408,
+          "fill": "#004D40",
+          "content": "9. Tema: Material 3, Google Fonts Inter + Outfit, Dark/Light/System",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "j7W8kw",
+          "x": 55,
+          "y": 428,
+          "fill": "#004D40",
+          "content": "10. PDF via pdf + printing packages para geracao de relatorios",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "Wugsq",
+          "x": 55,
+          "y": 448,
+          "fill": "#004D40",
+          "content": "11. 3D silo visualization via model_viewer_plus (GLB models)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "wCgyk",
+          "x": 55,
+          "y": 468,
+          "fill": "#004D40",
+          "content": "12. Localizacao: pt_BR (Portugues Brasil) - unico idioma suportado",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "SslVe",
+          "x": 40,
+          "y": 560,
+          "fill": "#00695C",
+          "content": "Estrutura de diretorios (lib/):",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 6,
+          "id": "JwNT6",
+          "x": 40,
+          "y": 580,
+          "fill": "#fff",
+          "width": 820,
+          "height": 80,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#B2DFDB"
+          }
+        },
+        {
+          "type": "text",
+          "id": "v1x7EZ",
+          "x": 55,
+          "y": 598,
+          "fill": "#333",
+          "content": "lib/core/ (models, services, theme, middlewares, values)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "xvKwY",
+          "x": 55,
+          "y": 615,
+          "fill": "#333",
+          "content": "lib/modules/ (19 modulos, cada um com bindings/, controllers/, views/)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "rzSpJ",
+          "x": 55,
+          "y": 632,
+          "fill": "#333",
+          "content": "lib/routes/ (app_routes.dart constantes + app_pages.dart GetPages)",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "rH9p8",
+          "x": 55,
+          "y": 649,
+          "fill": "#333",
+          "content": "main.dart: GetStorage > ApiService > AuthService > SettingsController > GetMaterialApp",
+          "fontFamily": "Inter",
+          "fontSize": 10,
+          "fontWeight": "normal"
+        }
+      ]
+    }
+  ]
+}

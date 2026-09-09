@@ -1,0 +1,352 @@
+================================================================================
+          APRESENTACAO SMART SECAGEM - VERSAO SIMPLES
+================================================================================
+
+
+================================================================================
+SLIDE 1 - CAPA
+================================================================================
+
+Smart Secagem
+
+Cuidando dos seus graos com tecnologia e inteligencia
+
+
+================================================================================
+SLIDE 2 - O QUE VAMOS FALAR
+================================================================================
+
+1. O que e o Smart Secagem
+2. Quais problemas ele resolve
+3. Como funciona por dentro
+4. O que ele faz na pratica
+5. As partes do sistema
+6. A inteligencia artificial
+7. Demonstracao
+8. Proximos passos
+9. Suas duvidas
+
+
+================================================================================
+SLIDE 3 - O QUE E O SMART SECAGEM
+================================================================================
+
+Imagina ter um assistente inteligente que cuida dos seus graos
+24 horas por dia, 7 dias por semana.
+
+O Smart Secagem e um sistema que monitora seus silos e secadores
+pela internet, avisa quando algo esta errado e ainda gera
+relatorios automaticos pra voce tomar decisao.
+
+Funciona no computador, no celular e no tablet.
+
+
+================================================================================
+SLIDE 4 - POR QUE ELE EXISTE
+================================================================================
+
+PROBLEMA:
+Todo ano, muito grao e perdido depois da colheita porque:
+- Ninguem esta olhando o que acontece nos silos
+- O secador pode pegar fogo e ninguem percebe
+- As decisoes sao feitas no achismo
+- Nao se sabe quanto esta custando cada operacao
+
+SOLUCAO:
+O Smart Secagem resolve isso porque:
+- Fica de olho o tempo todo nos sensores
+- Avisa quando tem problema
+- Gera relatorios prontos pra voce ler
+- Ajuda a economizar energia e dinheiro
+
+
+================================================================================
+SLIDE 5 - TECNOLOGIA POR DENTRO (SIMPLIFICADO)
+================================================================================
+
+O sistema tem duas partes que trabalham juntas:
+
+PARTE 1 - O CONTROLE:
+Recebe os dados dos sensores, guarda informacoes,
+faz o cadastro de tudo e controla os motores.
+
+PARTE 2 - O CEREBRO:
+Uma inteligencia artificial que entende os dados,
+gera relatorios e responde suas perguntas em
+linguagem normal, como voce fala com um amigo.
+
+
+================================================================================
+SLIDE 6 - COMO TUDO SE LIGA
+================================================================================
+
+SEU CELULAR OU COMPUTADOR
+        │
+        ▼
+   SMART SECAGEM
+        │
+        ├──→ CONTROLE (manda os dados)
+        │
+        └──→ CEREBRO IA (entende e responde)
+
+Simples: voce pergunta, o sistema responde com base
+no que esta acontecendo na sua planta agora mesmo.
+
+
+================================================================================
+SLIDE 7 - O QUE O SISTEMA FAZ (MODULOS)
+================================================================================
+
+O Smart Secagem tem varias partes que cuidam de coisas
+diferentes:
+
+PARA VOCE VER O QUE ACONTECE:
+- Dashboard com resumo do dia
+- Graficos de temperatura e umidade
+- Status dos silos e secadores
+
+PARA VOCE CONTROLAR:
+- Ligar e desligar motores pelo celular
+- Ver o historico de tudo
+
+PARA VOCE DECIDIR:
+- Relatorios gerados por IA
+- Alertas de problema
+
+PARA VOCE GASTAR MELHOR:
+- Controle de custos
+- Cadastro de clientes
+
+
+================================================================================
+SLIDE 8 - O DASHBOARD INTELIGENTE
+================================================================================
+
+Na tela principal, voce ve um resumo de tudo que esta
+acontecendo na sua planta.
+
+Mas o melhor: voce pode pedir pra inteligencia artificial
+gerar um relatorio pra voce.
+
+Tipos de relatorio:
+- Resumo do dia (o que aconteceu nas ultimas 24h)
+- Quanto esta custando a secagem
+- Se os graos estao bem ou com problema
+- Se os silos estao cheios ou vazios
+- Onde esta o gargalo da operacao
+
+Voce le o relatorio pronto, sem precisar ficar
+fazendo conta nem analisando grafico.
+
+
+================================================================================
+SLIDE 9 - O CHAT QUE ENTENDE SUA PERGUNTA
+================================================================================
+
+Tem uma parte do sistema que e tipo um WhatsApp com IA.
+
+Voce digita uma pergunta normal, tipo:
+"Como esta a temperatura do silo 3?"
+"Esta tudo bem com o lote de soja?"
+"Quanto falta pra encher o silo 2?"
+
+E a IA responde na hora, com base nos dados reais
+da sua planta. Nao e resposta generica.
+
+E como ter um funcionario esperto trabalhando 24h
+por dia so pra voce.
+
+
+================================================================================
+SLIDE 10 - ALARMA DE FOGO NO SECADOR
+================================================================================
+
+Secador pegando fogo e uma das piores coisas que podem
+acontecer. O Smart Secagem fica de olho pra evitar isso.
+
+ELE MONITORA:
+- Se o rolamento do motor esta quente demais
+- Se tem gas perigoso no ar
+- Se o motor esta vibrando diferente
+
+SE ACHAR ALGUMA COISA:
+Avisa voce com cores:
+VERDE - Tudo tranquilo
+AZUL - Fique atento
+AMARELO - Cuidado, tem algo estranho
+LARANJA - Perigo, aja rapido
+VERMELHO - Emergencia, pare tudo
+
+Quanto antes voce souber, menor o dano.
+
+
+================================================================================
+SLIDE 11 - AERACAO INTELIGENTE
+================================================================================
+
+Aeracao e quando voce sopra ar nos graos pra manter
+a qualidade. Mas nem sempre e bom aerar.
+
+O sistema calcula se vale a pena ligar os motores
+olhando:
+- Se o ar de fora esta no ponto certo
+- Se os graos precisam de resfriamento
+- Se nao vai fazer mal pro grao
+
+So liga quando precisa. Economiza energia e
+protege a qualidade do grao.
+
+
+================================================================================
+SLIDE 12 - SENSORES E CONTROLE
+================================================================================
+
+O sistema conversa com sensores espalhados pela planta.
+
+SENSORES:
+- De temperatura (ta quente ou frio?)
+- De rolamento (o motor esta bem?)
+- De gas (tem algo perigoso no ar?)
+
+MOTORES:
+- Voce liga e desliga pelo celular
+- Ve o status em tempo real
+- Sabe quanto tempo ja trabalhou
+
+TAO simples quanto ligar uma luz pela internet.
+
+
+================================================================================
+SLIDE 13 - VER OS SILOS PELA TELA
+================================================================================
+
+Voce pode ver seus silos em 3D, como se fosse um
+video game. Gira, da zoom, ve por dentro.
+
+Se tiver celular com camera, pode ver por cima do
+proprio silo no mundo real, com os dados em cima.
+
+Tambem tem um diagrama mostrando como os cabos e
+sensores estao ligados na planta.
+
+
+================================================================================
+SLIDE 14 - COMO OS DADOS VIAJAM
+================================================================================
+
+1. O sensor le a temperatura
+2. Manda pro sistema
+3. O sistema guarda e mostra pra voce
+4. Se voce pedir um relatorio, a IA entende e responde
+5. Tudo acontece em tempo real, na hora
+
+Nao precisa esperar. Nao precisa chamar ninguem.
+Os dados chegam na sua tela na hora que acontecem.
+
+
+================================================================================
+SLIDE 15 - O QUE O SISTEMA GUARDA
+================================================================================
+
+O Smart Secagem guarda informacoes sobre:
+
+- Seus silos (quantos tem, de quanto, onde estao)
+- Seus sensores (onde estao, o que medem)
+- Seus lotes (que grao, quando entrou, quanto tem)
+- Seus motores (se esta ligado, quanto gasta)
+- Seus clientes (quem compra, dados de contato)
+- Seus custos (quanto gasta com o que)
+- Seus usuarios (quem pode acessar o que)
+
+Tudo organizado pra voce achar rapido.
+
+
+================================================================================
+SLIDE 16 - O QUE VEM POR PE
+================================================================================
+
+Coisas que estamos planejando pra melhorar:
+
+- Aprender com o passado pra prever o futuro
+- Respostas ainda melhores da IA
+- Prever se vai dar problema 2 dias antes
+- Funcionar com internet fraca
+- App separado pro celular
+- Varias propriedades no mesmo login
+
+
+================================================================================
+SLIDE 17 - VAMOS VER NA PRATICA
+================================================================================
+
+Agora vou mostrar o sistema funcionando:
+
+1. Tela inicial com o resumo do dia
+2. Pedindo um relatorio pra IA
+3. Vendo a temperatura dos sensores
+4. Ligando um motor pelo celular
+5. Gerando um relatorio em PDF
+
+Qualquer duvida, pode perguntar durante a demo.
+
+
+================================================================================
+SLIDE 18 - POR QUE IMPORTA
+================================================================================
+
+O que voce ganha com o Smart Secagem:
+
+- MENOS PERDA: Graos bem cuidados sao mais valiosos
+- MENOS TRABALHO: Relatorios prontos, nao precisa fazer conta
+- MENOS SUSTO: Avisa antes do problema virar emergencia
+- MENOS GASTO: Liga motores so quando precisa
+- MAIS QUALIDADE: Graos bem guardados vendem melhor
+
+
+================================================================================
+SLIDE 19 - ENCERRAMENTO
+================================================================================
+
+Smart Secagem: tecnologia a favor do agricultor
+
+- Monitora seus silos e secadores pela internet
+- IA que entende e responde suas perguntas
+- Alertas pra voce nao ter surpresa
+- Relatorios prontos pra voce decidir
+
+Quer saber mais? secagem-digital.com
+
+Duvidas?
+
+
+================================================================================
+BONUS - PERGUNTAS QUE SEMPRE FAZEM
+================================================================================
+
+P: Funciona sem internet?
+R: O basico sim. Pra IA e relatorios, precisa.
+
+P: E dificil de usar?
+R: Nao. E tipo usar o WhatsApp. Se voce sabe usar celular,
+   sabe usar o Smart Secagem.
+
+P: Precisa instalar alguma coisa?
+R: No celular ou computador, nao. Funciona pelo navegador.
+
+P: E seguro?
+R: Sim. Cada pessoa tem sua senha e so ve o que pode ver.
+
+P: Da pra usar no celular?
+R: Sim. A tela se adapta ao tamanho da tela do celular.
+
+P: Quanto custa?
+R: Tem planos diferentes. A gente mostra depois.
+
+
+================================================================================
+                         FIM DA VERSAO SIMPLES
+================================================================================
+
+Total: 20 slides | Tempo: 15-25 minutos | Publico geral
+
+================================================================================

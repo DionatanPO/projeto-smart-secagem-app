@@ -1,4 +1,21 @@
 class SensorModel {
+  static const String tipoTemperatura = 'sensor_temperatura';
+  static const String tipoMancal = 'sensor_mancal';
+  static const String tipoAbafando = 'sensor_abafando';
+
+  static const List<String> tiposIncendio = [tipoMancal, tipoAbafando];
+
+  static String tipoLabel(String tipo) {
+    switch (tipo) {
+      case tipoMancal:
+        return 'Mancal';
+      case tipoAbafando:
+        return 'Abafamento';
+      default:
+        return 'Temperatura';
+    }
+  }
+
   final int? id;
   final String sensorId;
   final String tipo;
@@ -11,10 +28,12 @@ class SensorModel {
   final String? secadorName;
   final String? unidadeArmazenadoraNome;
 
+  bool get isFireSensor => tiposIncendio.contains(tipo);
+
   SensorModel({
     this.id,
     required this.sensorId,
-    this.tipo = 'sensor_temperatura',
+    this.tipo = tipoTemperatura,
     this.siloId,
     this.secadorId,
     this.unidadeArmazenadoraId,
@@ -29,7 +48,7 @@ class SensorModel {
     return SensorModel(
       id: json['id'],
       sensorId: json['sensor_id'],
-      tipo: json['tipo'] ?? 'sensor_temperatura',
+      tipo: json['tipo'] ?? tipoTemperatura,
       siloId: json['silo'],
       secadorId: json['secador'],
       unidadeArmazenadoraId: json['unidade_armazenadora'],

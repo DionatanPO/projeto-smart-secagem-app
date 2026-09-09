@@ -83,7 +83,7 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
                         size: 12, color: AppColors.primary),
                     const SizedBox(width: 6),
                     Text(
-                      'SENSE AI ACTIVE',
+                      'AGROMIND AI ACTIVE',
                       style: GoogleFonts.inter(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -97,7 +97,7 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  'Silo Sense IA',
+                  'AgroMind AI',
                   style: (isDesktop
                           ? theme.textTheme.headlineSmall
                           : theme.textTheme.titleLarge)
@@ -153,7 +153,7 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'SENSE CHAT IA',
+                      'AGROMIND CHAT',
                       style: GoogleFonts.outfit(
                           fontWeight: FontWeight.bold, fontSize: 14),
                     ),

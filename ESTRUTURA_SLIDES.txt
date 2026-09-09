@@ -1,0 +1,487 @@
+================================================================================
+               ESTRUTURA DE SLIDES - APRESENTACAO SMART SECAGEM
+================================================================================
+
+================================================================================
+SLIDE 1 - CAPA
+================================================================================
+
+  Titulo:      SMART SECAGEM
+  Subtitulo:   Plataforma de Inteligencia Agricola Pos-Colheita
+  Descricao:   Monitoramento, Automacao e IA Preditiva para Graos
+  Rodape:      Versao 1.0 | Setembro 2026
+
+  [Logo do projeto]
+  [Imagem de fundo: silos agricolas ou planta de armazenamento]
+
+================================================================================
+SLIDE 2 - AGENDA
+================================================================================
+
+  1. Visao Geral do Projeto
+  2. Problema e Solucao
+  3. Arquitetura Tecnica
+  4. Modulos do Sistema
+  5. Funcionalidades de IA
+  6. Demonstracao ao Vivo
+  7. Arquitetura de Integracao
+  8. Roadmap e Proximos Passos
+  9. Encerramento e Perguntas
+
+================================================================================
+SLIDE 3 - VISAO GERAL DO PROJETO
+================================================================================
+
+  Titulo: O que e o Smart Secagem?
+
+  Conteudo:
+  - Plataforma completa de monitoramento e automacao
+  - Foco na operacao pos-colheita de graos
+  - Integra gestao de silos, secagem e dispositivos IoT
+  - Analises preditivas via Inteligencia Artificial
+
+  Destaques:
+  - Web, Mobile e Desktop
+  - Tempo real
+  - IA integrada
+
+  [Imagem: dashboard do sistema]
+
+================================================================================
+SLIDE 4 - PROBLEMA E SOLUCAO
+================================================================================
+
+  Titulo: Por que o Smart Secagem?
+
+  PROBLEMA:
+  - Perdas pos-colheita de 10-30% da producao
+  - Falta de monitoramento em tempo real
+  - decisoes manuais baseadas em intuicao
+  - Risco de incendio em secadores
+  - Dificuldade de otimizar processos
+
+  SOLUCAO:
+  - Monitoramento IoT em tempo real
+  - IA para analise preditiva
+  - Automacao de processos
+  - Alertas inteligentes
+  - Relatorios automaticos
+
+  [Icones representando problema e solucao]
+
+================================================================================
+SLIDE 5 - STACK TECNOLOGICA
+================================================================================
+
+  Titulo: Tecnologias Utilizadas
+
+  FRONTEND:
+  - Flutter (Dart 3.x)
+  - Web, Mobile, Desktop
+  - GetX (State Management)
+
+  BACKEND:
+  - Django REST API
+  - Python
+
+  IA:
+  - Microservice separado
+  - LLM (Large Language Model)
+  - SSE Streaming
+
+  IoT:
+  - Sensores de temperatura
+  - Sensores de gas (CO)
+  - Sensores de vibracao
+  - Motores de aeracao
+
+  [Diagrama de icones de tecnologias]
+
+================================================================================
+SLIDE 6 - ARQUITETURA TECNICA
+================================================================================
+
+  Titulo: Arquitetura do Sistema
+
+  [Diagrama de arquitetura]
+
+  ┌─────────────────────────────────────────────────────────┐
+  │                    FLUTTER CLIENT                        │
+  │                                                         │
+  │  Dashboard IA  ←→  Smart Sense IA  ←→  Monitoramento    │
+  └────────────────────────┬────────────────────────────────┘
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+              ▼                         ▼
+  ┌───────────────────┐     ┌───────────────────────┐
+  │  Django REST API  │     │   AI Microservice      │
+  │    (porta 8000)   │     │     (porta 8001)       │
+  │                   │     │                        │
+  │  Dados, CRUD,     │     │  LLM, Streaming,       │
+  │  Autenticacao     │     │  Analise Inteligente   │
+  └───────────────────┘     └───────────────────────┘
+
+================================================================================
+SLIDE 7 - MODULOS DO SISTEMA
+================================================================================
+
+  Titulo: 19 Modulos Integrados
+
+  CATEGORIA PUBLICA (2):
+  - Landing Page
+  - Login
+
+  CATEGORIA CENTRAL (3):
+  - Home (Shell Principal)
+  - Dashboard IA
+  - Smart Sense IA (Chat)
+
+  CATEGORIA OPERACIONAL (7):
+  - Secagem
+  - Silo Management
+  - Silo Viewer (3D)
+  - Devices (IoT)
+  - Unidade Armazenadora
+  - Batch Management
+  - Processos
+
+  CATEGORIA FINANCEIRA (2):
+  - Clientes
+  - Custos
+
+  CATEGORIA ADMINISTRATIVA (5):
+  - Notifications
+  - Access Management
+  - Profile
+  - Settings
+  - Support
+
+  [Grid de icones dos modulos]
+
+================================================================================
+SLIDE 8 - DASHBOARD IA
+================================================================================
+
+  Titulo: Dashboard com Inteligencia Artificial
+
+  Funcionalidades:
+  - Resumo operacional em tempo real
+  - Streaming de resposta IA token por token
+  - 5 tipos de relatorio pre-definidos
+  - Prompts customizados pelo usuario
+  - Exportacao para PDF
+
+  TIPOS DE RELATORIO:
+  1. Relatorio Executivo 24h
+  2. Relatorio de Custos de Secagem
+  3. Relatorio de Saude dos Lotes
+  4. Relatorio de Ocupacao e Capacidade
+  5. Relatorio de Gargalos Operacionais
+
+  [Screenshot do dashboard com relatorio IA]
+
+================================================================================
+SLIDE 9 - SMART SENSE IA (CHAT)
+================================================================================
+
+  Titulo: Chat IA Conversacional
+
+  O que e:
+  - Interface de chat interativo
+  - Perguntas em linguagem natural
+  - Respostas contextuais com dados operacionais
+
+  Como funciona:
+  1. Usuario faz pergunta
+  2. Sistema busca contexto operacional
+  3. Contexto + pergunta envados a IA
+  4. Resposta streaming em tempo real
+
+  Capacidades:
+  - Consultas sobre sensores
+  - Analise de lotes
+  - Condicoes operacionais
+  - Historico de conversas
+
+  [Screenshot do chat IA]
+
+================================================================================
+SLIDE 10 - SISTEMA DE PREVISAO DE RISCO DE FOGO
+================================================================================
+
+  Titulo: Prevencao de Incendio em Secadores
+
+  O que monitora:
+  - Temperatura de rolamentos (mancal)
+  - Nivel de gas CO (abafamento)
+  - Vibracao
+  - Taxa de elevacao termica
+
+  5 Niveis de Risco:
+  ┌─────────────────────────────────────────────────┐
+  │  SEGURO     (verde)   │  Score = 0             │
+  │  ATENCAO    (azul)    │  Score >= 1            │
+  │  AVISO      (amarelo) │  Score >= 3            │
+  │  CRITICO    (laranja) │  Score >= 5            │
+  │  EMERGENCIA (vermelho)│  Score >= 7            │
+  └─────────────────────────────────────────────────┘
+
+  Acoes:
+  - Alertas em tempo real
+  - Dialogo de emergencia
+  - Recomendacoes automaticas
+
+  [Screenshot do painel de risco de fogo]
+
+================================================================================
+SLIDE 11 - EQUILIBRIO HIGROSCOPICO E DELTA T
+================================================================================
+
+  Titulo: Inteligencia de Aeracao
+
+  Conceito:
+  - Analise se ar externo pode remover umidade do grao
+  - Calculo de Delta T (diferenca de temperatura)
+  - Protecao contra sobre-secagem
+
+  Metricas Monitoradas:
+  ┌──────────────────┬────────────┬──────────────────────────┐
+  │ Metrica          │ Criticidade│ Descricao                │
+  ├──────────────────┼────────────┼──────────────────────────┤
+  │ Temp. Interna    │ Alta       │ Detecta pontos quentes   │
+  │ Umidade Relativa │ Alta       │ Ponto de equilibrio      │
+  │ Ponto de Orvalho │ Media      │ Previne condensacao      │
+  │ Delta T          │ Operac.    │ Resfriamento efetivo     │
+  └──────────────────┴────────────┴──────────────────────────┘
+
+  Decisao Inteligente:
+  - Aeracao ATIVA apenas quando Delta T favoravel
+  - Auto-desligamento em condicoes criticas
+
+  [Diagrama do fluxo de decisao]
+
+================================================================================
+SLIDE 12 - MONITORAMENTO IoT
+================================================================================
+
+  Titulo: Dispositivos e Sensores
+
+  SENSORES:
+  - Temperatura (atmosfera)
+  - Mancal (rolamento)
+  - Abafamento (gas CO)
+
+  MOTORES DE AERACAO:
+  - Controle ON/OFF remoto
+  - Status em tempo real
+  - Historico de operacao
+
+  TELEMETRIA:
+  - Temperatura
+  - Umidade
+  - Nivel de gas
+  - Vibracao
+  - Graficos com filtragem por data
+
+  [Screenshot da tela de dispositivos]
+
+================================================================================
+SLIDE 13 - VISUALIZACAO 3D E AR
+================================================================================
+
+  Titulo: Visualizacao Avancada
+
+  RECURSOS 3D:
+  - Modelo 3D interativo de silos
+  - Navegacao e rotacao
+  - Visualizacao de componentes
+
+  REALIDADE AUMENTADA:
+  - Sobreposicao de dados sobre o mundo real
+  - Informacoes de sensores em tempo real
+
+  TIMELINE:
+  - Estagios do projeto
+  - Marcos e entregas
+
+  ARQUITETURA DE REDE:
+  - Diagrama de conectividade IoT
+  - CONTROLADOR X7 (Modbus TCP)
+  - GATEWAY FIELDLOGGER (Modbus RTU)
+
+  [Screenshot da visualizacao 3D]
+
+================================================================================
+SLIDE 14 - ARQUITETURA DE INTEGRACAO
+================================================================================
+
+  Titulo: Fluxo de Dados Completo
+
+  [Diagrama de fluxo]
+
+  USUARIO → Flutter App
+       │
+       ├──→ GET /contexto/ → Django API (8000)
+       │         │
+       │         └──→ Dados operacionais
+       │
+       └──→ POST /chat-stream/ → AI Microservice (8001)
+                 │
+                 ├──→ prompt + context + history
+                 │
+                 └──→ SSE Stream → Resposta IA
+
+  TIPOS DE EVENTO SSE:
+  - message: conteudo da resposta
+  - thought: raciocinio da IA (chain-of-thought)
+  - metrics: metricas de performance
+  - error: erros
+  - done: conclusao
+
+================================================================================
+SLIDE 15 - MODELOS DE DADOS
+================================================================================
+
+  Titulo: 14 Modelos do Sistema
+
+  GESTAO:
+  - SiloModel, SecadorModel, MotorAeracaoModel
+  - BatchModel, ProcessoModel, UnidadeArmazenadoraModel
+
+  OPERACIONAL:
+  - SensorModel, TelemetryModel
+  - FireRiskModel, ResumoModel
+
+  NEGOCIO:
+  - ClienteModel, CustoProcessoModel
+
+  SISTEMA:
+  - UserModel, NotificationModel
+
+  [Diagrama de entidade-relacionamento simplificado]
+
+================================================================================
+SLIDE 16 - FUNCIONALIDADES PLANEJADAS
+================================================================================
+
+  Titulo: Roadmap e Proximos Passos
+
+  FASE 03 - PENDENTE:
+  - Machine Learning com dados historicos
+  - Deteccao de anomalias via IA
+  - Integracao com modelos preditivos
+
+  EM DESENVOLVIMENTO:
+  - RAG (Retrieval-Augmented Generation)
+  - Previsao de Hotspot 48h
+  - Modelos de equilibrio higroscopico
+
+  FUTURO:
+  - Integacao com LoRaWAN
+  - App mobile nativo
+  - Multi-tenant (multi-propriedade)
+
+  [Timeline de roadmap]
+
+================================================================================
+SLIDE 17 - DEMONSTRACAO AO VIVO
+================================================================================
+
+  Titulo: Demo do Sistema
+
+  CENARIOS DE DEMONSTRACAO:
+
+  1. Login e Dashboard
+     - Acessar o sistema
+     - Visualizar resumo IA
+
+  2. Chat Smart Sense IA
+     - Fazer pergunta sobre sensores
+     - Ver resposta em tempo real
+
+  3. Monitoramento de Sensores
+     - Visualizar telemetria
+     - Analisar graficos
+
+  4. Controle de Motores
+     - Toggle ON/OFF
+     - Verificar status
+
+  5. Relatorio IA
+     - Gerar relatorio executivo
+     - Exportar para PDF
+
+  [Screenshots ou live demo]
+
+================================================================================
+SLIDE 18 - NUMEROS E RESULTADOS
+================================================================================
+
+  Titulo: Numeros que Importam
+
+  ┌─────────────────────────────────────────────────┐
+  │  19      Modulos integrados                     │
+  │  14      Modelos de dados                       │
+  │  5       Tipos de relatorio IA                  │
+  │  3       Tipos de sensores IoT                  │
+  │  5       Niveis de risco de fogo                │
+  │  2       APIs integradas (Django + AI)          │
+  │  3       Plataformas (Web, Mobile, Desktop)     │
+  └─────────────────────────────────────────────────┘
+
+  VALOR AGREGADO:
+  - Reducao de perdas pos-colheita
+  - Decisoes baseadas em dados
+  - Prevencao de incendios
+  - Otimizacao de energia
+  - Qualidade do grao preservada
+
+================================================================================
+SLIDE 19 - ENCERRAMENTO
+================================================================================
+
+  Titulo: Obrigado!
+
+  RESUMO:
+  - Smart Secagem: solucao completa para pos-colheita
+  - IA integrada para analise preditiva
+  - Monitoramento IoT em tempo real
+  - Tomada de decisao inteligente
+
+  CONTATO:
+  - Website: secagem-digital.com
+  - API: api.secagem-digital.com
+
+  PERGUNTAS?
+
+  [Logo do projeto]
+  [Informacoes de contato]
+
+================================================================================
+BONUS - SLIDE DE CONTINGENCIA (PERGUNTAS)
+================================================================================
+
+  Titulo: Perguntas Frequentes
+
+  P: O sistema funciona offline?
+  R: Funcionalidades basicas sim. IA requer conexao.
+
+  P: Quais sensores sao compativeis?
+  R: Sensores de temperatura, mancal e abafamento (CO).
+
+  P: O sistema e seguro?
+  R: Autenticacao por token, 2FA disponivel.
+
+  P: Suporta multiplos usuarios?
+  R: Sim, com controle de acesso por nivel.
+
+================================================================================
+                          FIM DA ESTRUTURA
+================================================================================
+
+  Total de Slides: 19 + 1 bonus
+  Tempo estimado: 30-45 minutos
+  Formato recomendado: 16:9
+
+================================================================================

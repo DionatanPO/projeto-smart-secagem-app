@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/secador_model.dart';
 import '../../../core/models/telemetry_model.dart';
 import '../../../core/models/motor_aeracao_model.dart';
+import '../../../core/models/fire_risk_model.dart';
 import '../../../core/values/app_colors.dart';
 import '../../home/controllers/home_controller.dart';
 import '../../devices/widgets/telemetry_history_dialog.dart';
@@ -230,6 +231,11 @@ class SecagemView extends GetView<SecagemController> {
             ),
             const SizedBox(width: 8),
             _buildStatusBadge(secador.status, statusColor),
+            const SizedBox(width: 6),
+            Obx(() {
+              final level = controller.getSecadorFireLevel(secador.id ?? 0);
+              return _buildFireBadge(level);
+            }),
           ],
         ),
         if (secador.unidadeArmazenadoraNome != null)
@@ -368,10 +374,13 @@ class SecagemView extends GetView<SecagemController> {
                 ),
               ),
               // Sensores (callouts à direita)
-              if (readings.isNotEmpty)
+              if (readings.isNotEmpty && readings.length <= 5)
                 ...List.generate(readings.length, (index) {
                   final r = readings[index];
-                  final double topOffset = (graphicHeight * 0.2) + (index * 55.0);
+                  final double spacing = readings.length <= 3 ? 55.0 : 45.0;
+                  final double startOffset = graphicHeight * 0.15;
+                  final double maxTop = graphicHeight - 50;
+                  final double topOffset = (startOffset + (index * spacing)).clamp(startOffset, maxTop);
                   return Positioned(
                     left: (graphicWidth / 2) + 10,
                     top: topOffset,
@@ -389,6 +398,31 @@ class SecagemView extends GetView<SecagemController> {
                     ),
                   );
                 }),
+              if (readings.length > 5)
+                Positioned(
+                  left: (graphicWidth / 2) + 10,
+                  top: graphicHeight * 0.12,
+                  height: graphicHeight * 0.75,
+                  width: graphicWidth * 0.48,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: cs.surface.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                        itemCount: readings.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 6),
+                        itemBuilder: (context, index) {
+                          final r = readings[index];
+                          return _buildSensorLabel(r, isDark);
+                        },
+                      ),
+                    ),
+                  ),
+                ),
               if (readings.isEmpty)
                 Positioned(
                   right: 20,
@@ -423,6 +457,11 @@ class SecagemView extends GetView<SecagemController> {
   }
 
   Widget _buildSensorLabel(TelemetryModel reading, bool isDark) {
+    final tempStr = '${reading.temperature.toStringAsFixed(1)}°C';
+    final humStr = '${reading.humidity.toStringAsFixed(1)}%';
+    final sensorId = reading.sensorPhysicalId.toUpperCase();
+    final shortId = sensorId.length > 8 ? sensorId.substring(0, 8) : sensorId;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
@@ -431,10 +470,12 @@ class SecagemView extends GetView<SecagemController> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            reading.sensorPhysicalId.toUpperCase(),
+            shortId,
             style: GoogleFonts.inter(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 0.3),
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Row(
@@ -442,11 +483,11 @@ class SecagemView extends GetView<SecagemController> {
             children: [
               Icon(Icons.thermostat_rounded, size: 9, color: Colors.orange),
               const SizedBox(width: 2),
-              Text('${reading.temperature}°C', style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.orange)),
+              Text(tempStr, style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.orange)),
               const SizedBox(width: 6),
               Icon(Icons.water_drop_rounded, size: 9, color: Colors.blue),
               const SizedBox(width: 2),
-              Text('${reading.humidity}%', style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
+              Text(humStr, style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
             ],
           ),
         ],
@@ -605,6 +646,40 @@ class SecagemView extends GetView<SecagemController> {
       child: Text(
         status.toUpperCase(),
         style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900, color: color, letterSpacing: 1),
+      ),
+    );
+  }
+
+  Widget _buildFireBadge(FireRiskLevel level) {
+    Color color;
+    IconData icon;
+    String label;
+    switch (level) {
+      case FireRiskLevel.emergency:
+        color = const Color(0xFFDC2626); label = 'EMERGÊNCIA'; icon = Icons.local_fire_department_rounded;
+      case FireRiskLevel.critical:
+        color = const Color(0xFFEF4444); label = 'CRÍTICO'; icon = Icons.gpp_bad_rounded;
+      case FireRiskLevel.warning:
+        color = const Color(0xFFF97316); label = 'ALERTA'; icon = Icons.warning_rounded;
+      case FireRiskLevel.attention:
+        color = const Color(0xFFEAB308); label = 'ATENÇÃO'; icon = Icons.info_rounded;
+      case FireRiskLevel.safe:
+        color = const Color(0xFF22C55E); label = 'SEGURO'; icon = Icons.check_circle_rounded;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 4),
+          Text(label, style: GoogleFonts.inter(fontSize: 8, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5)),
+        ],
       ),
     );
   }

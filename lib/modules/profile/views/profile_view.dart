@@ -126,8 +126,6 @@ class ProfileView extends GetView<ProfileController> {
                   flex: isDesktop ? 1 : 0,
                   child: Column(
                     children: [
-                      _buildPreferencesCard(context, isDark),
-                      const SizedBox(height: 32),
                       _buildSystemSupportCard(context, isDark),
                     ],
                   ),
@@ -143,8 +141,6 @@ class ProfileView extends GetView<ProfileController> {
                 return Column(
                   children: [
                     _buildPersonalInfoCard(context, isDark),
-                    const SizedBox(height: 32),
-                    _buildPreferencesCard(context, isDark),
                     const SizedBox(height: 32),
                     _buildSystemSupportCard(context, isDark),
                   ],
@@ -358,66 +354,6 @@ class ProfileView extends GetView<ProfileController> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPreferencesCard(BuildContext context, bool isDark) {
-    final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width > 900;
-    return Container(
-      padding: EdgeInsets.all(isDesktop ? 32 : 20),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-            color: isDark
-                ? AppColors.borderDark
-                : AppColors.border.withOpacity(0.5)),
-        boxShadow: [
-          if (!isDark)
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.tune_rounded, color: AppColors.primary),
-              const SizedBox(width: 12),
-              Text(
-                'Preferências',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Obx(() => SwitchListTile(
-                value: controller.notificationsEnabled.value,
-                onChanged: controller.toggleNotifications,
-                title: Text(
-                  'Notificações de Alertas',
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: isDark ? Colors.white : AppColors.textPrimary,
-                  ),
-                ),
-                subtitle: Text(
-                  'Relatórios e Push da IA',
-                  style: GoogleFonts.inter(fontSize: 13),
-                ),
-                activeColor: AppColors.primary,
-                contentPadding: EdgeInsets.zero,
-              )),
-        ],
-      ),
     );
   }
 

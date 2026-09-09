@@ -9,9 +9,9 @@ class NotificationsView extends GetView<NotificationsController> {
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<NotificationsController>()) {
-      Get.put(NotificationsController());
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.loadNotifications();
+    });
 
     final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width >= 1100;

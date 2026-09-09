@@ -7,6 +7,7 @@ import '../../../core/models/secador_model.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../../core/models/telemetry_model.dart';
 import '../controllers/secagem_controller.dart';
+import '../widgets/fire_risk_panel.dart';
 
 class SecadorDetalhesView extends StatefulWidget {
   final SecadorModel secador;
@@ -28,6 +29,7 @@ class _SecadorDetalhesViewState extends State<SecadorDetalhesView> {
   void initState() {
     super.initState();
     loadData();
+    controller.assessFireRisk(widget.secador.id!);
   }
 
   Future<void> loadTelemetry() async {
@@ -181,6 +183,8 @@ class _SecadorDetalhesViewState extends State<SecadorDetalhesView> {
                     const SizedBox(height: 24),
                     _buildChart(cs),
                     const SizedBox(height: 24),
+                    FireRiskPanel(secadorId: widget.secador.id!),
+                    const SizedBox(height: 24),
                     _buildSensorList(cs),
                   ],
                 ),
@@ -201,7 +205,14 @@ class _SecadorDetalhesViewState extends State<SecadorDetalhesView> {
   }
 
   Widget _buildRightPanel(ColorScheme cs) {
-    return _buildSensorList(cs);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FireRiskPanel(secadorId: widget.secador.id!),
+        const SizedBox(height: 24),
+        _buildSensorList(cs),
+      ],
+    );
   }
 
   Widget _buildOverviewCards(ColorScheme cs, List<TelemetryModel> allTelemetry) {

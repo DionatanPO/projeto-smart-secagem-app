@@ -4,6 +4,8 @@ import '../../../core/models/secador_model.dart';
 import '../../../core/models/sensor_model.dart';
 import '../../../core/models/telemetry_model.dart';
 import '../../../core/models/motor_aeracao_model.dart';
+import '../../../core/models/fire_risk_model.dart';
+import '../../notifications/controllers/notifications_controller.dart';
 import '../../unidade_armazenadora_management/controllers/unidade_armazenadora_management_controller.dart';
 import '../../../core/models/unidade_armazenadora_model.dart';
 
@@ -25,6 +27,13 @@ class SecagemController extends GetxController {
   final secadorSensors = <SensorModel>[].obs;
   final secadorLatestReadings = <int, List<TelemetryModel>>{}.obs;
   final isLoadingSecadorSensors = false.obs;
+
+  // Fire risk monitoring
+  final fireRiskAssessments = <FireRiskModel>[].obs;
+  final isLoadingFireRisk = false.obs;
+  final overallFireLevel = FireRiskLevel.safe.obs;
+  final hasFireEmergency = false.obs;
+  final secadorFireLevels = <int, FireRiskLevel>{}.obs;
 
   List<SecadorModel> get filteredSecadores {
     if (searchQuery.value.isEmpty) return secadores;
@@ -48,6 +57,14 @@ class SecagemController extends GetxController {
     await getSecadores();
     await getAllSensors();
     await getAllMotors();
+    await assessAllFireRisk();
+    await _gerarNotificacoesApi();
+  }
+
+  Future<void> _gerarNotificacoesApi() async {
+    try {
+      await Get.find<NotificationsController>().loadNotifications();
+    } catch (_) {}
   }
 
   void filterSecadores(String query) => searchQuery.value = query;
@@ -194,6 +211,134 @@ class SecagemController extends GetxController {
 
   List<MotorAeracaoModel> getMotorsForSecador(int secadorId) {
     return _allMotors.where((m) => m.secadorId == secadorId).toList();
+  }
+
+  // --- Fire Risk Monitoring ---
+
+  Future<List<SensorModel>> getFireSensors(int secadorId) async {
+    try {
+      final response = await _apiService.dio.get('sensores/', queryParameters: {'secador': secadorId});
+      if (response.statusCode == 200) {
+        return (response.data as List)
+            .map((json) => SensorModel.fromJson(json))
+            .where((s) => s.isFireSensor)
+            .toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future<List<FireRiskModel>> assessFireRisk(int secadorId) async {
+    isLoadingFireRisk.value = true;
+    fireRiskAssessments.clear();
+    try {
+      final fireSensors = await getFireSensors(secadorId);
+      if (fireSensors.isEmpty) {
+        isLoadingFireRisk.value = false;
+        return [];
+      }
+
+      final assessments = <FireRiskModel>[];
+      final worstLevels = <FireRiskLevel>{};
+
+      for (final sensor in fireSensors) {
+        if (sensor.id == null) continue;
+
+        final telemetriaResp = await _apiService.dio.get('telemetria/', queryParameters: {
+          'sensor': sensor.id,
+          'limit': 10,
+        });
+
+        List<TelemetryModel> history = [];
+        if (telemetriaResp.statusCode == 200) {
+          history = (telemetriaResp.data as List)
+              .map((json) => TelemetryModel.fromJson(json))
+              .toList();
+        }
+
+        history.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        final latest = history.isNotEmpty ? history.first : null;
+
+        assessments.add(FireRiskModel.fromSensor(
+          sensor: sensor,
+          latestReading: latest,
+          recentHistory: history,
+        ));
+
+        worstLevels.add(assessments.last.level);
+      }
+
+      fireRiskAssessments.assignAll(assessments);
+
+      if (worstLevels.contains(FireRiskLevel.emergency)) {
+        overallFireLevel.value = FireRiskLevel.emergency;
+        hasFireEmergency.value = true;
+      } else if (worstLevels.contains(FireRiskLevel.critical)) {
+        overallFireLevel.value = FireRiskLevel.critical;
+        hasFireEmergency.value = false;
+      } else if (worstLevels.contains(FireRiskLevel.warning)) {
+        overallFireLevel.value = FireRiskLevel.warning;
+        hasFireEmergency.value = false;
+      } else if (worstLevels.contains(FireRiskLevel.attention)) {
+        overallFireLevel.value = FireRiskLevel.attention;
+        hasFireEmergency.value = false;
+      } else {
+        overallFireLevel.value = FireRiskLevel.safe;
+        hasFireEmergency.value = false;
+      }
+
+      isLoadingFireRisk.value = false;
+      return assessments;
+    } catch (_) {
+      isLoadingFireRisk.value = false;
+      return [];
+    }
+  }
+
+  Future<void> refreshFireRisk(int secadorId) async {
+    await assessFireRisk(secadorId);
+  }
+
+  Future<void> assessAllFireRisk() async {
+    secadorFireLevels.clear();
+
+    for (final secador in secadores) {
+      if (secador.id == null) continue;
+      final fireSensors = await getFireSensors(secador.id!);
+      if (fireSensors.isEmpty) {
+        secadorFireLevels[secador.id!] = FireRiskLevel.safe;
+        continue;
+      }
+      final worstLevels = <FireRiskLevel>{};
+      for (final sensor in fireSensors) {
+        if (sensor.id == null) continue;
+        final resp = await _apiService.dio.get('telemetria/', queryParameters: {'sensor': sensor.id, 'limit': 10});
+        List<TelemetryModel> history = [];
+        if (resp.statusCode == 200) {
+          history = (resp.data as List).map((json) => TelemetryModel.fromJson(json)).toList();
+        }
+        history.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        final risk = FireRiskModel.fromSensor(sensor: sensor, latestReading: history.isNotEmpty ? history.first : null, recentHistory: history);
+        worstLevels.add(risk.level);
+      }
+      FireRiskLevel finalLevel;
+      if (worstLevels.contains(FireRiskLevel.emergency)) {
+        finalLevel = FireRiskLevel.emergency;
+      } else if (worstLevels.contains(FireRiskLevel.critical)) {
+        finalLevel = FireRiskLevel.critical;
+      } else if (worstLevels.contains(FireRiskLevel.warning)) {
+        finalLevel = FireRiskLevel.warning;
+      } else if (worstLevels.contains(FireRiskLevel.attention)) {
+        finalLevel = FireRiskLevel.attention;
+      } else {
+        finalLevel = FireRiskLevel.safe;
+      }
+      secadorFireLevels[secador.id!] = finalLevel;
+    }
+  }
+
+  FireRiskLevel getSecadorFireLevel(int secadorId) {
+    return secadorFireLevels[secadorId] ?? FireRiskLevel.safe;
   }
 
   // --- CRUD ---

@@ -10,6 +10,7 @@ import 'core/services/api_service.dart';
 import 'core/services/auth_service.dart';
 import 'routes/app_pages.dart';
 import 'modules/settings/controllers/settings_controller.dart';
+import 'modules/notifications/controllers/notifications_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,7 @@ void main() async {
 
   // Initialize the controller at the top level
   final settingsController = Get.put(SettingsController());
+  Get.put(NotificationsController(), permanent: true);
 
   // Fonts are preloaded via web/index.html <link> tags
   runApp(

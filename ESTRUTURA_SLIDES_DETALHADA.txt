@@ -1,0 +1,985 @@
+================================================================================
+          ESTRUTURA DETALHADA DE SLIDES - APRESENTACAO SMART SECAGEM
+================================================================================
+
+
+================================================================================
+SLIDE 1 - CAPA
+================================================================================
+
+TITULO:
+  Smart Secagem
+
+SUBTITULO:
+  Plataforma de Inteligencia Agricola Pos-Colheita
+
+DESCRICAO COMPLEMENTAR:
+  Monitoramento, Automacao e IA Preditiva para Gestao de Graos
+
+INFORMACOES ADICIONAIS:
+  Versao 1.0
+  Setembro 2026
+
+ELEMENTOS VISUAIS:
+  Logo do projeto centralizado
+  Imagem de fundo com silos agricolas ou planta de armazenamento
+  Paleta de cores: verde (confianca), azul (tecnologia), branco (limpeza)
+
+
+================================================================================
+SLIDE 2 - AGENDA
+================================================================================
+
+TITULO:
+  Agenda da Apresentacao
+
+TOPICOS:
+  1. Visao Geral do Projeto
+  Apresentacao do Smart Secagem, seu proposito e publico-alvo.
+
+  2. Problema e Solucao
+  Quais dores do mercado agricola o sistema resolve e como.
+
+  3. Arquitetura Tecnica
+  Stack utilizada, dual-API e como os componentes se comunicam.
+
+  4. Modulos do Sistema
+  Os 19 modulos organizados por categoria e suas funcoes.
+
+  5. Funcionalidades de IA
+  Dashboard IA, Chat conversacional, Risco de Fogo e Equilibrio Higroscopico.
+
+  6. Demonstracao ao Vivo
+  Cenarios praticos de uso do sistema em operacao.
+
+  7. Arquitetura de Integracao
+  Fluxo completo de dados entre Frontend, Django API e AI Microservice.
+
+  8. Roadmap e Proximos Passos
+  Funcionalidades planejadas e proximas fases de desenvolvimento.
+
+  9. Encerramento e Perguntas
+  Resumo dos pontos-chave e abertura para duvidas.
+
+
+================================================================================
+SLIDE 3 - VISAO GERAL DO PROJETO
+================================================================================
+
+TITULO:
+  O que e o Smart Secagem?
+
+CONTEUDO PRINCIPAL:
+  O Smart Secagem e uma plataforma completa de monitoramento e automacao
+  para a operacao pos-colheita de graos. Ele integra gestao de silos,
+  controle de secagem, monitoramento de dispositivos IoT e analises
+  preditivas via Inteligencia Artificial para otimizar o armazenamento
+  e preservar a qualidade dos graos.
+
+PONTOS-CHAVE:
+  - Desenvolvido em Flutter, funcionando em Web, Mobile e Desktop
+  - Opera em tempo real com dados de sensores IoT
+  - Possui IA integrada para analise preditiva e relatorios
+  - Arquitetura modular com 19 modulos especializados
+  - Backend Django REST API separado do microservice de IA
+
+DIFERENCIAL COMPETITIVO:
+  Unica solucao que combina monitoramento IoT, IA generativa e
+  automacao de processos em uma unica plataforma integrada.
+
+ELEMENTOS VISUAIS:
+  Screenshot do dashboard principal do sistema
+  Icones representando as 3 plataformas (web, mobile, desktop)
+
+
+================================================================================
+SLIDE 4 - PROBLEMA E SOLUCAO
+================================================================================
+
+TITULO:
+  Por que o Smart Secagem?
+
+SECAO PROBLEMA:
+  A industria agricola brasileira enfrenta perdas significativas na
+  fase pos-colheita. Estima-se que entre 10% e 30% da producao e
+  perdida devido a falhas no monitoramento e gestao de armazenamento.
+
+  Principais dores identificadas:
+  - Perdas de graos por falta de monitoramento em tempo real
+  - Decisoes manuais baseadas em intuicao e experiencia subjetiva
+  - Risco constante de incendio em secadores por aquecimento de rolamentos
+  - Dificuldade de otimizar processos de secagem e aeracao
+  - Falta de visibilidade sobre custos e eficiencia operacional
+  - Atraso na identificacao de problemas em lotes armazenados
+
+SECAO SOLUCAO:
+  O Smart Secagem resolve esses problemas attraverso:
+
+  - Monitoramento IoT em tempo real com sensores de temperatura, gas e vibracao
+  - IA generativa que gera relatorios automaticos e responde perguntas
+  - Sistema de previsao de risco de fogo com 5 niveis de alerta
+  - Analise de equilibrio higroscopico para decisao inteligente de aeracao
+  - Dashboards interativos com visualizacao de dados e metricas
+  - Automacao de processos com controle remoto de motores
+
+IMPACTO ESPERADO:
+  Reducao de perdas, aumento da eficiencia operacional, preservacao
+  da qualidade do grao e tomada de decisao baseada em dados.
+
+
+================================================================================
+SLIDE 5 - STACK TECNOLOGICA
+================================================================================
+
+TITULO:
+  Tecnologias Utilizadas
+
+FRONTEND:
+  Flutter e o framework utilizado para construir a interface do usuario.
+  Escrito em Dart 3.x, ele permite compilar para Web, Mobile (Android/iOS)
+  e Desktop (Windows, Mac, Linux) a partir de uma unica base de codigo.
+
+  Gerenciamento de estado e rotas: GetX
+  Graficos: fl_chart
+  Armazenamento local: GetStorage (cache) e FlutterSecureStorage (tokens)
+  HTTP Client: Dio (API principal) e http (streaming IA)
+
+BACKEND:
+  Django REST API rodando na porta 8000.
+  Responsavel por toda a logica de negocio, CRUD de dados,
+  autenticacao por token e servir o contexto operacional.
+
+INTELIGENCIA ARTIFICIAL:
+  Microservice de IA separado rodando na porta 8001.
+  Utiliza LLM (Large Language Model) para gerar analises,
+  relatorios e responder perguntas em linguagem natural.
+  Comunicacao via Server-Sent Events (SSE) para streaming.
+
+DISPOSITIVOS IoT:
+  Sensores de temperatura (atmosfera)
+  Sensores de mancal (rolamento de motores)
+  Sensores de abafamento (gas CO - monoxido de carbono)
+  Motores de aeracao com controle ON/OFF remoto
+  Controladores X7 e Gateways FieldLogger
+
+
+================================================================================
+SLIDE 6 - ARQUITETURA TECNICA
+================================================================================
+
+TITULO:
+  Arquitetura do Sistema
+
+DESCRICAO:
+  O Smart Secagem utiliza uma arquitetura dual-API, separando
+  a logica de negocio (Django) da inteligencia artificial (AI Microservice).
+  O Flutter atua como cliente unico que se comunica com ambos.
+
+COMPONENTES:
+
+  FLUTTER CLIENT (Frontend):
+  Interface do usuario responsiva que consome as duas APIs.
+  Modulos de Dashboard IA, Smart Sense IA e Monitoramento.
+  Estado gerenciado pelo GetX com reatividade.
+
+  DJANGO REST API (porta 8000):
+  API principal responsavel por:
+  - Cadastro e gestao de entidades (silos, sensores, lotes, etc)
+  - Autenticacao e autorizacao
+  - Fornecimento de contexto operacional via endpoint /contexto/
+  - Integracao com banco de dados
+
+  AI MICROSERVICE (porta 8001):
+  Servico dedicado de inteligencia artificial:
+  - Recebe prompts com contexto operacional
+  - Gera respostas via LLM em streaming (SSE)
+  - Endpoint principal: /chat-stream/
+  - Suporte a system prompts customizaveis
+
+COMUNICACAO:
+  Frontend → GET /contexto/ → Django API → dados operacionais
+  Frontend → POST /chat-stream/ → AI Microservice → SSE Stream → resposta IA
+
+
+================================================================================
+SLIDE 7 - MODULOS DO SISTEMA (VISAO GERAL)
+================================================================================
+
+TITULO:
+  19 Modulos Integrados
+
+DESCRICAO:
+  O sistema e composto por 19 modulos organizados em 5 categorias.
+  Cada modulo e responsavel por uma funcionalidade especifica,
+  mas todos se comunicam compartilhando dados e contexto.
+
+MODULOS PUBLICOS (2):
+  Landing Page - Pagina inicial publica com portfolio de features,
+  precos, informacoes sobre a empresa, formulario de contato e
+  dados institucionais. E a primeira impressao do produto.
+
+  Login - Tela de autenticacao com validacoes de UI/UX premium.
+  Ponto de entrada para a area autenticada do sistema.
+
+MODULOS CENTRAIS (3):
+  Home - Shell principal com sidebar/drawer de navegacao e
+  roteamento interno para todos os sub-modulos autenticados.
+
+  Dashboard IA - Painel operacional com resumo inteligente gerado
+  por IA em tempo real. Possui 5 tipos de relatorio pre-definidos
+  e opcao de prompts customizados.
+
+  Smart Sense IA - Chat conversacional interativo para consultas
+  em linguagem natural sobre dados operacionais do sistema.
+
+MODULOS OPERACIONAIS (7):
+  Secagem - Controle e monitoramento do processo de secagem
+  com painel de prevencao de risco de fogo.
+
+  Silo Management - Parametrizacao e gestao de silos agricolas
+  com telemetria de sensores por silo.
+
+  Silo Viewer - Visualizacao 3D de silos com suporte a
+  Realidade Aumentada e diagrama de rede IoT.
+
+  Devices - Gestao de dispositivos IoT: sensores e motores
+  de aeracao com controle ON/OFF.
+
+  Unidade Armazenadora - Gestao de unidades de armazenamento.
+
+  Batch Management - Rastreamento de lotes de graos em silos.
+
+  Processos - Gestao e historico de processos de secagem.
+
+MODULOS FINANCEIROS (2):
+  Clientes - Cadastro e gestao de clientes produtores agricolas.
+
+  Custos - Rastreamento de custos para operacoes de secagem
+  e armazenamento.
+
+MODULOS ADMINISTRATIVOS (5):
+  Notifications - Centro de alertas e notificacoes do sistema.
+
+  Access Management - Controle de acesso e permissoes.
+
+  Profile - Gestao do perfil do usuario com 2FA.
+
+  Settings - Configuracoes do sistema (tema, cores).
+
+  Support - Centro de suporte educativo sobre aeracao.
+
+
+================================================================================
+SLIDE 8 - DASHBOARD IA (DETALHADO)
+================================================================================
+
+TITULO:
+  Dashboard com Inteligencia Artificial
+
+O QUE E:
+  O Dashboard IA e o coracao analitico do Smart Secagem.
+  Ele recebe dados operacionais em tempo real e gera resumos
+  inteligentes utilizando um Large Language Model (LLM).
+
+FLUXO OPERACIONAL:
+  Passo 1: O usuario acessa o Dashboard
+  Passo 2: O sistema busca dados operacionais via GET /contexto/
+  Passo 3: Os dados sao envolvidos em tags XML <contexto_operacional>
+  Passo 4: O prompt e enviado via POST /chat-stream/ (SSE streaming)
+  Passo 5: A resposta e exibida incrementalmente como Markdown
+
+5 TIPOS DE RELATORIO PRE-DEFINIDOS:
+
+  Relatorio Executivo 24h:
+  Panorama operacional das ultimas 24 horas com alertas ativos,
+  recomendacoes prioritarias e metricas de desempenho geral.
+
+  Relatorio de Custos de Secagem:
+  Analise financeira detalhada por processo e secador,
+  incluindo custo por tonelada e projecoes de custos.
+
+  Relatorio de Saude dos Lotes:
+  Analise de risco e qualidade dos lotes armazenados,
+  com verificacao de tempo de armazenamento e condicoes.
+
+  Relatorio de Ocupacao e Capacidade:
+  Taxa de ocupacao dos silos, tendencias de uso e
+  projecao de saturacao por unidade de armazenamento.
+
+  Relatorio de Gargalos Operacionais:
+  Diagnostico de gargalos na cadeia operacional:
+  RECEPCAO → SECAGEM → ARMAZENAMENTO → EXPEDICAO
+
+RECURSOS TECNICOS:
+  - Streaming de resposta token por token
+  - Tratamento de eventos "thought" (raciocinio da IA)
+  - Tratamento de eventos "metrics" (metricas de performance)
+  - Tracking de tempo de resposta
+  - Exportacao para PDF via PdfService
+  - Persistencia do ultimo prompt utilizado via GetStorage
+
+
+================================================================================
+SLIDE 9 - SMART SENSE IA (DETALHADO)
+================================================================================
+
+TITULO:
+  Chat IA Conversacional - Silo Sense IA
+
+O QUE E:
+  O Smart Sense IA e uma interface de chat interativo onde os
+  usuarios podem fazer perguntas em linguagem natural sobre todo
+  o ecossistema de dados da operacao de pos-colheita.
+
+COMO FUNCIONA:
+  1. O usuario digita uma pergunta na interface de chat
+  2. O sistema automaticamente busca o contexto operacional
+     atualizado via GET /contexto/ na Django API
+  3. O contexto e combinado com a pergunta do usuario
+  4. A requisicao e enviada ao AI Microservice via POST /chat-stream/
+  5. A resposta chega via Server-Sent Events (SSE)
+  6. O texto e renderizado em Markdown em tempo real
+
+CAPACIDADES:
+  - Consultas sobre sensores especificos (temperatura, gas, vibracao)
+  - Analise de lotes armazenados e suas condicoes
+  - Verificacao de status de motores de aeracao
+  - Consulta sobre processos de secagem em andamento
+  - Perguntas gerais sobre a operacao
+  - Historico de conversas mantido para continuidade
+
+DIFERENCIAL:
+  O chat nao e apenas um chatbot generico. Ele recebe automaticamente
+  o contexto operacional completo da planta, incluindo dados de
+  todos os sensores, lotes, silos e processos ativos. Isso permite
+  respostas precisas e contextualizadas.
+
+INDICADORES VISUAIS:
+  - Badge "SENSE AI ACTIVE" no header
+  - Indicador de status de conexao
+  - Animacao de loading durante processamento
+
+
+================================================================================
+SLIDE 10 - SISTEMA DE PREVISAO DE RISCO DE FOGO
+================================================================================
+
+TITULO:
+  Prevencao de Incendio em Secadores
+
+PROBLEMA QUE RESOLVE:
+  Incendios em secadores de graos sao causados principalmente por
+  aquecimento excessivo de rolamentos (mancal) e acumulo de gas
+  CO por abafamento. Sem monitoramento adequado, esses incidentes
+  podem causar perdas catastroficas.
+
+O QUE MONITORA:
+  Sensores de Mancal (Rolamento):
+  Monitoram a temperatura dos rolamentos dos motores.
+  Aquecimento anormal indica fricao excessiva e risco de fogo.
+
+  Sensores de Abafamento (Gas CO):
+  Detectam presenca de monoxido de carbono, indicador de
+  combustao incompleta ou aquecimento de graos.
+
+  Sensores de Vibracao:
+  Detectam oscilacoes anormais que podem indicar desgaste
+  mecanico ou desbalanceamento de componentes.
+
+  Taxa de Elevacao Termica:
+  Calcula a velocidade de aumento de temperatura (C/min)
+  para identificacao de tendencias criticas.
+
+ALGORITMO DE SCORING:
+  O sistema atribui pontuacao de 0 a 12+ baseada na combinacao
+  de todos os fatores monitorados. Cada tipo de sensor possui
+  thresholds especificos:
+
+  Sensor Mancal:
+  Aviso acima de 75 graus Celsius
+  Critico acima de 90 graus Celsius
+  Emergencia acima de 110 graus Celsius
+
+  Sensor Abafamento (CO):
+  Aviso acima de 50 ppm
+  Critico acima de 150 ppm
+  Emergencia acima de 400 ppm
+
+5 NIVEIS DE RISCO:
+  Seguro (vermelho): Score igual a 0 - Nenhuma anomalia detectada
+  Atenucao (azul): Score maior ou igual a 1 - Monitoramento atento
+  Aviso (amarelo): Score maior ou igual a 3 - Acao preventiva necessaria
+  Critico (laranja): Score maior ou igual a 5 - Intervencao urgente
+  Emergencia (vermelho): Score maior ou igual a 7 - Parada imediata
+
+RECURSOS DA INTERFACE:
+  - Monitoramento em tempo real de todos os sensores
+  - Agregacao de nivel de fogo geral por secador
+  - Dialogo de emergencia com feedback haptico
+  - Cards de risco detalhados com dados completos de telemetria
+  - Dialogo educativo explicando tipos de sensor e niveis de risco
+
+
+================================================================================
+SLIDE 11 - EQUILIBRIO HIGROSCOPICO E DELTA T
+================================================================================
+
+TITULO:
+  Inteligencia de Aeracao - Equilibrio Higroscopico
+
+CONCEITO FUNDAMENTAL:
+  O equilibrio higroscopico e o ponto em que o grao atinge seu
+  teor de umidade de equilibrio com o ar ambiente. A aeracao
+  inteligente verifica se o ar externo pode remover umidade do
+  grao sem causa-los dano ou sobre-secagem.
+
+POR QUE E IMPORTANTE:
+  Aeracao incorreta pode causar:
+  - Sobre-secagem do grao (perda de peso e qualidade)
+  - Absorcao de umidade (risco de mofo e germinacao)
+  - Condensacao nas paredes do silo (corrosao e deterioracao)
+  - Consumo energetico desnecessario
+
+METRICAS MONITORADAS:
+
+  Temperatura Interna (Criticidade Alta):
+  Detecta pontos quentes na massa de graos que podem indicar
+  atividade biologica (insetos, fungos) ou processos de
+  fermentacao indesejados.
+
+  Umidade Relativa (Criticidade Alta):
+  Define o ponto de equilibrio para evitar ganho de peso
+  por absorcao de umidade do ar. Fundamental para decisao
+  de aeracao.
+
+  Ponto de Orvalho (Criticidade Media):
+  Previne condensacao de agua nas paredes frias do silo.
+  Se a temperatura da parede estiver abaixo do ponto de
+  orvalho, ocorre condensacao.
+
+  Delta T (Criticidade Operacional):
+  Diferenca entre a temperatura do ar externo e a massa
+  de grao. Indica se ha potencial de resfriamento efetivo.
+
+FLUXO DE DECISAO INTELIGENTE:
+
+  Passo 1 - Monitoramento Constante:
+  Leitura de sensores a cada 60 segundos, coletando dados
+  de temperatura e umidade interna e externa.
+
+  Passo 2 - Analise de Equilibrio Higroscopico:
+  Calculo se o ar externo pode remover umidade do grao
+  sem causa-los dano. Verificacao de nao sobre-secagem.
+
+  Passo 3 - Decisao Inteligente:
+  Aeracao e ativada APENAS se Delta T e favoravel e a
+  umidade relativa externa esta na janela ideal.
+
+  Passo 4 - Protecao de Qualidade:
+  Sistema auto-desliga se detecta tendencia de aquecimento
+  ou aumento de umidade na massa de graos.
+
+
+================================================================================
+SLIDE 12 - MONITORAMENTO IoT
+================================================================================
+
+TITULO:
+  Dispositivos e Sensores em Tempo Real
+
+TIPOS DE SENSORES:
+
+  Sensor de Temperatura:
+  Monitora a temperatura atmosfera dentro do silo ou secador.
+  Dados criticos para deteccao de pontos quentes e tendencias
+  de aquecimento.
+
+  Sensor de Mancal:
+  Monitora a temperatura dos rolamentos dos motores de aeracao
+  e de outros componentes mecanicos. Indicador direto de
+  desgaste e risco de falha.
+
+  Sensor de Abafamento:
+  Detecta presenca de monoxido de carbono (CO) no ambiente.
+  Indicador de combustao incompleta, aquecimento de graos
+  ou problemas de ventilacao.
+
+MOTORES DE AERACAO:
+
+  Controle ON/OFF Remoto:
+  Possibilidade de ligar e desligar motores de aeracao
+  diretamente pela interface do sistema, sem necessidade
+  de acesso fisico.
+
+  Status em Tempo Real:
+  Visualizacao do estado atual de cada motor (ligado/desligado),
+  incluindo potencia, RPM, vazao de ar e horimetro.
+
+  Historico de Operacao:
+  Registro completo de todos os acionamentos e desligamentos
+  para analise de eficiencia e manutencao preventiva.
+
+DADOS DE TELEMETRIA:
+  Cada envio de telemetria contem:
+  - Temperatura atual
+  - Umidade relativa
+  - Nivel de gas (CO)
+  - Vibracao
+  - Timestamp da leitura
+
+  Os dados sao exibidos em graficos interativos com filtragem
+  por data e intervalo de tempo.
+
+
+================================================================================
+SLIDE 13 - VISUALIZACAO 3D E AR
+================================================================================
+
+TITULO:
+  Visualizacao Avancada de Silos
+
+MODELO 3D:
+  Visualizacao tridimensional interativa dos silos da planta.
+  O usuario pode rotacionar, zoom e explorar os componentes
+  de cada silo de forma intuitiva.
+
+  Funcionalidades:
+  - Rotacao livre em 360 graus
+  - Zoom in/out para detalhes
+  - Selecao de silos especificos
+  - Visualizacao de camadas internas
+  - Indicadores de nivel de enchimento
+
+REALIDADE AUMENTADA (AR):
+  Sobreposicao de dados do sistema sobre o mundo real atraves
+  da camera do dispositivo. Permite visualizar informacoes de
+  sensores e status de componentes diretamente sobre o objeto
+  fisico.
+
+  Aplicacoes:
+  - Visualizacao de temperatura em tempo real sobre o silo
+  - Status de motores de aeracao no local fisico
+  - Alertas de risco posicionados no componente afetado
+
+TIMELINE DO PROJETO:
+  Visualizacao cronologica dos estagios de implementacao do
+  projeto, incluindo entregas realizadas e fases futuras.
+
+ARQUITETURA DE REDE IoT:
+  Diagrama visual da arquitetura de conectividade dos dispositivos:
+
+  CONTROLADOR X7:
+  Modbus TCP Client com interface de dashboard.
+  Responsavel pela aquisicao de dados dos sensores.
+
+  GATEWAY FIELDLOGGER:
+  Master Modbus RTU, Modbus TCP Server e conversor de protocolo.
+  Ponto central de comunicacao entre sensores e sistema.
+
+  MEIO FISICO:
+  Comunicacao via Ethernet CAT6e e barramento RS485 twisted pair.
+  Suporte a multiplos sensores por gateway (3+ sensores).
+
+
+================================================================================
+SLIDE 14 - ARQUITETURA DE INTEGRACAO (FLUXO DE DADOS)
+================================================================================
+
+TITULO:
+  Fluxo Completo de Dados
+
+DESCRICAO GERAL:
+  Demonstracao completa de como os dados fluem desde a entrada
+  do usuario ate a resposta da IA e visualizacao dos dados.
+
+FLUXO DETALHADO:
+
+  1. ENTRADA DO USUARIO
+  O usuario interage com a interface Flutter, seja digitando
+  uma pergunta no Chat IA ou selecionando um relatorio no Dashboard.
+
+  2. BUSCA DE CONTEXTO OPERACIONAL
+  O Flutter envia uma requisicao GET para o endpoint /contexto/
+  da Django API (porta 8000). Esta requisicao retorna todos os
+  dados operacionais atuais: silos, sensores, lotes, motores
+  e processos ativos.
+
+  3. MONTAGEM DO PROMPT
+  O contexto recebido e envolvido em tags XML e combinado com
+  o system prompt escolhido (ou customizado) e a pergunta
+  do usuario.
+
+  4. REQUISICAO AO AI MICROSERVICE
+  O prompt montado e enviado via POST para o endpoint
+  /chat-stream/ do AI Microservice (porta 8001).
+
+  5. STREAMING SSE
+  O AI Microservice processa o prompt com o LLM e retorna
+  a resposta em formato Server-Sent Events (SSE), token por token.
+
+  6. RENDERIZACAO
+  Cada token recebido e processado e exibido na interface
+  em tempo real com formatação Markdown.
+
+TIPOS DE EVENTO SSE:
+  message - Conteudo da resposta (tokens de texto)
+  thought - Raciocinio interno da IA (chain-of-thought)
+  metrics - Metricas de performance do processamento
+  error - Erros encontrados durante o processamento
+  done - Sinal de conclusao da resposta
+
+
+================================================================================
+SLIDE 15 - MODELOS DE DADOS
+================================================================================
+
+TITULO:
+  14 Modelos do Sistema
+
+DESCRICAO:
+  O Smart Secagem possui 14 modelos de dados que estruturam
+  toda a informacao do sistema. Cada modelo representa uma
+  entidade do dominio agricola ou do sistema.
+
+MODELOS DE GESTAO:
+
+  SiloModel:
+  Representa a configuracao e dados de um silo agricola.
+  Inclui capacidade, localizacao, sensores associados
+  e metadados de identificacao.
+
+  SecadorModel:
+  Representa a configuracao e status de um secador.
+  Inclui tipo, capacidade, parametros de operacao.
+
+  MotorAeracaoModel:
+  Representa um motor de aeracao com todos os seus dados:
+  identificacao, descricao, status, estado (ligado/desligado),
+  potencia em KW, RPM, vazao de ar, horimetro e consumo atual.
+  Possui vinculos com silo e secador.
+
+  BatchModel:
+  Representa um lote de graos armazenado em um silo.
+  Inclui tipo de grao, quantidade, data de entrada e
+  metadados de qualidade.
+
+  ProcessoModel:
+  Representa um processo de secagem em andamento ou historico.
+  Inclui parametros de operacao, metricas e status.
+
+  UnidadeArmazenadoraModel:
+  Representa uma unidade de armazenamento (U.A.) com sua
+  configuracao e localizacao.
+
+MODELOS OPERACIONAIS:
+
+  SensorModel:
+  Representa um sensor IoT com tres tipos: sensor_temperatura,
+  sensor_mancal e sensor_abafando. Inclui tipo, localizacao
+  e vinculo com equipamento.
+
+  TelemetryModel:
+  Representa um registro de telemetria do sensor com dados
+  de temperatura, umidade, nivel de gas, vibracao e timestamp.
+
+  FireRiskModel:
+  Representa o calculo de risco de incendio com 5 niveis
+  de severidade: seguro, atencao, aviso, critico e emergencia.
+  Calcula score baseado em temperatura, gas, vibracao e taxa
+  de elevacao termica.
+
+  ResumoModel:
+  Representa a resposta ou resumo gerado pela IA.
+  Campo principal: resposta (String).
+
+MODELOS DE NEGOCIO:
+
+  ClienteModel:
+  Dados do cliente ou produtor agricola.
+
+  CustoProcessoModel:
+  Dados de custo associados a processos de secagem.
+
+MODELOS DE SISTEMA:
+
+  UserModel:
+  Conta do usuario com dados pessoais, nivel de acesso
+  e configuracoes de seguranca.
+
+  NotificationModel:
+  Dados de notificacao ou alerta do sistema.
+
+
+================================================================================
+SLIDE 16 - FUNCIONALIDADES PLANEJADAS
+================================================================================
+
+TITULO:
+  Roadmap e Proximos Passos
+
+FASE ATUAL:
+  O sistema esta funcional com todas as 19 integradas,
+  IA integrada via LLM e monitoramento IoT em tempo real.
+
+FASE 03 - MACHINE LEARNING (Status: Pendente):
+  Treinamento de modelos de Machine Learning com dados
+  historicos coletados pelos sensores ao longo do tempo.
+  Objetivo: calibrar algoritmos de IA para deteccao
+  automatica de anomalias e padroes incomuns.
+
+  Funcionalidades previstas:
+  - Modelos preditivos de qualidade do grao
+  - Deteccao de anomalias em padroes de telemetria
+  - Classificacao automatica de condicoes operacionais
+  - Integracao com Smart Sense IA para respostas preditivas
+
+RAG - RETRIEVAL-AUGMENTED GENERATION:
+  O parametro use_rag ja existe nas chamadas da API
+  (atualmente configurado como false). Quando ativado,
+  permitira que o LLM acesse uma base de conhecimento
+  estruturada para enriquecer suas respostas com informacoes
+  especificas da planta e do dominio agricola.
+
+PREVISAO DE HOTSPOT 48H:
+  Funcionalidade referenciada no modulo Smart Sense IA
+  para prever a formacao de pontos quentes com 48 horas
+  de antecedencia, permitindo acoes preventivas.
+
+MODELOS PREDITIVOS DE EQUILIBRIO HIGROSCOPICO:
+  Modelos de ML para prever o equilibrio higroscopico
+  em tempo real, considerando variaveis como temperatura
+  externa, umidade, tipo de grao e condicoes de armazenamento.
+
+INTEGRACAO COM LORAWAN:
+  Expansao da conectividade IoT para sensores LoRaWAN
+  de longo alcance, permitindo monitoramento de areas
+  agricolas mais distantes sem necessidade de infraestrutura
+  cabada.
+
+APP MOBILE NATIVO:
+  Desenvolvimento de aplicativo mobile nativo (Android/iOS)
+  com funcionalidades off-line e notificacoes push.
+
+MULTI-TENANT:
+  Suporte a multiplas propriedades em uma unica conta,
+  permitindo gestao centralizada de diversas plantas
+  de armazenamento.
+
+
+================================================================================
+SLIDE 17 - DEMONSTRACAO AO VIVO
+================================================================================
+
+TITULO:
+  Demonstracao do Sistema
+
+INTRODUCAO:
+  A demonstracao mostrara na pratica as principais
+  funcionalidades do Smart Secagem em operacao real.
+
+CENARIO 1 - LOGIN E DASHBOARD:
+  - Acessar o sistema via browser
+  - Realizar autenticacao
+  - Visualizar o Dashboard com dados operacionais
+  - Demonstracao de um relatorio IA sendo gerado
+
+CENARIO 2 - CHAT SMART SENSE IA:
+  - Acessar o modulo Smart Sense IA
+  - Digitar uma pergunta sobre sensores
+  - Observar a resposta sendo gerada em streaming
+  - Demonstrar a capacidade de contexto automatico
+
+CENARIO 3 - MONITORAMENTO DE SENSORES:
+  - Acessar a aba de dispositivos
+  - Visualizar sensores ativos e seus dados
+  - Abrir grafico de telemetria historica
+  - Demonstrar filtragem por data
+
+CENARIO 4 - CONTROLE DE MOTORES:
+  - Acessar aba de Motores de Aeracao
+  - Demonstrar toggle ON/OFF de um motor
+  - Verificar atualizacao de status em tempo real
+
+CENARIO 5 - RELATORIO IA:
+  - Selecionar tipo de relatorio no Dashboard
+  - Observar o relatorio sendo gerado token por token
+  - Demonstrar exportacao para PDF
+
+PREPARACAO:
+  - Sistema rodando com dados de demonstracao
+  - Backend e AI Microservice ativos
+  - Conexao de rede estavel
+
+
+================================================================================
+SLIDE 18 - NUMEROS E RESULTADOS
+================================================================================
+
+TITULO:
+  Numeros que Importam
+
+METRICAS DO SISTEMA:
+  19 Modulos integrados em uma unica plataforma
+  14 Modelos de dados estruturados
+  5 Tipos de relatorio IA pre-definidos
+  3 Tipos de sensores IoT monitorados
+  5 Niveis de risco de fogo calculados
+  2 APIs integradas (Django + AI Microservice)
+  3 Plataformas suportadas (Web, Mobile, Desktop)
+  1 Streaming SSE para respostas em tempo real
+
+VALOR AGREGADO PARA O CLIENTE:
+
+  Reducao de Perdas:
+  Monitoramento constante e alertas inteligentes reduzem
+  significativamente as perdas pos-colheita por acao
+  de pragas, fungos e condicoes inadequadas.
+
+  Decisoes Baseadas em Dados:
+  Relatorios IA automaticos eliminam a necessidade de
+  analises manuais e proporcionam visao completa da
+  operacao em tempo real.
+
+  Prevencao de Incendios:
+  Sistema de scoring multi-fator detecta riscos antes
+  que se tornem emergencias, protegendo patrimonio e
+  vidas.
+
+  Otimimizacao de Energia:
+  Aeracao inteligente ativa motores apenas quando
+  Delta T e favoravel, reduzindo consumo energetico.
+
+  Preservacao da Qualidade:
+  Controle preciso de umidade e temperatura mantem
+  a qualidade do grao e o valor comercial.
+
+
+================================================================================
+SLIDE 19 - ENCERRAMENTO
+================================================================================
+
+TITULO:
+  Obrigado!
+
+RESUMO DOS PONTOS-CHAVE:
+  O Smart Secagem e uma solucao completa para a operacao
+  pos-colheita de graos, combinando monitoramento IoT em
+  tempo real, Inteligencia Artificial generativa e automacao
+  de processos.
+
+  Os 19 modulos atendem todas as necessidades da cadeia
+  de armazenamento, desde o recebimento do grao ate sua
+  expedicao.
+
+  A IA integrada permite gerar relatorios automaticos,
+  responder perguntas em linguagem natural e prever
+  riscos antes que se tornem problemas.
+
+INFORMACOES DE CONTATO:
+  Website: secagem-digital.com
+  API: api.secagem-digital.com
+  Email: [inserir email de contato]
+
+PROXIMOS PASSOS:
+  - Agendar demonstracao personalizada
+  - Iniciar fase de piloto
+  - Definir cronograma de implementacao
+
+PERGUNTAS:
+  Abertura para duvidas e esclarecimentos.
+
+
+================================================================================
+SLIDE BONUS - PERGUNTAS FREQUENTES
+================================================================================
+
+TITULO:
+  Perguntas Frequentes
+
+PERGUNTA 1:
+  O Smart Secagem funciona offline?
+
+RESPOSTA:
+  Funcionalidades basicas como visualizacao de dados em cache
+  e controle local de motores funcionam offline. Porem, as
+  funcionalidades de IA (Dashboard IA, Chat, Relatorios)
+  requerem conexao com a internet para acessar o AI Microservice.
+
+
+PERGUNTA 2:
+  Quais tipos de sensores sao compativeis com o sistema?
+
+RESPOSTA:
+  O sistema e compativel com sensores de temperatura atmosfera,
+  sensores de mancal (rolamento) e sensores de abafamento (gas CO).
+  Os dispositivos se comunicam via Modbus RTU/TCP atraves de
+  Controladores X7 e Gateways FieldLogger.
+
+
+PERGUNTA 3:
+  O sistema e seguro contra acessos nao autorizados?
+
+RESPOSTA:
+  Sim. O sistema utiliza autenticacao por token via API,
+  armazenamento seguro de credenciais via FlutterSecureStorage,
+  middleware de protecao de rotas e suporte a autenticacao
+  de dois fatores (2FA).
+
+
+PERGUNTA 4:
+  O sistema suporta multiplos usuarios simultaneos?
+
+RESPOSTA:
+  Sim. O Smart Secagem possui modulo de gestao de acessos
+  com controle de permissoes por nivel. Cada usuario possui
+  seu perfil e nivel de acesso, permitindo uso seguro por
+  multiplas pessoas da organizacao.
+
+
+PERGUNTA 5:
+  E possivel personalizar os relatorios IA?
+
+RESPOSTA:
+  Sim. O Dashboard IA possui 5 relatorios pre-definidos,
+  porem o usuario pode criar prompts customizados para
+  gerar relatorios sob medida para suas necessidades especificas.
+
+
+PERGUNTA 6:
+  O sistema gera relatorios em PDF?
+
+RESPOSTA:
+  Sim. Apos gerar um relatorio via IA, o usuario pode
+  exporta-lo para PDF utilizando o servico integrado
+  de geracao de PDF (PdfService).
+
+
+PERGUNTA 7:
+  Quais plataformas sao suportadas?
+
+RESPOSTA:
+  O Smart Secagem funciona em Web (qualquer navegador moderno),
+  Mobile (Android e iOS) e Desktop (Windows, Mac e Linux).
+  A experiencia e responsiva e adaptada para cada plataforma.
+
+
+PERGUNTA 8:
+  Como e feito o monitoramento de risco de fogo?
+
+RESPOSTA:
+  O sistema utiliza um algoritmo de scoring multi-fator que
+  analisa temperatura de rolamentos, nivel de gas CO,
+  vibracao e taxa de elevacao termica. Cada fator contribui
+  para um score de 0 a 12+, classificado em 5 niveis de risco.
+
+
+================================================================================
+                        FIM DA ESTRUTURA DETALHADA
+================================================================================
+
+  Total de Slides: 19 + 1 bonus
+  Tempo estimado de apresentacao: 30-45 minutos
+  Formato recomendado: 16:9 (widescreen)
+  Ferramenta sugerida: PowerPoint, Google Slides ou Canva
+
+================================================================================

@@ -10,6 +10,7 @@ import '../../devices/views/devices_view.dart';
 
 
 import '../../notifications/views/notifications_view.dart';
+import '../../notifications/controllers/notifications_controller.dart';
 import '../../support/views/support_view.dart';
 import '../../smart_sense_ia/views/smart_sense_ia_view.dart';
 import '../../profile/views/profile_view.dart';
@@ -156,11 +157,12 @@ class HomeView extends GetView<HomeController> {
   }
 
   List<Widget> _buildAllDestinations({required BuildContext context, bool useDrawer = false}) {
+    final notifCtrl = Get.find<NotificationsController>();
     final sections = [
       ('Principal', [
         (0, 'Projeto', Icons.architecture_rounded),
         (1, 'Resumo IA', Icons.dashboard_rounded),
-        (9, 'Smart Sense IA', Icons.psychology_rounded),
+        (9, 'AgroMind AI', Icons.psychology_rounded),
         (14, 'Processos', Icons.history_rounded),
       ]),
       ('Monitoramento', [
@@ -208,12 +210,18 @@ class HomeView extends GetView<HomeController> {
 
         if (useDrawer) {
           destinations.add(NavigationDrawerDestination(
-            icon: Icon(icon),
+            icon: index == 5 && notifCtrl.unreadCount > 0
+                ? Badge(
+                    label: Text('${notifCtrl.unreadCount}', style: const TextStyle(fontSize: 10)),
+                    child: Icon(icon),
+                  )
+                : Icon(icon),
             selectedIcon: Icon(icon, fill: 1),
             label: Text(label, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
           ));
         } else {
-          destinations.add(_buildMenuItem(context, index, label, icon));
+          destinations.add(_buildMenuItem(context, index, label, icon,
+              badge: index == 5 && notifCtrl.unreadCount > 0 ? notifCtrl.unreadCount : null));
         }
       }
     }
@@ -226,7 +234,7 @@ class HomeView extends GetView<HomeController> {
     return destinations;
   }
 
-  Widget _buildMenuItem(BuildContext context, int index, String title, IconData icon) {
+  Widget _buildMenuItem(BuildContext context, int index, String title, IconData icon, {int? badge}) {
     final colorScheme = Theme.of(context).colorScheme;
     return Obx(() {
       final isSelected = controller.selectedIndex.value == index;
@@ -261,6 +269,24 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
                   ),
+                  if (badge != null && badge > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: colorScheme.error,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        badge > 99 ? '99+' : badge.toString(),
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
