@@ -46,7 +46,7 @@ class SiloViewerView extends StatelessWidget {
                             const SizedBox(width: 8),
                           ],
                           Text(
-                            'Projeto do Silo',
+                            'Projeto Smart Secagem',
                             style: (isDesktop
                                     ? theme.textTheme.headlineSmall
                                     : theme.textTheme.titleLarge)
@@ -98,7 +98,7 @@ class SiloViewerView extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Acompanhe as fases, diretrizes e a infraestrutura tecnológica do projeto.',
+                    'Plataforma de monitoramento e automação do pós-colheita: silos, secadores, sensores e IA em um só lugar.',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: isDark ? AppColors.textMuted : AppColors.textSecondary,
                     ),
@@ -136,7 +136,7 @@ class SiloViewerView extends StatelessWidget {
           _buildHeroSection(
             context,
             'Descrição do Projeto',
-            'O Smart Secagem redefine o armazenamento de grãos através da convergência entre termometria digital e inteligência artificial. Nosso compromisso é transformar simples silos em centros de dados inteligentes, garantindo a integridade da safra com precisão cirúrgica.',
+            'O Smart Secagem é a plataforma de monitoramento e automação do pós-colheita agrícola. Ela transforma a gestão manual e reativa de silos e grãos em um processo inteligente e preditivo, com foco em Massa Estável: equilíbrio higroscópico, Delta T e ponto de orvalho para minimizar perdas biológicas e maximizar o lucro da colheita.',
             Icons.auto_awesome_rounded,
           ),
           const SizedBox(height: 32),
@@ -150,7 +150,7 @@ class SiloViewerView extends StatelessWidget {
                   child: _buildGlassCard(
                     context,
                     'Objetivo Estratégico',
-                    'Implementar monitoramento 24/7 para neutralizar riscos de deterioração e maximizar a rentabilidade operacional.',
+                    'Garantir a Massa Estável com diagnóstico 24h: eliminar o controle manual de aeradores e exaustores e ligar os motores apenas em condições climáticas ideais.',
                     Icons.api_rounded,
                     Colors.blue,
                   ),
@@ -160,7 +160,7 @@ class SiloViewerView extends StatelessWidget {
                   child: _buildGlassCard(
                     context,
                     'Metodologia Técnica',
-                    'Integração de sensores LoRaWAN inteligentes e modelos preditivos de equilíbrio higroscópico em tempo real.',
+                    'Leitura de temperatura e UR interna/externa a cada 60s, visão multi-camada (topo, meio e base) e decisão por equilíbrio higroscópico, Delta T, UR externa e ponto de orvalho.',
                     Icons.layers_rounded,
                     Colors.purple,
                   ),
@@ -170,7 +170,7 @@ class SiloViewerView extends StatelessWidget {
                   child: _buildGlassCard(
                     context,
                     'Impacto Mensurável',
-                    'Alcançar excelência na secagem com redução drástica no consumo energético e perdas de massa.',
+                    'AgroMind AI com dois serviços: Resumo IA automático no dashboard e chat interativo para consultas — ambos com contexto operacional em tempo real, previsão de hotspots em 48h e laudos térmicos.',
                     Icons.bolt_rounded,
                     Colors.green,
                   ),
@@ -183,7 +183,7 @@ class SiloViewerView extends StatelessWidget {
                 _buildGlassCard(
                   context,
                   'Objetivo Estratégico',
-                  'Implementar monitoramento 24/7 para neutralizar riscos de deterioração e maximizar a rentabilidade operacional.',
+                  'Garantir a Massa Estável com diagnóstico 24h: eliminar o controle manual de aeradores e exaustores e ligar os motores apenas em condições climáticas ideais.',
                   Icons.api_rounded,
                   Colors.blue,
                 ),
@@ -191,7 +191,7 @@ class SiloViewerView extends StatelessWidget {
                 _buildGlassCard(
                   context,
                   'Metodologia Técnica',
-                  'Integração de sensores LoRaWAN inteligentes e modelos preditivos de equilíbrio higroscópico em tempo real.',
+                  'Leitura de temperatura e UR interna/externa a cada 60s, visão multi-camada (topo, meio e base) e decisão por equilíbrio higroscópico, Delta T, UR externa e ponto de orvalho.',
                   Icons.layers_rounded,
                   Colors.purple,
                 ),
@@ -199,7 +199,7 @@ class SiloViewerView extends StatelessWidget {
                 _buildGlassCard(
                   context,
                   'Impacto Mensurável',
-                  'Alcançar excelência na secagem com redução drástica no consumo energético e perdas de massa.',
+                  'AgroMind AI com dois serviços: Resumo IA automático no dashboard e chat interativo para consultas — ambos com contexto operacional em tempo real, previsão de hotspots em 48h e laudos térmicos.',
                   Icons.bolt_rounded,
                   Colors.green,
                 ),
@@ -232,7 +232,7 @@ class SiloViewerView extends StatelessWidget {
             context,
             'FASE 02',
             'Hardware & Conectividade',
-            'Instalação dos cabos termométricos de alta precisão e configuração do Gateway LoRaWAN industrial para comunicação sem fio.',
+            'Instalação dos cabos termométricos (topo, meio e base) e configuração da conectividade dos sensores de temperatura, mancal e abafamento.',
             'Em Andamento',
             false,
             true,
@@ -241,8 +241,8 @@ class SiloViewerView extends StatelessWidget {
           _buildStageItem(
             context,
             'FASE 03',
-            'Integração Smart Sense IA',
-            'Treinamento dos modelos de Machine Learning com dados históricos e calibração dos algoritmos de IA para detecção de anomalias.',
+            'Integração AgroMind AI',
+            'Conexão dos serviços de IA (Resumo IA + chat AgroMind) ao contexto operacional, com previsão de hotspots em 48h e alertas em tempo real.',
             'Pendente',
             false,
             false,
@@ -585,7 +585,7 @@ class SiloViewerView extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              'Este silo utiliza a tecnologia de sensores IoT de 4ª geração com blindagem magnética e comunicação criptografada.',
+              'Regra do sistema: a aeração liga apenas se o Delta T for favorável e a UR externa estiver na janela ideal — e desliga automaticamente ante tendência de aquecimento ou umidade na massa.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: isDark ? AppColors.textMuted : AppColors.textSecondary,
                 fontStyle: FontStyle.italic,
