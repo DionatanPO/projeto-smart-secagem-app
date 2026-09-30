@@ -26,12 +26,16 @@ class FireRiskModel {
   final List<String> recommendations;
   final DateTime timestamp;
 
+  // Limiares unificados com a API (api/services/fire_risk_service.py).
+  // Ao alterar aqui, alterar lá.
   static const double mancalWarning = 75.0;
   static const double mancalCritical = 90.0;
   static const double mancalEmergency = 110.0;
   static const double coWarning = 50.0;
   static const double coCritical = 150.0;
   static const double coEmergency = 400.0;
+  static const double co2Attention = 1500.0;
+  static const double co2Warning = 3000.0;
   static const double riseRateWarning = 2.0;
   static const double riseRateCritical = 5.0;
 
@@ -52,46 +56,75 @@ class FireRiskModel {
   static FireRiskLevel calculateLevel({
     required double temperature,
     double? gasLevel,
+    double? co2Ppm,
     required double riseRate,
     required String tipo,
   }) {
     int dangerScore = 0;
 
     if (tipo == SensorModel.tipoMancal) {
-      if (temperature >= mancalEmergency) dangerScore += 5;
-      else if (temperature >= mancalCritical) dangerScore += 4;
-      else if (temperature >= mancalWarning) dangerScore += 2;
+      if (temperature >= mancalEmergency) {
+        dangerScore += 5;
+      } else if (temperature >= mancalCritical) {
+        dangerScore += 4;
+      } else if (temperature >= mancalWarning) {
+        dangerScore += 2;
+      }
     }
 
     if (tipo == SensorModel.tipoAbafando && gasLevel != null) {
-      if (gasLevel >= coEmergency) dangerScore += 5;
-      else if (gasLevel >= coCritical) dangerScore += 4;
-      else if (gasLevel >= coWarning) dangerScore += 2;
+      if (gasLevel >= coEmergency) {
+        dangerScore += 5;
+      } else if (gasLevel >= coCritical) {
+        dangerScore += 4;
+      } else if (gasLevel >= coWarning) {
+        dangerScore += 2;
+      }
     }
 
-    if (riseRate >= riseRateCritical) dangerScore += 3;
-    else if (riseRate >= riseRateWarning) dangerScore += 1;
+    if (tipo == SensorModel.tipoAbafando && co2Ppm != null) {
+      if (co2Ppm >= co2Warning) {
+        dangerScore += 4;
+      } else if (co2Ppm >= co2Attention) {
+        dangerScore += 2;
+      }
+    }
 
-    if (dangerScore >= 7) return FireRiskLevel.emergency;
-    if (dangerScore >= 5) return FireRiskLevel.critical;
-    if (dangerScore >= 3) return FireRiskLevel.warning;
-    if (dangerScore >= 1) return FireRiskLevel.attention;
+    if (riseRate >= riseRateCritical) {
+      dangerScore += 3;
+    } else if (riseRate >= riseRateWarning) {
+      dangerScore += 1;
+    }
+
+    if (dangerScore >= 7) {
+      return FireRiskLevel.emergency;
+    }
+    if (dangerScore >= 5) {
+      return FireRiskLevel.critical;
+    }
+    if (dangerScore >= 3) {
+      return FireRiskLevel.warning;
+    }
+    if (dangerScore >= 1) {
+      return FireRiskLevel.attention;
+    }
     return FireRiskLevel.safe;
   }
 
-  static String buildMessage(FireRiskLevel level, String sensorId, String tipo, double temp, double? gasLevel) {
+  static String buildMessage(FireRiskLevel level, String sensorId, String tipo, double temp, double? gasLevel, [double? co2Ppm]) {
     final prefix = SensorModel.tipoLabel(tipo);
+    final co2Suffix = co2Ppm != null ? ', CO₂ ${co2Ppm.toStringAsFixed(0)}ppm' : '';
     switch (level) {
       case FireRiskLevel.safe:
         return '$prefix $sensorId operando normalmente (${temp.toStringAsFixed(1)}°C).';
       case FireRiskLevel.attention:
         return '$prefix $sensorId com temperatura elevada (${temp.toStringAsFixed(1)}°C).';
       case FireRiskLevel.warning:
-        return '$prefix $sensorId: temperatura ${temp.toStringAsFixed(1)}°C${gasLevel != null ? ', gás ${gasLevel.toStringAsFixed(0)}ppm' : ''}.';
+        return '$prefix $sensorId: temperatura ${temp.toStringAsFixed(1)}°C${gasLevel != null ? ', gás ${gasLevel.toStringAsFixed(0)}ppm' : ''}$co2Suffix.';
       case FireRiskLevel.critical:
-        return 'ALTA PROBABILIDADE DE INCÊNDIO - $prefix $sensorId a ${temp.toStringAsFixed(1)}°C!';
+        return 'ALTA PROBABILIDADE DE INCÊNDIO - $prefix $sensorId a ${temp.toStringAsFixed(1)}°C$co2Suffix!';
       case FireRiskLevel.emergency:
-        return 'EMERGÊNCIA - $prefix $sensorId ${temp.toStringAsFixed(1)}°C${gasLevel != null ? ', ${gasLevel.toStringAsFixed(0)}ppm CO' : ''}! AÇÃO IMEDIATA!';
+        return 'EMERGÊNCIA - $prefix $sensorId ${temp.toStringAsFixed(1)}°C${gasLevel != null ? ', ${gasLevel.toStringAsFixed(0)}ppm CO' : ''}$co2Suffix! AÇÃO IMEDIATA!';
     }
   }
 
@@ -138,6 +171,7 @@ class FireRiskModel {
     final temp = latestReading?.temperature ?? 0;
     final gas = latestReading?.gasLevel;
     final vib = latestReading?.vibration;
+    final co2 = latestReading?.co2Ppm;
 
     double riseRate = 0;
     if (recentHistory.length >= 2) {
@@ -151,7 +185,7 @@ class FireRiskModel {
       }
     }
 
-    final level = calculateLevel(temperature: temp, gasLevel: gas, riseRate: riseRate, tipo: sensor.tipo);
+    final level = calculateLevel(temperature: temp, gasLevel: gas, co2Ppm: co2, riseRate: riseRate, tipo: sensor.tipo);
     return FireRiskModel(
       sensor: sensor,
       currentTemp: temp,
@@ -159,7 +193,7 @@ class FireRiskModel {
       currentVibration: vib,
       temperatureRiseRate: riseRate,
       level: level,
-      message: buildMessage(level, sensor.sensorId, sensor.tipo, temp, gas),
+      message: buildMessage(level, sensor.sensorId, sensor.tipo, temp, gas, co2),
       recommendations: buildRecommendations(level, sensor.tipo),
       timestamp: latestReading?.timestamp ?? DateTime.now(),
     );

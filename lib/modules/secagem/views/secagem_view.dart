@@ -10,6 +10,7 @@ import '../../home/controllers/home_controller.dart';
 import '../../devices/widgets/telemetry_history_dialog.dart';
 import '../controllers/secagem_controller.dart';
 import 'secador_detalhes_view.dart';
+import 'automacao_view.dart';
 
 class SecagemView extends GetView<SecagemController> {
   const SecagemView({super.key});
@@ -334,6 +335,10 @@ class SecagemView extends GetView<SecagemController> {
             PopupMenuItem(
               onTap: () => Get.to(() => SecadorDetalhesView(secador: secador)),
               child: Row(children: [Icon(Icons.assessment_rounded, size: 20, color: cs.primary), const SizedBox(width: 12), Text('Sensores e Telemetria', style: GoogleFonts.inter(color: cs.onSurface))]),
+            ),
+            PopupMenuItem(
+              onTap: () => Get.to(() => AutomacaoView(secador: secador)),
+              child: Row(children: [Icon(Icons.tune_rounded, size: 20, color: cs.primary), const SizedBox(width: 12), Text('Parâmetros de Automação', style: GoogleFonts.inter(color: cs.onSurface))]),
             ),
             if (Get.find<HomeController>().isAdmin)
             PopupMenuItem(

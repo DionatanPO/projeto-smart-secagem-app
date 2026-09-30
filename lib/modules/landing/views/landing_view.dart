@@ -7,10 +7,27 @@ import '../widgets/web_footer.dart';
 import '../widgets/web_drawer.dart';
 import '../controllers/landing_controller.dart';
 
-class LandingView extends StatelessWidget {
+class LandingView extends StatefulWidget {
   const LandingView({super.key});
 
-  static final _featuresKey = GlobalKey();
+  @override
+  State<LandingView> createState() => _LandingViewState();
+}
+
+class _LandingViewState extends State<LandingView> {
+  // Chave de instância (nunca static): static sobrevive ao hot restart e a
+  // árvore antiga + nova disputam a mesma key ("GlobalKey used multiple times").
+  final _featuresKey = GlobalKey();
+  late final LandingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Get.isRegistered<LandingController>()) {
+      Get.delete<LandingController>();
+    }
+    controller = Get.put(LandingController());
+  }
 
   void _scrollToFeatures() {
     final context = _featuresKey.currentContext;
@@ -21,7 +38,6 @@ class LandingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(LandingController());
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final size = MediaQuery.of(context).size;
@@ -79,9 +95,9 @@ class LandingView extends StatelessWidget {
                       fit: BoxFit.cover,
                       clipBehavior: Clip.hardEdge,
                       child: SizedBox(
-                        width: controller.videoController.value.size.width,
-                        height: controller.videoController.value.size.height,
-                        child: VideoPlayer(controller.videoController),
+                        width: controller.videoController!.value.size.width,
+                        height: controller.videoController!.value.size.height,
+                        child: VideoPlayer(controller.videoController!),
                       ),
                     ),
                   ),

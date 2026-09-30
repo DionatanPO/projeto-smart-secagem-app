@@ -4,10 +4,11 @@ import 'package:video_player/video_player.dart';
 import '../../../routes/app_routes.dart';
 
 class LandingController extends GetxController {
-  late VideoPlayerController videoController;
+  VideoPlayerController? videoController;
   final isVideoInitialized = false.obs;
   final hasVideoError = false.obs;
   final isLoading = true.obs;
+  bool _disposed = false;
 
   @override
   void onInit() {
@@ -19,12 +20,18 @@ class LandingController extends GetxController {
 
   Future<void> _initVideo() async {
     await Future.delayed(const Duration(milliseconds: 100));
+    if (_disposed) return;
     try {
-      videoController = VideoPlayerController.asset('assets/video.mp4');
-      await videoController.initialize();
-      videoController.setLooping(true);
-      videoController.setVolume(0);
-      videoController.play();
+      final vc = VideoPlayerController.asset('assets/video.mp4');
+      await vc.initialize();
+      if (_disposed) {
+        vc.dispose();
+        return;
+      }
+      videoController = vc;
+      vc.setLooping(true);
+      vc.setVolume(0);
+      vc.play();
       isVideoInitialized.value = true;
     } catch (e) {
       hasVideoError.value = true;
@@ -35,7 +42,9 @@ class LandingController extends GetxController {
 
   @override
   void onClose() {
-    videoController.dispose();
+    _disposed = true;
+    videoController?.dispose();
+    videoController = null;
     super.onClose();
   }
 

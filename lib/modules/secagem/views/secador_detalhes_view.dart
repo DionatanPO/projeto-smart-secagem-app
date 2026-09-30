@@ -8,6 +8,7 @@ import '../../../core/models/sensor_model.dart';
 import '../../../core/models/telemetry_model.dart';
 import '../controllers/secagem_controller.dart';
 import '../widgets/fire_risk_panel.dart';
+import 'automacao_view.dart';
 
 class SecadorDetalhesView extends StatefulWidget {
   final SecadorModel secador;
@@ -157,6 +158,11 @@ class _SecadorDetalhesViewState extends State<SecadorDetalhesView> {
             icon: const Icon(Icons.refresh_rounded),
             onPressed: loadData,
             tooltip: 'Atualizar',
+          ),
+          IconButton(
+            icon: const Icon(Icons.tune_rounded),
+            onPressed: () => Get.to(() => AutomacaoView(secador: widget.secador)),
+            tooltip: 'Parâmetros de Automação',
           ),
           const SizedBox(width: 8),
         ],
@@ -445,6 +451,13 @@ class _SecadorDetalhesViewState extends State<SecadorDetalhesView> {
     final telemetrias = telemetriaMap[sensor.id] ?? [];
     final latestTemp = telemetrias.isNotEmpty ? telemetrias.first.temperature : null;
     final latestHum = telemetrias.isNotEmpty ? telemetrias.first.humidity : null;
+    double? latestCo2;
+    for (final t in telemetrias) {
+      if (t.co2Ppm != null) {
+        latestCo2 = t.co2Ppm;
+        break;
+      }
+    }
 
     return _SensorCard(
       key: ValueKey(sensor.sensorId),
@@ -454,6 +467,7 @@ class _SecadorDetalhesViewState extends State<SecadorDetalhesView> {
       telemetrias: telemetrias,
       latestTemp: latestTemp,
       latestHum: latestHum,
+      latestCo2: latestCo2,
     );
   }
 }
@@ -465,6 +479,7 @@ class _SensorCard extends StatefulWidget {
   final List<TelemetryModel> telemetrias;
   final double? latestTemp;
   final double? latestHum;
+  final double? latestCo2;
 
   const _SensorCard({
     super.key,
@@ -474,6 +489,7 @@ class _SensorCard extends StatefulWidget {
     required this.telemetrias,
     required this.latestTemp,
     required this.latestHum,
+    this.latestCo2,
   });
 
   @override
@@ -491,6 +507,7 @@ class _SensorCardState extends State<_SensorCard> {
     final telemetrias = widget.telemetrias;
     final latestTemp = widget.latestTemp;
     final latestHum = widget.latestHum;
+    final latestCo2 = widget.latestCo2;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -550,7 +567,7 @@ class _SensorCardState extends State<_SensorCard> {
             firstChild: const SizedBox.shrink(),
             secondChild: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: _buildContent(cs, telemetrias, latestTemp, latestHum),
+              child: _buildContent(cs, telemetrias, latestTemp, latestHum, latestCo2),
             ),
             crossFadeState: _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 200),
@@ -560,7 +577,7 @@ class _SensorCardState extends State<_SensorCard> {
     );
   }
 
-  Widget _buildContent(ColorScheme cs, List<TelemetryModel> telemetrias, double? latestTemp, double? latestHum) {
+  Widget _buildContent(ColorScheme cs, List<TelemetryModel> telemetrias, double? latestTemp, double? latestHum, double? latestCo2) {
     if (telemetrias.isEmpty) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -579,6 +596,10 @@ class _SensorCardState extends State<_SensorCard> {
             _miniStat(cs, Icons.thermostat_rounded, 'Temperatura', '${latestTemp!.toStringAsFixed(1)}°C', Colors.orange),
             const SizedBox(width: 12),
             _miniStat(cs, Icons.water_drop_rounded, 'Umidade', '${latestHum!.toStringAsFixed(1)}%', Colors.blue),
+            if (latestCo2 != null) ...[
+              const SizedBox(width: 12),
+              _miniStat(cs, Icons.cloud_rounded, 'CO₂', '${latestCo2.toStringAsFixed(0)} ppm', Colors.teal),
+            ],
           ],
         ),
         const SizedBox(height: 12),

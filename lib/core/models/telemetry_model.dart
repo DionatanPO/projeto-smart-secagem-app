@@ -6,6 +6,7 @@ class TelemetryModel {
   final String sensorPhysicalId;
   final double temperature;
   final double humidity;
+  final double? co2Ppm;
   final double? gasLevel;
   final double? vibration;
   final DateTime timestamp;
@@ -17,6 +18,7 @@ class TelemetryModel {
     required this.sensorPhysicalId,
     required this.temperature,
     required this.humidity,
+    this.co2Ppm,
     this.gasLevel,
     this.vibration,
     required this.timestamp,
@@ -28,14 +30,12 @@ class TelemetryModel {
     double? vibration;
 
     final dadosExtras = json['dados_extras'];
+    Map<String, dynamic> extras = {};
     if (dadosExtras != null) {
-      Map<String, dynamic> extras;
       if (dadosExtras is Map) {
         extras = dadosExtras.cast<String, dynamic>();
       } else if (dadosExtras is String) {
         extras = (jsonDecode(dadosExtras) as Map).cast<String, dynamic>();
-      } else {
-        extras = {};
       }
       gasLevel = (extras['nivel_gas'] as num?)?.toDouble();
       vibration = (extras['vibracao'] as num?)?.toDouble();
@@ -45,8 +45,13 @@ class TelemetryModel {
       id: json['id'],
       sensorId: json['sensor'] ?? 0,
       sensorPhysicalId: json['sensor_physical_id'] ?? '',
-      temperature: (json['temperatura'] as num).toDouble(),
-      humidity: (json['umidade'] as num).toDouble(),
+      // Sensores só de umidade (externa) podem postar sem temperatura e vice-versa.
+      temperature: (json['temperatura'] as num?)?.toDouble() ?? 0.0,
+      humidity: (json['umidade'] as num?)?.toDouble() ?? 0.0,
+      // CO₂ tem campo próprio na API; aceita legado em dados_extras.
+      co2Ppm: (json['co2_ppm'] as num?)?.toDouble() ??
+          (extras['co2_ppm'] as num?)?.toDouble() ??
+          (extras['co2'] as num?)?.toDouble(),
       gasLevel: gasLevel ?? (json['nivel_gas'] as num?)?.toDouble(),
       vibration: vibration ?? (json['vibracao'] as num?)?.toDouble(),
       timestamp: DateTime.parse(json['timestamp']),
@@ -64,6 +69,7 @@ class TelemetryModel {
       'sensor_physical_id': sensorPhysicalId,
       'temperatura': temperature,
       'umidade': humidity,
+      if (co2Ppm != null) 'co2_ppm': co2Ppm,
       'dados_extras': extras,
       'timestamp': timestamp.toIso8601String(),
     };

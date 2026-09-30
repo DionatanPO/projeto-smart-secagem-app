@@ -3,7 +3,20 @@ class SensorModel {
   static const String tipoMancal = 'sensor_mancal';
   static const String tipoAbafando = 'sensor_abafando';
 
+  // Tipos da automação de secadores (plenum, massa, exaustão, fornalha, ambiente)
+  // Temperatura e umidade externas podem vir de sensores separados.
+  static const String tipoPlenum = 'plenum';
+  static const String tipoMassaGraos = 'massa_graos';
+  static const String tipoPpp = 'ppp';
+  static const String tipoExaustao = 'exaustao';
+  static const String tipoFornalha = 'fornalha';
+  static const String tipoAmbiente = 'ambiente';
+  static const String tipoEstacao = 'estacao_meteorologica';
+  static const String tipoUmidade = 'sensor_umidade';
+  static const String tipoCo2 = 'sensor_co2';
+
   static const List<String> tiposIncendio = [tipoMancal, tipoAbafando];
+  static const List<String> tiposAmbiente = [tipoAmbiente, tipoEstacao];
 
   static String tipoLabel(String tipo) {
     switch (tipo) {
@@ -11,6 +24,23 @@ class SensorModel {
         return 'Mancal';
       case tipoAbafando:
         return 'Abafamento';
+      case tipoPlenum:
+        return 'Plenum';
+      case tipoMassaGraos:
+        return 'Massa de grãos';
+      case tipoPpp:
+        return 'PPP';
+      case tipoExaustao:
+        return 'Exaustão';
+      case tipoFornalha:
+        return 'Fornalha';
+      case tipoAmbiente:
+      case tipoEstacao:
+        return 'Ambiente';
+      case tipoUmidade:
+        return 'Umidade';
+      case tipoCo2:
+        return 'CO₂';
       default:
         return 'Temperatura';
     }
@@ -29,6 +59,10 @@ class SensorModel {
   final String? unidadeArmazenadoraNome;
 
   bool get isFireSensor => tiposIncendio.contains(tipo);
+
+  /// Sensor de unidade (estação meteorológica): sem silo/secador, só unidade.
+  bool get isAmbiente =>
+      tiposAmbiente.contains(tipo) && siloId == null && secadorId == null;
 
   SensorModel({
     this.id,
