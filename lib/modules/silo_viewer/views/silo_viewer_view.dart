@@ -242,7 +242,7 @@ class SiloViewerView extends StatelessWidget {
             context,
             'FASE 03',
             'Integração AgroMind AI',
-            'Conexão dos serviços de IA (Resumo IA + chat AgroMind) ao contexto operacional, com previsão de hotspots em 48h e alertas em tempo real.',
+            'Conexão dos serviços de IA (Resumo IA + chat SolumAI) ao contexto operacional, com previsão de hotspots em 48h e alertas em tempo real.',
             'Pendente',
             false,
             false,

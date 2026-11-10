@@ -162,7 +162,7 @@ class HomeView extends GetView<HomeController> {
       ('Principal', [
         (0, 'Projeto', Icons.architecture_rounded),
         (1, 'Resumo IA', Icons.dashboard_rounded),
-        (9, 'AgroMind AI', Icons.psychology_rounded),
+        (9, 'SolumAI', Icons.psychology_rounded),
         (14, 'Processos', Icons.history_rounded),
       ]),
       ('Monitoramento', [

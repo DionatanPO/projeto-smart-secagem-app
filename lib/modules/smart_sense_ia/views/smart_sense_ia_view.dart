@@ -25,7 +25,7 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: isDesktop ? 32.0 : 16.0),
+          const SizedBox(height: 8),
           
           Padding(
             padding: EdgeInsets.symmetric(horizontal: isDesktop ? 32.0 : 16.0),
@@ -35,7 +35,7 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
             ),
           ),
           
-          const SizedBox(height: 16),
+          if (!isDesktop) const SizedBox(height: 4),
           
           Expanded(
             child: Padding(
@@ -53,59 +53,13 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
 
   Widget _buildHeader(
       BuildContext context, bool isDesktop, ThemeData theme) {
+    if (isDesktop) return const SizedBox.shrink();
     return Row(
       children: [
-        if (!isDesktop) ...[
-          IconButton(
-            onPressed: () => Scaffold.of(context).openDrawer(),
-            icon: const Icon(Icons.menu_rounded),
-            color: theme.primaryColor,
-          ),
-          const SizedBox(width: 8),
-        ],
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border:
-                      Border.all(color: AppColors.primary.withOpacity(0.2)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.auto_awesome_rounded,
-                        size: 12, color: AppColors.primary),
-                    const SizedBox(width: 6),
-                    Text(
-                      'AGROMIND AI ACTIVE',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  'AgroMind AI',
-                  style: (isDesktop
-                          ? theme.textTheme.headlineSmall
-                          : theme.textTheme.titleLarge)
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
+        IconButton(
+          onPressed: () => Scaffold.of(context).openDrawer(),
+          icon: const Icon(Icons.menu_rounded),
+          color: theme.primaryColor,
         ),
       ],
     );
@@ -153,7 +107,7 @@ class SmartSenseIAView extends GetView<SmartSenseIAController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'AGROMIND CHAT',
+                      'SOLUMAI CHAT',
                       style: GoogleFonts.outfit(
                           fontWeight: FontWeight.bold, fontSize: 14),
                     ),
